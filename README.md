@@ -1,8 +1,8 @@
-# React + Vite
+# Introduction
+This repository is used for the code development process as part of the NUSteals IS3106  project endeavour
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Setup Process
+- `node_modules` is included in gitignore so if u clone u need to do `npm install` so that the dependencies in `package.json` will be added
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+# Separate Branches
+* Might be good to consider separate branches for each stakeholder before pushing changes to main branch
