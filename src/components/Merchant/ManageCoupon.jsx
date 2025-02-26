@@ -1,12 +1,12 @@
 import React from 'react'
 import GeneralNavBar from '../../layout/GeneralNavBar'
 
-const login = () => {
+const ManageCoupon = () => {
   return (
     <>
-        <GeneralNavBar userRole="login"/>
+        <GeneralNavBar userRole="merchant"/>
     </>
   )
 }
 
-export default login
+export default ManageCoupon
