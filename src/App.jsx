@@ -5,7 +5,7 @@ import AboutUs from './components/HomePage/AboutUs';
 import Login from "./components/HomePage/Login";
 import Merchant from "./components/Merchant/Merchant";
 import Student from "./components/Student/Student";
-import ManageCoupon from "./components/Merchant/ManageCoupon";
+import ManageCoupon from "./components/Merchant/ManageCoupon/ManageCoupon";
 import MerchantDashboard from "./components/Merchant/MerchantDashboard";
 import MerchantFaqs from "./components/Merchant/MerchantFaqs";
 import MerchantProfile from "./components/Merchant/MerchantProfile";
