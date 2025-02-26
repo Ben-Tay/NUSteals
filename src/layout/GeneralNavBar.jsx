@@ -123,7 +123,7 @@ const GeneralNavBar = ({ userRole }) => {
       <div>
         <header className="bg-orange-400 h-7"> 
         </header>
-        <Navbar expand="lg" className="bg-white shadow-lg">
+        <Navbar expand="lg" className="bg-white shadow-lg" style={{ marginBottom: '80px' }}>
           <Container>
             <Navbar.Brand href="#home" className="text-warning">NUSteals</Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />

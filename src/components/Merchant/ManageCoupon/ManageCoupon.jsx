@@ -11,9 +11,10 @@ const ManageCoupon = () => {
       <div className="content-wrapper">
         
         <h1> ADD COUPON </h1>
+        <br></br>
 
         
-        <Row className="g-4">
+        <Row className="g-5">
           {/* LEFT SIDE */}
           <Col>
             <Row className="mb-4">
