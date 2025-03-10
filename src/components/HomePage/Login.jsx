@@ -98,8 +98,8 @@ const login = () => {
                         )}
                         </Form.Group>
                         <div className="d-flex flex-col justify-content-between text-blue-600 md:flex-row md:mb-3">
-                            <Alert.Link href="#">Create an account</Alert.Link>
-                            <Alert.Link href="#">Forgot password?</Alert.Link>
+                            <Alert.Link href="/create">Create an account</Alert.Link>
+                            <Alert.Link href="/forgetpassword">Forgot password?</Alert.Link>
                         </div>
                           {/* Show Spinner while Loading */}
                           {isLoading ? (

@@ -4,11 +4,13 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 
-const GeneralNavBar = ({ userRole }) => {
+const GeneralNavBar = ({ userRole, isStudent }) => {
+  
   const linkClass = ({ isActive }) =>
     isActive
       ? 'text-blue py-3 px-3 no-underline'
       : 'text-black py-3 px-3 no-underline';
+
 
   const renderLinks = () => {
     switch(userRole) {
@@ -79,19 +81,19 @@ const GeneralNavBar = ({ userRole }) => {
             </>
           );
         // LOGIN NAVBAR
-        case 'login':
+        case 'create':
           return (
             <>
               <Nav.Item>
-                <NavLink to="/studentLogin" className={linkClass}>
-                  Student
-                </NavLink>
-              </Nav.Item>
-              <Nav.Item>
-              <NavLink to="/merchantLogin" className={linkClass}>
-                Merchant
-              </NavLink>
-              </Nav.Item>
+                  <NavLink to="/create" className={linkClass} end>
+                    Student
+                  </NavLink>
+                </Nav.Item>
+                <Nav.Item>
+                  <NavLink to="/create/merchant" className={linkClass}>
+                    Merchant
+                  </NavLink>
+                </Nav.Item>
             </>
           );
 

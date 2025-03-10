@@ -9,6 +9,8 @@ import ManageCoupon from "./components/Merchant/ManageCoupon/ManageCoupon";
 import MerchantDashboard from "./components/Merchant/MerchantDashboard";
 import MerchantFaqs from "./components/Merchant/MerchantFaqs";
 import MerchantProfile from "./components/Merchant/MerchantProfile";
+import CreateAccount from './components/HomePage/CreateAccount';
+import ForgotPassword from './components/HomePage/ForgotPassword';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 
@@ -26,6 +28,14 @@ const App = () => {
     {
       path: "/login",
       element: <Login/>
+    },
+    {
+      path: "/create",
+      element: <CreateAccount/>
+    },
+    {
+      path: "/forgetpassword",
+      element: <ForgotPassword/>
     },
     {
       path: "/merchantLogin",
