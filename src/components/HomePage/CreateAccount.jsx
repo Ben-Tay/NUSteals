@@ -1,87 +1,135 @@
-import React, { useState, useRef } from 'react';
-import GeneralNavBar from '../../layout/GeneralNavBar';
-import { Form, Button, Col, Image, Container, Row } from 'react-bootstrap';
+import { useState } from "react";
+import { useNavigate } from 'react-router-dom';
+import Form from "react-bootstrap/Form";
+import Button from "react-bootstrap/Button";
+import GeneralNavBar from '../../layout/GeneralNavBar'
 
-const CreateAccount = () => {
-  // State to hold the image preview URL
-  const [image, setImage] = useState(null);
+function ControlledForm() {
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [validated, setValidated] = useState(false);
+  const [role, setRole] = useState("");
+  const navigate = useNavigate();
 
-  // Reference to the hidden file input
-  const fileInputRef = useRef(null);
+  {/* Role Selection Field */ }
+  <Form.Group className="mb-3" controlId="formRole">
+    <Form.Label>Role</Form.Label>
+    <Form.Select
+      value={role}
+      onChange={(e) => setRole(e.target.value)}
+      required
+    >
+      <option value="">Select your role</option>
+      <option value="student">Student</option>
+      <option value="merchant">Merchant</option>
+    </Form.Select>
+    <Form.Control.Feedback type="invalid">
+      Please select a role.
+    </Form.Control.Feedback>
+  </Form.Group>
 
-  // Function to handle image click
-  const handleImageClick = () => {
-    // Trigger the file input click to open the file dialog
-    fileInputRef.current.click();
-  };
-
-  // Function to handle image selection
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Create a preview URL for the selected image
-      const imageUrl = URL.createObjectURL(file);
-      setImage(imageUrl);
+  const handleSubmit = (event) => {
+    const form = event.currentTarget;
+    if (form.checkValidity() === false) {
+      event.preventDefault();
+      event.stopPropagation();
+    } else {
+      event.preventDefault(); // Prevent default form submission
+      // Handle form submission logic here (e.g., API call)
+      navigate("/Login"); // Navigate only if the form is valid
     }
+    setValidated(true);
   };
 
   return (
-    <>
-      <GeneralNavBar userRole="create" />
-      <Container>
-        <Row>
-          <Col xs={6} md={4} className="text-center">
-            {/* Display the image or a placeholder icon */}
-            <div
-              onClick={handleImageClick}
-              style={{
-                width: '100px',
-                height: '100px',
-                borderRadius: '50%',
-                overflow: 'hidden',
-                cursor: 'pointer',
-                display: 'inline-block',
-                backgroundColor: '#f0f0f0',
-                lineHeight: '100px',
-                textAlign: 'center',
-              }}
-            >
-              {image ? (
-                <Image
-                  src={image}
-                  alt="Uploaded Preview"
-                  roundedCircle
-                  width="100"
-                  height="100"
-                />
-              ) : (
-                <i
-                  className="bi bi-image"
-                  style={{ fontSize: '50px', color: '#6c757d' }}
-                ></i>
-              )}
-            </div>
-            {/* Hidden file input */}
-            <Form.Control
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              style={{ display: 'none' }}
-              ref={fileInputRef}
-            />
-          </Col>
-        </Row>
-      </Container>
+    <>  <GeneralNavBar />
+      <div className="flex justify-center items-center h-screen">
+        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+          <h2 className="text-center text-2xl font-bold mb-4">Sign up</h2>
+          <Form noValidate validated={validated} onSubmit={handleSubmit}>
 
-      <Form>
-        {image && (
-          <Form.Group>
-          </Form.Group>
-        )}
-        <Button type="submit">Submit</Button>
-      </Form>
+            {/* This is for name field */}
+            <Form.Group className="mb-3" controlId="formName">
+              <Form.Label>Name</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="formAddress">
+              <Form.Label>Address</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
+            </Form.Group>
+
+
+            {/* This is for email field */}
+            <Form.Group className="mb-3" controlId="formEmail">
+              <Form.Label>Email address</Form.Label>
+              <Form.Control
+                type="email" // Use type="email" for default email validation
+                placeholder="Enter email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="off"
+              />
+              <Form.Control.Feedback type="invalid">
+                Please provide a valid email address.
+              </Form.Control.Feedback>
+            </Form.Group>
+
+
+            {/* This is for password field */}
+            <Form.Group className="mb-3" controlId="formPassword">
+              <Form.Label>Password</Form.Label>
+              <Form.Control
+                type="password"
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="new-password"
+              />
+            </Form.Group>
+
+            {/* Role Selection Field */}
+            <Form.Group className="mb-3" controlId="formRole">
+              <Form.Label>Role</Form.Label>
+              <Form.Select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                required
+              >
+                <option value="">Select your role</option>
+                <option value="student">Student</option>
+                <option value="merchant">Merchant</option>
+              </Form.Select>
+              <Form.Control.Feedback type="invalid">
+                Please select a role.
+              </Form.Control.Feedback>
+            </Form.Group>
+
+
+
+            <Button variant="primary" type="submit" className="w-full">
+              Sign up
+            </Button>
+          </Form>
+        </div>
+      </div>
     </>
   );
-};
+}
 
-export default CreateAccount;
+export default ControlledForm;
