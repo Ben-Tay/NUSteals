@@ -11,6 +11,8 @@ import MerchantFaqs from "./components/Merchant/MerchantFaqs";
 import MerchantProfile from "./components/Merchant/MerchantProfile";
 import CreateAccount from './components/HomePage/CreateAccount';
 import ForgotPassword from './components/HomePage/ForgotPassword';
+import StudentCoupon from './components/Student/ManageCoupon/StudentCoupon';
+import StudentCouponHistory from './components/Student/ManageCoupon/StudentCouponHistory';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 
@@ -62,8 +64,15 @@ const App = () => {
       path: "/studentLogin",
       element: <Student/>
       // can add children if need be
-    }
-
+    },
+    {
+    path: "/studentCoupon",
+    element: <StudentCoupon/>
+    },
+    {
+      path: "/studentCoupon/history",
+      element: <StudentCouponHistory/>
+    },
   ]);
 
   return (
