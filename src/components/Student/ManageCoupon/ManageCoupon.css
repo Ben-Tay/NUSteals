@@ -1,0 +1,17 @@
+.content-wrapper {
+    padding-left: 5%;
+    padding-right: 5%;
+}
+.box-orange {
+    border: 1px solid #FFA500;
+    padding: 10px;
+    border-radius: 5px;
+    height: 200px;
+}
+.bigger-box-orange {
+    border: 3px solid #FFA500;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 600px;
+    min-width: 250px;
+}
