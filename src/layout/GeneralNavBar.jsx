@@ -4,8 +4,8 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 
-const GeneralNavBar = ({ userRole, isStudent }) => {
-  
+const GeneralNavBar = ({ userRole }) => {
+
   const linkClass = ({ isActive }) =>
     isActive
       ? 'text-blue py-3 px-3 no-underline'
@@ -13,7 +13,7 @@ const GeneralNavBar = ({ userRole, isStudent }) => {
 
 
   const renderLinks = () => {
-    switch(userRole) {
+    switch (userRole) {
       // MERCHANT NAVBAR
       case 'merchant':
         return (
@@ -29,14 +29,14 @@ const GeneralNavBar = ({ userRole, isStudent }) => {
               </NavLink>
             </Nav.Item>
             <Nav.Item>
-                <NavLink to="/merchantProfile" className={linkClass}>
+              <NavLink to="/merchantProfile" className={linkClass}>
                 Profile
-                </NavLink>
+              </NavLink>
             </Nav.Item>
             <Nav.Item>
-                <NavLink to="/merchantFaqs" className={linkClass}>
+              <NavLink to="/merchantFaqs" className={linkClass}>
                 FAQs
-                </NavLink>
+              </NavLink>
             </Nav.Item>
           </>
         );
@@ -55,75 +55,75 @@ const GeneralNavBar = ({ userRole, isStudent }) => {
               </NavLink>
             </Nav.Item>
             <Nav.Item>
-                <NavLink to="/#" className={linkClass}>
+              <NavLink to="/#" className={linkClass}>
                 FAQs
-                </NavLink>
+              </NavLink>
             </Nav.Item>
           </>
         );
-        // ADMIN NAVBAR
-        case 'admin':
-          return (
-            <>
-              <Nav.Item>
+      // ADMIN NAVBAR
+      case 'admin':
+        return (
+          <>
+            <Nav.Item>
               <NavLink to="/adminDashboard" className={linkClass}>
                 Dashboard
               </NavLink>
             </Nav.Item>
-              <NavLink to="/manageUsers" className={linkClass}>
-                Manage Users
-              </NavLink>
-              <Nav.Item>
-                <NavLink to="/manageCoupons" className={linkClass}>
+            <NavLink to="/manageUsers" className={linkClass}>
+              Manage Users
+            </NavLink>
+            <Nav.Item>
+              <NavLink to="/manageCoupons" className={linkClass}>
                 Manage Coupons
-                </NavLink>
-              </Nav.Item>
-            </>
-          );
-        // LOGIN NAVBAR
-        case 'create':
-          return (
-            <>
-              <Nav.Item>
-                  <NavLink to="/create" className={linkClass} end>
-                    Student
-                  </NavLink>
-                </Nav.Item>
-                <Nav.Item>
-                  <NavLink to="/create/merchant" className={linkClass}>
-                    Merchant
-                  </NavLink>
-                </Nav.Item>
-            </>
-          );
+              </NavLink>
+            </Nav.Item>
+          </>
+        );
+      // LOGIN NAVBAR
+      case 'create':
+        return (
+          <>
+            <Nav.Item>
+              <NavLink to="/create" className={linkClass} end>
+                Student
+              </NavLink>
+            </Nav.Item>
+            <Nav.Item>
+              <NavLink to="/create/merchant" className={linkClass}>
+                Merchant
+              </NavLink>
+            </Nav.Item>
+          </>
+        );
 
-        // DEFAULT NAVBAR
-        default:
-          return (
-            <>
-              <Nav.Item>
-                <NavLink to="/" className={linkClass}>
-                  Home
-                </NavLink>
-              </Nav.Item>
-              <Nav.Item>
-                  <NavLink to="/aboutUs" className={linkClass}>
-                    About Us
-                  </NavLink>
-              </Nav.Item>
-              <Nav.Item>
-                  <NavLink to="/login" className={linkClass}>
-                    Login
-                </NavLink>
-              </Nav.Item>
-            </>
-          )
+      // DEFAULT NAVBAR
+      default:
+        return (
+          <>
+            <Nav.Item>
+              <NavLink to="/" className={linkClass}>
+                Home
+              </NavLink>
+            </Nav.Item>
+            <Nav.Item>
+              <NavLink to="/aboutUs" className={linkClass}>
+                About Us
+              </NavLink>
+            </Nav.Item>
+            <Nav.Item>
+              <NavLink to="/login" className={linkClass}>
+                Login
+              </NavLink>
+            </Nav.Item>
+          </>
+        )
     }
   }
   return (
     <>
       <div>
-        <header className="bg-orange-400 h-7"> 
+        <header className="bg-orange-400 h-7">
         </header>
         <Navbar expand="lg" className="bg-white shadow-lg" style={{ marginBottom: '80px' }}>
           <Container>
