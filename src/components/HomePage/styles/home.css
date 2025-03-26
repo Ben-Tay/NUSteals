@@ -1,0 +1,12 @@
+/* Specific style for homepage carousel */
+
+/* Override the carousel arrow background color */
+.carousel-control-prev-icon, .carousel-control-next-icon {
+    background-color: #742727 !important; /* You can change this to any color */
+  }
+  
+/* Optional: Change the color on hover */
+.carousel-control-prev-icon:hover, .carousel-control-next-icon:hover {
+    background-color: #f00 !important; /* Hover effect color */
+}
+
