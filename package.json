@@ -7,11 +7,15 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server": "nodemon backend/server.js"
   },
   "dependencies": {
     "bootstrap": "^5.3.3",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "mongoose": "^8.13.0",
+    "nodemon": "^3.1.9",
     "react": "^19.0.0",
     "react-bootstrap": "^2.10.9",
     "react-dom": "^19.0.0",

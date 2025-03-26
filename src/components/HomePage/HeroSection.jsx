@@ -1,10 +1,10 @@
 import React from 'react';
 
 const partners = [
-  { name: 'Merchant 1', logo: '/assets/subway.jpg', name: 'Subway' },
-  { name: 'Merchant 2', logo: '/assets/starbucks.jpg', name: 'Starbucks' },
-  { name: 'Merchant 3', logo: '/assets/hothideout.jpg', name: 'Hot Hideout'},
-  { name: 'Merchant 4', logo: '/assets/jollibee.jpg', name: 'Jollibee' },
+  { logo: '/assets/subway.jpg', name: 'Subway' },
+  { logo: '/assets/starbucks.jpg', name: 'Starbucks' },
+  { logo: '/assets/hothideout.jpg', name: 'Hot Hideout'},
+  { logo: '/assets/jollibee.jpg', name: 'Jollibee' },
 ];
 
 const HeroSection = () => {
