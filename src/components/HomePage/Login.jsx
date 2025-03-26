@@ -26,7 +26,7 @@ const login = () => {
     event.preventDefault(); // prevent default refresh behaviour of button
 
     // Trigger form validation
-    if (form.checkValidity() === false || !role) {
+    if (form.checkValidity() === false) {
       event.stopPropagation(); // prevent the form from submitting if not valid
     } else {
       setIsLoading(true); // Show the spinner while loading
