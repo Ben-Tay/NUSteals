@@ -20,10 +20,18 @@ function ControlledForm() {
 
 
   const handleSubmit = async (event) => {
+    const form = event.currentTarget;
     event.preventDefault();
 
     // Debug: Log what's being sent
     console.log("Submitting:", { name, email, password, role, address });
+
+    // Check if form is valid
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+      setValidated(true);
+      return;
+    }
 
     try {
       const response = await fetch('http://localhost:3000/api/users', { // Full URL for testing
@@ -43,7 +51,7 @@ function ControlledForm() {
       if (response.status === 201) {
         // If submission is successful, navigate to another page (e.g., login page)
         navigate('/Login'); // You can change the route as per your requirement
-      } 
+      }
 
       console.log("Response status:", response.status);
       const responseText = await response.text();
@@ -77,6 +85,9 @@ function ControlledForm() {
                     onChange={(e) => setName(e.target.value)}
                     required
                   />
+                  <Form.Control.Feedback type="invalid">
+                    Please enter a correct username
+                  </Form.Control.Feedback>
 
                 </Form.Group>
                 <Form.Group className="mb-3" controlId="formAddress">
@@ -118,6 +129,9 @@ function ControlledForm() {
                     required
                     autoComplete="new-password"
                   />
+                  <Form.Control.Feedback type="invalid">
+                    Please enter a valid password
+                  </Form.Control.Feedback>
                 </Form.Group>
 
                 {/* Role Selection Field */}

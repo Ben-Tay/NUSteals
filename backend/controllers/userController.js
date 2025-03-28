@@ -49,11 +49,11 @@ const createUser = async (req, res) => {
 
 // Get a single user
 const getSingleUser = async (req, res) => {
-    
+
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(404).json({error: "Invalid userId"});
+        return res.status(404).json({ error: "Invalid userId" });
     }
 
     const user = await users.findById(id);
@@ -62,14 +62,14 @@ const getSingleUser = async (req, res) => {
         return res.status(404).json({ error: "User not found" });
     }
     res.status(200).json(user);
-    
-} 
+
+}
 
 
 // Get all users
 const getAllUsers = async (req, res) => {
     try {
-        const allUsers = await users.find({}).sort({createdAt: -1}); // Fetch all users from DB from most recent
+        const allUsers = await users.find({}).sort({ createdAt: -1 }); // Fetch all users from DB from most recent
         res.status(200).json(allUsers);
     } catch (error) {
         console.error("Error fetching users:", error);
@@ -82,47 +82,47 @@ const deleteUser = async (req, res) => {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(404).json({error: "Invalid userId"});
+        return res.status(404).json({ error: "Invalid userId" });
     }
 
-    const deletedUser = await users.findOneAndDelete({_id: id});
+    const deletedUser = await users.findOneAndDelete({ _id: id });
 
     if (!deletedUser) {
-        return res.status(404).json({error: "User not found"});
+        return res.status(404).json({ error: "User not found" });
     }
 
     // Send response back to postman for verification
-    res.status(200).json({ message: "User deleted successfully", user: deletedUser})
+    res.status(200).json({ message: "User deleted successfully", user: deletedUser })
 }
 
 // Edit a user
 const editUser = async (req, res) => {
     // Check for validation errors
     const errors = validationResult(req);
-  
+
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+        return res.status(400).json({ errors: errors.array() });
     }
-  
+
     const { name, email, password, role } = req.body;
     const { id } = req.params;
-  
+
     try {
-      const updatedUser = await users.findByIdAndUpdate(
-        id,
-        { name, email, password, role },
-        { new: true }
-      );
-  
-      if (!updatedUser) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-  
-      // Send the updated user back
-      res.status(200).json(updatedUser);
+        const updatedUser = await users.findByIdAndUpdate(
+            id,
+            { name, email, password, role },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Send the updated user back
+        res.status(200).json(updatedUser);
     } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'Server Error' });
+        console.error(err);
+        res.status(500).json({ message: 'Server Error' });
     }
 };
 
