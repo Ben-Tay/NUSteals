@@ -12,7 +12,7 @@ const ForgotPassword = () => {
     <>
       <div className="flex flex-col min-h-screen">
       <GeneralNavBar/>
-        <div className="flex-1">
+        <div className="flex-1 mt-5">
           <Card className="mx-auto w-1/2">
             <Card.Body>
               <Card.Title className="!font-bold !text-blue-500 !text-center">Password Reset Form</Card.Title>

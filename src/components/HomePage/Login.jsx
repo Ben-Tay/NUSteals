@@ -44,6 +44,8 @@ const login = () => {
             navigate('/studentLogin'); // Navigate to student profile
           } else if (user.role === "merchant") {
             navigate('/merchantLogin'); // Navigate to merchant profile
+          } else if (user.role === "admin") {
+            navigate('/adminLogin');
           }
         } else {
           setError('Invalid email or password');

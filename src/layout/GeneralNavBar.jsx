@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom'; // Import NavLink
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
+import { TbLogout } from "react-icons/tb";
 
 const GeneralNavBar = ({ userRole }) => {
 
@@ -10,7 +11,6 @@ const GeneralNavBar = ({ userRole }) => {
     isActive
       ? 'text-blue py-3 px-3 no-underline'
       : 'text-black py-3 px-3 no-underline';
-
 
   const renderLinks = () => {
     switch (userRole) {
@@ -65,19 +65,28 @@ const GeneralNavBar = ({ userRole }) => {
       case 'admin':
         return (
           <>
-            <Nav.Item>
-              <NavLink to="/adminDashboard" className={linkClass}>
-                Dashboard
+            <div className="flex justify-content-end">
+              <Nav.Item className="flex">
+                <NavLink to="/adminLogin" className={linkClass} end>
+                  Dashboard
+                </NavLink>
+              </Nav.Item>
+              <Nav.Item className="flex">
+              <NavLink to="/adminLogin/adminManageUsers" className={linkClass}>
+                Manage Users
               </NavLink>
-            </Nav.Item>
-            <NavLink to="/manageUsers" className={linkClass}>
-              Manage Users
-            </NavLink>
-            <Nav.Item>
-              <NavLink to="/manageCoupons" className={linkClass}>
-                Manage Coupons
-              </NavLink>
-            </Nav.Item>
+              </Nav.Item>
+              <Nav.Item className="flex">
+                <NavLink to="/adminLogin/adminManageCoupon" className={linkClass}>
+                  Manage Coupons
+                </NavLink>
+              </Nav.Item> 
+              <Nav.Item className="flex"> 
+                  <NavLink to="/" className={linkClass} style = {{ marginTop: "3px"}}>
+                    <TbLogout className="mr-3 text-xl" />
+                  </NavLink>
+              </Nav.Item>
+            </div>
           </>
         );
       // LOGIN NAVBAR
@@ -125,7 +134,7 @@ const GeneralNavBar = ({ userRole }) => {
       <div>
         <header className="bg-orange-400 h-7">
         </header>
-        <Navbar expand="lg" className="bg-white shadow-lg" style={{ marginBottom: '80px' }}>
+        <Navbar expand="lg" className="bg-white shadow-lg" style={{ marginBottom: '40px' }}>
           <Container>
             <Navbar.Brand href="#home" className="text-warning">NUSteals</Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
