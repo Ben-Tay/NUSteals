@@ -4,20 +4,32 @@ import dotenv from 'dotenv';
 import userRoutes from './routes/users.js';
 import couponRoutes from './routes/coupons.js'
 import mongoose from 'mongoose';
+import cors from 'cors';
+
 
 // express app + routers
-const app = express(); 
+const app = express();
 
 // Middleware
+// This must come before other middleware
+app.use(cors({
+    origin: 'http://localhost:5173', // Allow only your frontend origin
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
+    credentials: true, // Allow credentials (cookies, tokens, etc.)
+}));
+
+// allow us to access req body for post and edit requests in json format
+app.use(express.json());
 // 1.Log endpoint requests
 app.use((req, res, next) => {
     console.log(req.path, req.method)
     next()
 })
-// allow us to access req body for post and edit requests in json format
-app.use(express.json()); 
+
 //serve static files 
 app.use(express.static("public"));
+//use cors
 
 // Load environment variables from the .env file in the backend folder
 dotenv.config({ path: path.resolve('backend', '.env') });
