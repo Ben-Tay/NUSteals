@@ -43,7 +43,7 @@ function ControlledForm() {
       if (response.status === 201) {
         // If submission is successful, navigate to another page (e.g., login page)
         navigate('/Login'); // You can change the route as per your requirement
-      }
+      } 
 
       console.log("Response status:", response.status);
       const responseText = await response.text();

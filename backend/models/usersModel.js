@@ -3,10 +3,11 @@ const { Schema } = mongoose; // Destructure Schema from mongoose
 
 const userSchema = new Schema({
     name: { type: String, required: true },
-    address: { type: String, required: false },
     email: { type: String, required: true },
     password: { type: String, required: true },
     role: { type: String, required: true },
+    address: { type: String, required: false },
+    photo: { type: String, required: false }, // store the image path, not required unless user wants
 }, {
     timestamps: true,
 });
