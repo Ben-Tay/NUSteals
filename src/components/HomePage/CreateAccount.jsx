@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import GeneralNavBar from '../../layout/GeneralNavBar'
 import Footer from './Footer';
+
+
 
 function ControlledForm() {
   const [name, setName] = useState("");
@@ -12,40 +14,51 @@ function ControlledForm() {
   const [password, setPassword] = useState("");
   const [validated, setValidated] = useState(false);
   const [role, setRole] = useState("");
-  const navigate = useNavigate();
 
-  {/* Role Selection Field */ }
-  <Form.Group className="mb-3" controlId="formRole">
-    <Form.Label>Role</Form.Label>
-    <Form.Select
-      value={role}
-      onChange={(e) => setRole(e.target.value)}
-      required
-    >
-      <option value="">Select your role</option>
-      <option value="student">Student</option>
-      <option value="merchant">Merchant</option>
-    </Form.Select>
-    <Form.Control.Feedback type="invalid">
-      Please select a role.
-    </Form.Control.Feedback>
-  </Form.Group>
+  const navigate = useNavigate(); // Initialize the navigate function
 
-  const handleSubmit = (event) => {
-    const form = event.currentTarget;
-    if (form.checkValidity() === false) {
-      event.preventDefault();
-      event.stopPropagation();
-    } else {
-      event.preventDefault(); // Prevent default form submission
-      // Handle form submission logic here (e.g., API call)
-      navigate("/Login"); // Navigate only if the form is valid
+
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    // Debug: Log what's being sent
+    console.log("Submitting:", { name, email, password, role, address });
+
+    try {
+      const response = await fetch('http://localhost:3000/api/users', { // Full URL for testing
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          role: role,
+          address: address || null
+        }),
+        credentials: 'include' // If using cookies
+
+      });
+
+      if (response.status === 201) {
+        // If submission is successful, navigate to another page (e.g., login page)
+        navigate('/Login'); // You can change the route as per your requirement
+      }
+
+      console.log("Response status:", response.status);
+      const responseText = await response.text();
+      console.log("Raw response:", responseText);
+
+
+
+    } catch (error) {
+      console.error("Signup error:", error);
+      return;
     }
-    setValidated(true);
   };
 
   return (
-    <>  
+    <>
       <div className="flex flex-col min-h-screen">
         <div className="flex-1">
           <GeneralNavBar />
@@ -128,10 +141,10 @@ function ControlledForm() {
                   Sign up
                 </Button>
               </Form>
-              </div>
+            </div>
 
-              </div>
-            <Footer/>
+          </div>
+          <Footer />
         </div>
       </div>
     </>
