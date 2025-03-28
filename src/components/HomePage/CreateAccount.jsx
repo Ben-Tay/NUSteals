@@ -34,7 +34,7 @@ function ControlledForm() {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/api/users', { // Full URL for testing
+      const response = await fetch('https://nusteals-express.onrender.com/api/users', { // Full URL for testing
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
