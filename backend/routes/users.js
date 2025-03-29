@@ -1,11 +1,14 @@
 import express from 'express';
-import { createUser, getAllUsers, getSingleUser, deleteUser, editUser} from '../controllers/userController.js';
+import { createUser, getUserByLogin, getAllUsers, getSingleUser, deleteUser, editUser} from '../controllers/userController.js';
 import validateUser from '../controllers/validateUser';
 
 const router = express.Router();
 
 // Get all users
 router.get('/', getAllUsers);
+
+// Login a user
+router.post('/login', getUserByLogin)
 
 // Get a single user
 router.get('/:id', getSingleUser);

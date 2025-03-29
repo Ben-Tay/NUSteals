@@ -68,7 +68,7 @@ function ControlledForm() {
   return (
     <>
       <div className="flex flex-col min-h-screen">
-        <div className="flex-1">
+        <div className="flex-1 mt-5">
           <GeneralNavBar />
           <div className="flex justify-center items-center py-6">
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
@@ -122,15 +122,17 @@ function ControlledForm() {
                 <Form.Group className="mb-3" controlId="formPassword">
                   <Form.Label>Password</Form.Label>
                   <Form.Control
-                    type="password"
-                    placeholder="Enter password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    autoComplete="new-password"
-                  />
+                      type="password"
+                      placeholder="Enter password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      isInvalid={password.length < 6}
+                      minLength={6}
+                      required
+                      autoComplete="new-password"
+                    />
                   <Form.Control.Feedback type="invalid">
-                    Please enter a valid password
+                    {password.length < 6 ? "Password must be at least 6 characters long" : "Please enter a valid password"}
                   </Form.Control.Feedback>
                 </Form.Group>
 
@@ -156,10 +158,9 @@ function ControlledForm() {
                 </Button>
               </Form>
             </div>
-
           </div>
-          <Footer />
         </div>
+        <Footer/>
       </div>
     </>
   );
