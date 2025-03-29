@@ -15,6 +15,14 @@ const createUser = async (req, res) => {
     }
 
     try {
+        console.log("Checking if user already exists:", email);
+
+        // Check if a user with the same email already exists
+        const existingUser = await users.findOne({ email });
+        if (existingUser) {
+            return res.status(409).json({ error: "Email is already registered" });
+        }
+
         console.log("Creating user:", { name, email, role });
 
         const newUser = await users.create({
@@ -23,10 +31,10 @@ const createUser = async (req, res) => {
             email,
             password,
             role,
-            photo: null // default photo url null by default
+            photo: null // default photo URL null by default
         });
 
-        // Return safe user data (exclude password & photo [cuz not needed])
+        // Return safe user data (exclude password & photo)
         res.status(201).json({
             id: newUser._id,
             name: newUser.name,
@@ -38,14 +46,12 @@ const createUser = async (req, res) => {
 
     } catch (error) {
         console.error("User creation failed:", error);
-        res.status(400).json({
+        res.status(500).json({
             error: "User registration failed",
-            details: error.message,
-            mongooseError: error.name === 'ValidationError' ? error.errors : undefined
+            details: error.message
         });
     }
-}
-
+};
 
 // Get a single user
 const getSingleUser = async (req, res) => {
@@ -64,6 +70,7 @@ const getSingleUser = async (req, res) => {
     res.status(200).json(user);
 
 }
+
 
 
 // Get all users
@@ -104,13 +111,13 @@ const editUser = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, address } = req.body;
     const { id } = req.params;
 
     try {
         const updatedUser = await users.findByIdAndUpdate(
             id,
-            { name, email, password, role },
+            { name, email, password, role, address },
             { new: true }
         );
 
