@@ -1,107 +1,126 @@
-import { useState } from 'react'
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Home from "./components/HomePage/Home";
-import AboutUs from './components/HomePage/AboutUs';
+import AboutUs from "./components/HomePage/AboutUs";
 import Login from "./components/HomePage/Login";
-import CreateAccount from './components/HomePage/CreateAccount';
-import ForgotPassword from './components/HomePage/ForgotPassword';
+import CreateAccount from "./components/HomePage/CreateAccount";
+import ForgotPassword from "./components/HomePage/ForgotPassword";
 import Merchant from "./components/Merchant/Merchant";
 import Student from "./components/Student/Student";
 import ManageCoupon from "./components/Merchant/ManageCoupon/ManageCoupon";
 import MerchantDashboard from "./components/Merchant/MerchantDashboard";
 import MerchantFaqs from "./components/Merchant/MerchantFaqs";
 import MerchantProfile from "./components/Merchant/MerchantProfile";
-import StudentCoupon from './components/Student/ManageCoupon/StudentCoupon';
-import StudentCouponHistory from './components/Student/ManageCoupon/StudentCouponHistory';
-import Admin from './components/Admin/Admin';
-import AdminDashboard from './components/Admin/AdminDashboard';
-import AdminCouponMgt from './components/Admin/AdminCouponMgt';
-import AdminUserMgt from './components/Admin/AdminUserMgt';
-import 'bootstrap/dist/css/bootstrap.min.css';
-
+import StudentCoupon from "./components/Student/ManageCoupon/StudentCoupon";
+import StudentCouponHistory from "./components/Student/ManageCoupon/StudentCouponHistory";
+import Admin from "./components/Admin/Admin";
+import AdminDashboard from "./components/Admin/AdminDashboard";
+import AdminCouponMgt from "./components/Admin/AdminCouponMgt";
+import AdminUserMgt from "./components/Admin/AdminUserMgt";
+import StudentFaqs from "./components/Student/StudentFaqs";
+import StudentProfile from "./components/Student/StudentProfile";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const App = () => {
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <Home/>
+      element: <Home />,
       // can add children if need be
     },
     {
       path: "/aboutUs",
-      element: <AboutUs/>
+      element: <AboutUs />,
     },
     {
       path: "/login",
-      element: <Login/>
+      element: <Login />,
     },
     {
       path: "/create",
-      element: <CreateAccount/>
+      element: <CreateAccount />,
     },
     {
       path: "/forgetpassword",
-      element: <ForgotPassword/>
+      element: <ForgotPassword />,
     },
+
+    // Merchant routes
     {
       path: "/merchantLogin",
-      element: <Merchant/>
+      element: <Merchant />,
       // can add children if need be
     },
     {
       path: "/manageCoupons",
-      element: <ManageCoupon/>
+      element: <ManageCoupon />,
     },
     {
       path: "/merchantDashboard",
-      element: <MerchantDashboard/>
+      element: <MerchantDashboard />,
     },
     {
       path: "/merchantFaqs",
-      element: <MerchantFaqs/>
+      element: <MerchantFaqs />,
     },
     {
       path: "/merchantProfile",
-      element: <MerchantProfile/>
+      element: <MerchantProfile />,
     },
+
+    // Student routes
     {
       path: "/studentLogin",
-      element: <Student/>
-      // can add children if need be
+      element: <Student />,
+      children: [
+        {
+          index: true,
+          element: <StudentCoupon />,
+        },
+        {
+          path: "studentCoupon", // Viewing all coupons
+          element: <StudentCoupon />,
+        },
+        {
+          path: "studentCoupon/history", // Viewing coupon history
+          element: <StudentCouponHistory />,
+        },
+        {
+          path: "faq", // FAQs
+          element: <StudentFaqs />,
+        },
+        {
+          path: "profile", // Profile page
+          element: <StudentProfile />,
+        },
+      ],
     },
-    {
-    path: "/studentCoupon",
-    element: <StudentCoupon/>
-    },
-    {
-      path: "/studentCoupon/history",
-      element: <StudentCouponHistory/>
-    },
+
+    // Admin routes
     {
       path: "/adminLogin",
-      element: <Admin/>,
+      element: <Admin />,
       children: [
-          {
-            index: true, // the first one that is shown when go to adminLogin
-            element: <AdminDashboard/>
-          },
-          {
-            path: 'adminManageCoupon',
-            element: <AdminCouponMgt/>
-          },
-          {
-            path: 'adminManageUsers',
-            element: <AdminUserMgt/>
-          }
-      ]
-    }
+        {
+          index: true, // the first one that is shown when go to adminLogin
+          element: <AdminDashboard />,
+        },
+        {
+          path: "adminManageCoupon",
+          element: <AdminCouponMgt />,
+        },
+        {
+          path: "adminManageUsers",
+          element: <AdminUserMgt />,
+        },
+      ],
+    },
   ]);
 
   return (
     <>
-      <RouterProvider router={router}/>
+      <RouterProvider router={router} />
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;
