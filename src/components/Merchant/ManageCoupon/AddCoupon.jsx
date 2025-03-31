@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import Modal from 'react-bootstrap/Modal';
+import { useNavigate } from 'react-router-dom';
 import GeneralNavBar from '../../../layout/GeneralNavBar';
 import { Row, Col, Button, Form } from 'react-bootstrap';
 import './AddCoupon.css';
 
 const AddCoupon = () => {
+  const navigate = useNavigate();
   const [couponName, setCouponName] = useState('');
   const [discount, setDiscount] = useState('');
   const [discountType, setDiscountType] = useState('flat'); // 'flat' or 'percentage'
@@ -12,6 +15,11 @@ const AddCoupon = () => {
   const [category, setCategory] = useState('');
   const [totalCoupons, setTotalCoupons] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
+  const [editingCoupon, setEditingCoupon] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [couponToDelete, setCouponToDelete] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [couponNameError, setCouponNameError] = useState("");
 
   // Standard T&C template string; adjust as needed
   const standardTemplate = `Standard Terms & Conditions:
@@ -20,34 +28,126 @@ const AddCoupon = () => {
 3. Cannot be combined with any other offer.
 4. Subject to change without prior notice.`;
 
-  const handleCreateCoupon = () => {
-    // Handle coupon creation logic
-    console.log({
-      couponName,
-      discount,
-      discountType,
-      description,
-      terms,
-      category,
-      totalCoupons,
-      expiryDate,
-    });
+  useEffect(() => {
+    if (editingCoupon) {
+      setCouponName(editingCoupon.couponName);
+      setDiscount(editingCoupon.discount);
+      setDiscountType(editingCoupon.discountType);
+      setDescription(editingCoupon.description);
+      setTerms(editingCoupon.termsConditions);
+      setCategory(editingCoupon.category);
+      setTotalCoupons(editingCoupon.totalNum);
+      setExpiryDate(editingCoupon.expiryDate);
+    }
+  }, [editingCoupon]);
+
+  // CREATE COUPON
+  const handleCreateCoupon = async () => {
+    if (!couponName || !discount || !expiryDate) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:3000/api/coupons', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          couponName,
+          discount,
+          discountType,
+          description,
+          termsConditions: terms,
+          category,
+          totalNum: totalCoupons,
+          expiryDate,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create coupon');
+      }
+
+      const newCoupon = await response.json();
+      alert('Coupon created successfully!');
+      navigate('/manage-coupons'); // Redirect after success
+    } catch (error) {
+      console.error('Error creating coupon:', error);
+      alert('Failed to create coupon');
+    }
   };
 
-  // Function to fill in standard T&C
-  const fillTemplate = () => {
-    setTerms(standardTemplate);
+  // EDIT COUPON
+  const handleSaveChanges = async (couponId) => {
+    if (!editingCoupon) return;
+
+    try {
+      const response = await fetch(`http://localhost:3000/api/coupons/${couponId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          couponName,
+          discount,
+          discountType,
+          description,
+          termsConditions: terms,
+          category,
+          totalNum: totalCoupons,
+          expiryDate,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update coupon');
+      }
+
+      const updatedCoupon = await response.json();
+      alert('Coupon updated successfully!');
+      setEditingCoupon(null);
+      setShowModal(false);
+      navigate('/manage-coupons'); // Redirect after success
+    } catch (error) {
+      console.error('Error updating coupon:', error);
+      alert('Failed to update coupon');
+    }
+  };
+
+  // DELETE COUPON
+  const handleCouponDelete = async (couponId) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/coupons/${couponId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete coupon');
+      }
+
+      alert('Coupon deleted successfully!');
+      setShowDeleteModal(false);
+      setCouponToDelete(null);
+      navigate('/manage-coupons'); // Redirect after delete
+    } catch (error) {
+      console.error('Error deleting coupon:', error);
+      alert('Failed to delete coupon');
+    }
+  };
+
+  const handleDeleteClick = (coupon) => {
+    setCouponToDelete(coupon);
+    setShowDeleteModal(true);
   };
 
   return (
     <>
       <GeneralNavBar userRole="merchant" />
       <div className="content-wrapper mb-4">
-        <h1>ADD COUPON</h1>
+        <h1>{editingCoupon ? 'EDIT COUPON' : 'ADD COUPON'}</h1>
         <br />
 
         <Row className="g-5">
-          {/* LEFT SIDE */}
           <Col>
             {/* Coupon Name */}
             <Row className="mb-4">
@@ -59,6 +159,7 @@ const AddCoupon = () => {
                   value={couponName}
                   onChange={(e) => setCouponName(e.target.value)}
                 />
+                {couponNameError && <div className="error">{couponNameError}</div>}
               </div>
             </Row>
 
@@ -91,11 +192,7 @@ const AddCoupon = () => {
                   </Form.Group>
                   <Form.Control
                     type="number"
-                    placeholder={
-                      discountType === 'flat'
-                        ? 'Enter flat discount amount (e.g., 5 for $5 off)'
-                        : 'Enter discount percentage (e.g., 10 for 10% off)'
-                    }
+                    placeholder={discountType === 'flat' ? 'Flat discount amount' : 'Percentage'}
                     value={discount}
                     onChange={(e) => setDiscount(e.target.value)}
                   />
@@ -117,7 +214,7 @@ const AddCoupon = () => {
               </div>
             </Row>
 
-            {/* Terms & Conditions with Template Button */}
+            {/* Terms & Conditions */}
             <Row className="mb-4">
               <div className="box-orange">
                 <h2>TERMS & CONDITIONS:</h2>
@@ -128,21 +225,41 @@ const AddCoupon = () => {
                   value={terms}
                   onChange={(e) => setTerms(e.target.value)}
                 />
-                <Button variant="secondary" size="sm" className="mt-2" onClick={fillTemplate}>
+                <Button variant="secondary" size="sm" className="mt-2" onClick={() => setTerms(standardTemplate)}>
                   Use Standard Template
                 </Button>
               </div>
             </Row>
 
-            {/* Create Button */}
-            <Button variant="warning" onClick={handleCreateCoupon}>
-              Create
+            <Button variant="warning" onClick={editingCoupon ? handleSaveChanges : handleCreateCoupon}>
+              {editingCoupon ? 'Save Changes' : 'Create'}
             </Button>
+
+            {editingCoupon && (
+              <Button variant="danger" className="ms-2" onClick={() => handleDeleteClick(editingCoupon)}>
+                Delete Coupon
+              </Button>
+            )}
+
+            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+              <Modal.Header closeButton>
+                <Modal.Title>Delete Coupon</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <p>Are you sure you want to delete this coupon?</p>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
+                <Button variant="danger" onClick={() => handleCouponDelete(couponToDelete._id)}>Delete</Button>
+              </Modal.Footer>
+            </Modal>
+
           </Col>
 
-          {/* RIGHT SIDE */}
+          {/* Right Side */}
           <Col>
             <div className="bigger-box-orange">
+              {/* Category, Total Coupons, Expiry Date */}
               <Row className="mb-4">
                 <div className="box-orange">
                   <p>Coupon Category:</p>

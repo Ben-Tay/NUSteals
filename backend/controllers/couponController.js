@@ -4,13 +4,14 @@ import { validationResult } from 'express-validator';
 
 // Create a single coupon
 const createCoupon = async (req, res) => {
-    const { couponName, discount, description, termsConditions, category, totalNum, expiryDate } = req.body;
+    const { couponName, discount, discountType, description, termsConditions, category, totalNum, expiryDate } = req.body;
+
 
     // Validate input (400 - invalid data)
-    if (!couponName || !discount || !description || !termsConditions || !category || !totalNum || !expiryDate ) {
+    if (!couponName || !discount || !description || !discountType || !termsConditions || !category || !totalNum || !expiryDate ) {
         return res.status(400).json({
             error: "Missing required fields",
-            required: ["couponName", "discount", "description", "termsConditions", "category", "totalNum", "expiryDate"]
+            required: ["couponName", "discount", "description", "discountType", "termsConditions", "category", "totalNum", "expiryDate"]
         });
     }
 
@@ -29,6 +30,7 @@ const createCoupon = async (req, res) => {
             couponName,
             discount, 
             description, 
+            discountType,
             termsConditions, 
             category, 
             totalNum, 
@@ -41,6 +43,7 @@ const createCoupon = async (req, res) => {
             couponName: newCoupon.couponName,
             discount: newCoupon.discount,
             description: newCoupon.description,
+            discountType: newCoupon.discountType,
             category: newCoupon.category,
             createdAt: newCoupon.createdAt
         });
@@ -112,13 +115,13 @@ const editCoupon = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { couponName, discount, description, termsConditions, category, totalNum, expiryDate} = req.body;
+    const { couponName, discount, description, discountType, termsConditions, category, totalNum, expiryDate} = req.body;
     const { id } = req.params;
 
     try {
         const updatedCoupon = await coupons.findByIdAndUpdate(
             id,
-            { couponName, discount, description, termsConditions, category, totalNum, expiryDate },
+            { couponName, discount, description, discountType, termsConditions, category, totalNum, expiryDate },
             { new: true }
         );
 

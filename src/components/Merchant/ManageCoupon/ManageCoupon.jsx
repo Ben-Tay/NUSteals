@@ -1,11 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import GeneralNavBar from '../../../layout/GeneralNavBar';
 import { Row, Col, Container, Card } from 'react-bootstrap';
 import GeneralCoupon from '../../../layout/GeneralCoupon';
 
-
 const ManageCoupon = () => {
+    const navigate = useNavigate();
     const [merchantName] = useState('John Doe');
+    const [loading, setLoading] = useState(true);
+    const [coupons, setCoupons] = useState([]);
+
+    // SHOW ALL COUPONS
+    useEffect(() => {
+        const fetchCoupons = async () => {
+            try {
+            const response = await fetch("http://localhost:3000/api/coupons", {
+                method: "GET",
+                credentials: "include",
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch coupons");
+            }
+
+            const data = await response.json();
+            setCoupons(data);
+            } catch (error) {
+            console.error("Error fetching coupons:", error);
+            } finally {
+            setLoading(false);
+            }
+        };
+
+        fetchCoupons();
+        }, [COUPONS_API_URL]);
+
     return (
         <>
           <GeneralNavBar userRole="merchant" />
@@ -43,9 +72,23 @@ const ManageCoupon = () => {
                         <Container className="mb-4">
                             <h3>All Coupons</h3>
                         </Container>
-                        
-                        <GeneralCoupon children="merchant"/>
 
+                        {loading ? (
+                            <p>Loading...</p>
+                        ) : coupons.length === 0 ? (
+                        <p>No coupons found</p>
+                        ) : (
+                            coupons.map((coupon) => (
+                                <GeneralCoupon
+                                key={coupon._id}
+                                discount={`${coupon.discount}`}
+                                discountBottom={coupon.discountType}
+                                descriptionHeader={coupon.couponName}
+                                description={coupon.description}
+                                children="merchant"
+                                />
+                            ))
+                        )}
                         <div className="d-flex justify-content-end mt-4">
                             <a href="/addCoupon">
                             <button className="px-10 py-2 bg-[#F88B2C] text-white border-none rounded text-center" >Add Coupon</button>

@@ -11,7 +11,7 @@ const Coupon = ({ brandLogo, brandName, discount, descriptionHeader, description
             case 'merchant':
                 return (
                 <div className="flex flex-col gap-2">
-                    <button className="px-10 py-2 bg-[#F88B2C] text-white border-none rounded text-center">View Coupon</button>
+                    <button className="px-10 py-2 bg-[#F88B2C] text-white border-none rounded text-center">Edit Coupon</button>
 
                     <a 
                     href="#" 
