@@ -12,6 +12,11 @@ const GeneralNavBar = ({ userRole }) => {
       ? 'text-blue py-3 px-3 no-underline'
       : 'text-black py-3 px-3 no-underline';
 
+  const handleLogout = () => {
+     // Clear the access token from localStorage
+     localStorage.removeItem('accessToken')
+  }
+
   const renderLinks = () => {
     switch (userRole) {
       // MERCHANT NAVBAR
@@ -82,7 +87,7 @@ const GeneralNavBar = ({ userRole }) => {
                 </NavLink>
               </Nav.Item> 
               <Nav.Item className="flex"> 
-                  <NavLink to="/" className={linkClass} style = {{ marginTop: "3px"}}>
+                  <NavLink to="/" className={linkClass} style = {{ marginTop: "3px"}} onClick={handleLogout}>
                     <TbLogout className="mr-3 text-xl" />
                   </NavLink>
               </Nav.Item>

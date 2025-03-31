@@ -6,6 +6,7 @@ import Button from 'react-bootstrap/Button';
 import { Spinner } from 'react-bootstrap';
 import Alert from 'react-bootstrap/Alert';
 import Footer from './Footer';
+import { jwtDecode } from "jwt-decode";
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -27,7 +28,7 @@ const Login = () => {
 
       try {
         // Fetch all users from the backend
-        const response = await fetch('https://nusteals-express.onrender.com/api/users/login', {
+        const response = await fetch('http://localhost:3000/api/users/login', {
            method: 'POST',
            headers: {
               'Content-Type': 'application/json',
@@ -35,7 +36,8 @@ const Login = () => {
            body: JSON.stringify({
               email, 
               password,
-           })
+           }),
+           credentials: 'include', // Allow sending cookies or tokens
         });
 
         // Handle internal server error
@@ -47,8 +49,37 @@ const Login = () => {
           return;
         }
 
-        const user = await response.json(); // Get user from response
-      
+        const data = await response.json(); // Get acces token
+
+        console.log(`is + ${data.accessToken}`);
+        if (data.accessToken) {
+           // store access token in localStorage
+           localStorage.setItem('accessToken', data.accessToken);
+        }
+
+        // Decode JWT token to get User ID
+        const decodedToken = jwtDecode(data.accessToken);
+        const userId = decodedToken.uid; // Access the user ID from the decoded token
+
+        const token = localStorage.getItem("accesstoken");
+        const findUser = await fetch(`https://nusteals-express.onrender.com/api/users/${userId}`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            method: "GET",
+        });
+
+        if (!findUser.ok) {
+          // Handle error response (e.g., user not found, server error)
+          const errorData = await findUser.json();
+          setError(errorData.message || 'User not found');
+          setIsLoading(false);
+          return;
+        } 
+
+        const user = await findUser.json();
+
         if (user) {
           // If user is found, navigate based on their role
           if (user.role === 'student') {

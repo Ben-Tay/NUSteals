@@ -1,6 +1,8 @@
 import users from '../models/usersModel.js';
 import mongoose from 'mongoose';
 import { validationResult } from 'express-validator';
+import jwt from 'jsonwebtoken';
+
 
 // Create a single user
 const createUser = async (req, res) => {
@@ -15,6 +17,14 @@ const createUser = async (req, res) => {
     }
 
     try {
+        console.log("Checking if user already exists:", email);
+
+        // Check if a user with the same email already exists
+        const existingUser = await users.findOne({ email });
+        if (existingUser) {
+            return res.status(409).json({ error: "Email is already registered" });
+        }
+
         console.log("Creating user:", { name, email, role });
 
         const newUser = await users.create({
@@ -23,10 +33,10 @@ const createUser = async (req, res) => {
             email,
             password,
             role,
-            photo: null // default photo url null by default
+            photo: null // default photo URL null by default
         });
 
-        // Return safe user data (exclude password & photo [cuz not needed])
+        // Return safe user data (exclude password & photo)
         res.status(201).json({
             id: newUser._id,
             name: newUser.name,
@@ -38,14 +48,12 @@ const createUser = async (req, res) => {
 
     } catch (error) {
         console.error("User creation failed:", error);
-        res.status(400).json({
+        res.status(500).json({
             error: "User registration failed",
-            details: error.message,
-            mongooseError: error.name === 'ValidationError' ? error.errors : undefined
+            details: error.message
         });
     }
-}
-
+};
 
 // Get a single user
 const getSingleUser = async (req, res) => {
@@ -65,6 +73,7 @@ const getSingleUser = async (req, res) => {
     res.status(200).json(user);
 
 }
+
 
 
 // Get all users
@@ -87,16 +96,17 @@ const getUserByLogin = async(req, res) => {
     }
 
     try {
-        const user = await users.findOne({ email }) // Find user by email
-        if (!user) {
-            return res.status(404).json({ message: "Invalid email or password"});
+        const foundUser = await users.findOne({ email }) // Find user by email
+        if (foundUser && foundUser.password === password) {
+            // handle authentication to sign on found User's id
+            const userDetails = { uid: foundUser._id} 
+            const accessToken = jwt.sign(userDetails, process.env.JWT_SECRET, { expiresIn: "12h"});
+            res.status(200).json({accessToken}); // return user data if credentials correct
+        }
+        else {
+            return res.status(401).json({ message: "Invalid login credentials"});
         }
 
-        if (password !== user.password) {
-            return res.status(404).json({ message: "Invalid email or password"});
-        }
-
-        res.status(200).json(user); // return user data if credentials correct
         
     } catch(error) {
         console.error(error);
@@ -131,13 +141,13 @@ const editUser = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, address } = req.body;
     const { id } = req.params;
 
     try {
         const updatedUser = await users.findByIdAndUpdate(
             id,
-            { name, email, password, role },
+            { name, email, password, role, address },
             { new: true }
         );
 
@@ -153,5 +163,28 @@ const editUser = async (req, res) => {
     }
 };
 
+
+const requireAuthJWT = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+        const token = authHeader.split(" ")[1];
+
+        if (!token) {
+            return res.status(401).json({ message: "Unauthorized: No token provided" });
+        }
+
+        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+            if (!err) {
+                req.user = user;
+                next();
+            } else {
+                //most likely token expired
+                res.sendStatus(401);
+                return;
+            }
+        });
+    } else { res.sendStatus(401); }
+} //end requireAuthJWT
+
 // Export the user handler methods to the routes page
-export { createUser, getUserByLogin, getAllUsers, getSingleUser, deleteUser, editUser } 
+export { createUser, getUserByLogin, getAllUsers, getSingleUser, deleteUser, editUser, requireAuthJWT } 
