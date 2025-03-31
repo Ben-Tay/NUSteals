@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import uniqueValidator from 'mongoose-unique-validator'; // Use import instead of require
 const { Schema } = mongoose; // Destructure Schema from mongoose
 
 
@@ -15,8 +14,7 @@ const userSchema = new Schema({
     timestamps: true,
 });
 
-// Apply the uniqueValidator plugin to the schema
-// userSchema.plugin(uniqueValidator);
+
 
 // Create and export the model
 const User = mongoose.model('User', userSchema);
