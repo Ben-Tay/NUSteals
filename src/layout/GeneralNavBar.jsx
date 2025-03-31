@@ -23,47 +23,61 @@ const GeneralNavBar = ({ userRole }) => {
       case 'merchant':
         return (
           <>
-            <Nav.Item>
-              <NavLink to="/merchantDashboard" className={linkClass}>
-                Dashboard
-              </NavLink>
-            </Nav.Item>
-            <Nav.Item>
-              <NavLink to="/manageCoupons" className={linkClass}>
-                Manage Coupons
-              </NavLink>
-            </Nav.Item>
-            <Nav.Item>
-              <NavLink to="/merchantProfile" className={linkClass}>
-                Profile
-              </NavLink>
-            </Nav.Item>
-            <Nav.Item>
-              <NavLink to="/merchantFaqs" className={linkClass}>
-                FAQs
-              </NavLink>
-            </Nav.Item>
+            <div className="flex justify-content-end">
+              <Nav.Item className="flex">
+                <NavLink to="/merchantDashboard" className={linkClass}>
+                  Dashboard
+                </NavLink>
+              </Nav.Item>
+              <Nav.Item className="flex">
+                <NavLink to="/manageCoupons" className={linkClass}>
+                  Manage Coupons
+                </NavLink>
+              </Nav.Item>
+              <Nav.Item className="flex">
+                <NavLink to="/merchantProfile" className={linkClass}>
+                  Profile
+                </NavLink>
+              </Nav.Item>
+              <Nav.Item className="flex">
+                <NavLink to="/merchantFaqs" className={linkClass}>
+                  FAQs
+                </NavLink>
+              </Nav.Item>
+              <Nav.Item className="flex">
+                <NavLink to="/" className={linkClass} style = {{ marginTop: "3px"}} onClick={handleLogout}>
+                    <TbLogout className="mr-3 text-xl" />
+                </NavLink>
+              </Nav.Item>
+            </div>
           </>
         );
       // STUDENT NAVBAR
       case 'student':
         return (
           <>
-            <Nav.Item>
-              <NavLink to="/#" className={linkClass}>
-                Redeem Coupons
-              </NavLink>
-            </Nav.Item>
-            <Nav.Item>
-              <NavLink to="/#" className={linkClass}>
-                Profile
-              </NavLink>
-            </Nav.Item>
-            <Nav.Item>
-              <NavLink to="/#" className={linkClass}>
-                FAQs
-              </NavLink>
-            </Nav.Item>
+            <div className="flex justify-content-end">
+              <Nav.Item className="flex">
+                <NavLink to="/#" className={linkClass}>
+                  Redeem Coupons
+                </NavLink>
+              </Nav.Item>
+              <Nav.Item className="flex"> 
+                <NavLink to="/#" className={linkClass}>
+                  Profile
+                </NavLink>
+              </Nav.Item>
+              <Nav.Item className="flex"> 
+                <NavLink to="/#" className={linkClass}>
+                  FAQs
+                </NavLink>
+              </Nav.Item>
+              <Nav.Item className="flex"> 
+                  <NavLink to="/" className={linkClass} style = {{ marginTop: "3px"}} onClick={handleLogout}>
+                    <TbLogout className="mr-3 text-xl" />
+                  </NavLink>
+              </Nav.Item>
+            </div>
           </>
         );
       // ADMIN NAVBAR

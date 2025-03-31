@@ -25,6 +25,11 @@ const createUser = async (req, res) => {
             return res.status(409).json({ error: "Email is already registered" });
         }
 
+        const existingUsername = await users.findOne({ name});
+        if (existingUsername) {
+            return res.status(409).json({ error: "Username already exists"});
+        }
+
         console.log("Creating user:", { name, email, role });
 
         const newUser = await users.create({

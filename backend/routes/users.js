@@ -6,7 +6,7 @@ import validateUser from '../controllers/validateUser';
 const router = express.Router();
 
 // Get all users
-router.get('/', requireAuthJWT, getAllUsers);
+router.get('/', getAllUsers);
 
 // Login a user
 router.post('/login', getUserByLogin)

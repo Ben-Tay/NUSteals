@@ -45,13 +45,12 @@ function ControlledForm() {
 
       if (response.status === 201) {
         navigate("/Login"); // Redirect on success
-      } else if (response.status === 400 && data.details) {
-        const details = data.details;
-
-        if (details.includes("dup key: { email:")) {
+      } else if (response.status === 409 && data.error) {
+        // Handle email already registered error
+        if (data.error === "Email is already registered") {
           setEmailError("This email is already registered. Please use a different email.");
-        } else if (details.includes("dup key: { name:")) {
-          setNameError("This name is already taken. Please choose a different name.");
+        } else if (data.error === "Username already exists") {
+          setNameError("This username already exists");
         } else {
           setError("Signup failed. Please try again.");
         }
@@ -68,7 +67,7 @@ function ControlledForm() {
   return (
     <>
       <div className="flex flex-col min-h-screen">
-        <div className="flex-1 mt-5">
+        <div className="flex-1">
           <GeneralNavBar />
           <div className="flex justify-center items-center py-6">
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
@@ -123,17 +122,15 @@ function ControlledForm() {
                 <Form.Group className="mb-3" controlId="formPassword">
                   <Form.Label>Password</Form.Label>
                   <Form.Control
-                      type="password"
-                      placeholder="Enter password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      isInvalid={password.length < 6}
-                      minLength={6}
-                      required
-                      autoComplete="new-password"
-                    />
+                    type="password"
+                    placeholder="Enter password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    autoComplete="new-password"
+                  />
                   <Form.Control.Feedback type="invalid">
-                    {password.length < 6 ? "Password must be at least 6 characters long" : "Please enter a valid password"}
+                    Please enter a valid password
                   </Form.Control.Feedback>
                 </Form.Group>
 
@@ -160,8 +157,8 @@ function ControlledForm() {
               </Form>
             </div>
           </div>
+          <Footer />
         </div>
-        <Footer/>
       </div>
     </>
   );
