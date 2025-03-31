@@ -93,7 +93,6 @@ const ManageCoupon = () => {
                             <a href="/addCoupon">
                             <button className="px-10 py-2 bg-[#F88B2C] text-white border-none rounded text-center" >Add Coupon</button>
                             </a>
- 
 
                         </div>
 
