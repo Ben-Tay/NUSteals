@@ -76,7 +76,7 @@ function ControlledForm() {
 
                 {/* Name Field */}
                 <Form.Group className="mb-3" controlId="formName">
-                  <Form.Label>Name</Form.Label>
+                  <Form.Label>Username</Form.Label>
                   <Form.Control
                     type="text"
                     placeholder="Enter Name"
@@ -126,11 +126,12 @@ function ControlledForm() {
                     placeholder="Enter password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    minLength={6}
                     required
                     autoComplete="new-password"
                   />
                   <Form.Control.Feedback type="invalid">
-                    Please enter a valid password
+                    {password.length < 6 ? "Password must be at least 6 characters long" : "Please enter a valid password"}                 
                   </Form.Control.Feedback>
                 </Form.Group>
 

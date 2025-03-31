@@ -79,8 +79,6 @@ const getSingleUser = async (req, res) => {
 
 }
 
-
-
 // Get all users
 const getAllUsers = async (req, res) => {
     try {
@@ -168,6 +166,32 @@ const editUser = async (req, res) => {
     }
 };
 
+const resetPassword = async (req, res) => {
+    const { email, password } = req.body;
+    if (!email) {
+        return res.status(400).json({ message: "Email input required!"});
+    } 
+
+    try {
+        // Can use email, as we made sure email is unique
+        const findUser = await users.findOne({ email });
+        if (!findUser) {
+            return res.status(404).json({ message: "User not found!"});
+        }
+
+        const updatedUser = await users.findByIdAndUpdate(
+            findUser._id,
+            { password }, 
+            { new: true }
+        )
+        // Send the updated user back
+        res.status(200).json({updatedUser});
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server Error' });
+    }
+    
+}
 
 const requireAuthJWT = (req, res, next) => {
     const authHeader = req.headers.authorization;
@@ -192,4 +216,4 @@ const requireAuthJWT = (req, res, next) => {
 } //end requireAuthJWT
 
 // Export the user handler methods to the routes page
-export { createUser, getUserByLogin, getAllUsers, getSingleUser, deleteUser, editUser, requireAuthJWT } 
+export { createUser, getUserByLogin, getAllUsers, getSingleUser, deleteUser, editUser, resetPassword, requireAuthJWT } 
