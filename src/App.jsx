@@ -8,6 +8,7 @@ import ForgotPassword from './components/HomePage/ForgotPassword';
 import Merchant from "./components/Merchant/Merchant";
 import Student from "./components/Student/Student";
 import ManageCoupon from "./components/Merchant/ManageCoupon/ManageCoupon";
+import AddCoupon from "./components/Merchant/ManageCoupon/AddCoupon";
 import MerchantDashboard from "./components/Merchant/MerchantDashboard";
 import MerchantFaqs from "./components/Merchant/MerchantFaqs";
 import MerchantProfile from "./components/Merchant/MerchantProfile";
@@ -51,6 +52,10 @@ const App = () => {
     {
       path: "/manageCoupons",
       element: <ManageCoupon/>
+    },
+    {
+      path: "/addCoupon",
+      element: <AddCoupon/>
     },
     {
       path: "/merchantDashboard",
