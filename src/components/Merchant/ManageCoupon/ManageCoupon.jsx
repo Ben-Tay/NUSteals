@@ -35,9 +35,10 @@ const ManageCoupon = () => {
                         <Button variant="secondary">Change Photo</Button>
                         </Col>
                     </Col>
-                    <Col>
-                    <h3>All Coupons</h3>
-                    <GeneralCoupon />
+                    {/* RIGHT SIDE */}
+                    <Col md={8}>
+                        <h3>All Coupons</h3>
+                        <GeneralCoupon children="merchant"/>
                     </Col>
                     <h1>Related Stores</h1>
                 </Row>
