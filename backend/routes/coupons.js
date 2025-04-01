@@ -1,6 +1,6 @@
 import express from 'express';
 import { createCoupon, getAllCoupons, getSingleCoupon, deleteCoupon, editCoupon } from '../controllers/couponController.js';
-import validateCoupon from '../controllers/validateCoupon';
+import validateCoupon from '../controllers/validateCoupon.js';
 
 const router = express.Router();
 

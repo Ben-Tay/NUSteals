@@ -1,11 +1,10 @@
-import coupons from '../models/couponsModel.js';
+import Coupon from '../models/couponsModel.js';
 import mongoose from 'mongoose';
 import { validationResult } from 'express-validator';
 
 // Create a single coupon
 const createCoupon = async (req, res) => {
     const { couponName, discount, discountType, description, termsConditions, category, totalNum, expiryDate } = req.body;
-
 
     // Validate input (400 - invalid data)
     if (!couponName || !discount || !description || !discountType || !termsConditions || !category || !totalNum || !expiryDate ) {
@@ -19,14 +18,14 @@ const createCoupon = async (req, res) => {
         console.log("Checking if coupon already exists:", couponName);
 
         // Check if a coupon with the same name already exists
-        const existingCoupon = await coupons.findOne({ couponName });
+        const existingCoupon = await Coupon.findOne({ couponName });
         if (existingCoupon) {
             return res.status(409).json({ error: "Coupon already exists" });
         }
 
         console.log("Creating coupon:", { couponName, discount });
 
-        const newCoupon = await coupons.create({
+        const newCoupon = await Coupon.create({
             couponName,
             discount, 
             description, 
@@ -66,7 +65,7 @@ const getSingleCoupon = async (req, res) => {
         return res.status(404).json({ error: "Invalid couponId" });
     }
 
-    const coupon = await coupons.findById(id);
+    const coupon = await Coupon.findById(id);
 
     if (!coupon) {
         return res.status(404).json({ error: "Coupon not found" });
@@ -75,12 +74,10 @@ const getSingleCoupon = async (req, res) => {
 
 }
 
-
-
 // Get all coupons
 const getAllCoupons = async (req, res) => {
     try {
-        const allCoupons = await coupons.find({}).sort({ createdAt: -1 }); // Fetch all users from DB from most recent
+        const allCoupons = await Coupon.find({}).sort({ createdAt: -1 }); // Fetch all coupons from DB from most recent
         res.status(200).json(allCoupons);
     } catch (error) {
         console.error("Error fetching coupons:", error);
@@ -96,7 +93,7 @@ const deleteCoupon = async (req, res) => {
         return res.status(404).json({ error: "Invalid couponId" });
     }
 
-    const deletedCoupon = await coupons.findOneAndDelete({ _id: id });
+    const deletedCoupon = await Coupon.findOneAndDelete({ _id: id });
 
     if (!deletedCoupon) {
         return res.status(404).json({ error: "Coupon not found" });
@@ -119,7 +116,7 @@ const editCoupon = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const updatedCoupon = await coupons.findByIdAndUpdate(
+        const updatedCoupon = await Coupon.findByIdAndUpdate(
             id,
             { couponName, discount, description, discountType, termsConditions, category, totalNum, expiryDate },
             { new: true }
@@ -136,6 +133,7 @@ const editCoupon = async (req, res) => {
         res.status(500).json({ message: 'Server Error' });
     }
 };
+
 
 // Export the coupon handler methods to the routes page
 export { createCoupon, getAllCoupons, getSingleCoupon, deleteCoupon, editCoupon } 

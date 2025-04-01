@@ -33,7 +33,7 @@ const ManageCoupon = () => {
         };
 
         fetchCoupons();
-        }, [COUPONS_API_URL]);
+        }, []);
 
     return (
         <>

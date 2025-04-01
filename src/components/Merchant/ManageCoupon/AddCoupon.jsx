@@ -51,15 +51,16 @@ const AddCoupon = () => {
     try {
       const response = await fetch('http://localhost:3000/api/coupons', {
         method: 'POST',
+        credentials: "include",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           couponName,
-          discount,
+          discount: Number(discount),
           discountType,
           description,
           termsConditions: terms,
           category,
-          totalNum: totalCoupons,
+          totalNum: Number(totalCoupons),
           expiryDate,
         }),
       });
@@ -69,7 +70,6 @@ const AddCoupon = () => {
       }
 
       const newCoupon = await response.json();
-      alert('Coupon created successfully!');
       navigate('/manageCoupons'); // Redirect after success
     } catch (error) {
       console.error('Error creating coupon:', error);
