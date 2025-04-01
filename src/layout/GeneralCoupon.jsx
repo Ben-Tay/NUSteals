@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Coupon = ({ brandLogo, brandName, discount, descriptionHeader, description, children }) => {
+const Coupon = ({ brandLogo, brandName, discount, descriptionHeader, description, children, coupon, onEditClick }) => {
     // Split discount into 2 parts so they can be stacked
     const [discountTop, discountBottom] = discount ? discount.split(' ') : ['0%', 'off'];
 
@@ -11,7 +11,7 @@ const Coupon = ({ brandLogo, brandName, discount, descriptionHeader, description
             case 'merchant':
                 return (
                 <div className="flex flex-col gap-2">
-                    <button className="px-10 py-2 bg-[#F88B2C] text-white border-none rounded text-center">Edit Coupon</button>
+                    <button className="px-10 py-2 bg-[#F88B2C] text-white border-none rounded text-center"onClick={onEditClick(coupon)}>Edit Coupon</button>
 
                     <a 
                     href="#" 
@@ -33,7 +33,7 @@ const Coupon = ({ brandLogo, brandName, discount, descriptionHeader, description
             {/* LEFT: Discount (10% width) */}
             <div className="basis-[10%] bg-gray-100 p-4 flex flex-col items-center justify-center">
                 <span className="text-2xl font-bold text-warning">{discountTop}</span>
-                <span className="text-2xl font-bold text-warning">{discountBottom}</span>
+                <span className="text-2xl font-bold text-warning">{discountBottom}%</span>
             </div>
 
             {/* MIDDLE: Description (60% width) */}

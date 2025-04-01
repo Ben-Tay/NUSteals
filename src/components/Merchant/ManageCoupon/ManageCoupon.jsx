@@ -35,6 +35,15 @@ const ManageCoupon = () => {
         fetchCoupons();
         }, []);
 
+    // GO TO EDIT COUPON
+    const handleEditClick = (coupon) => {
+        navigate('/addCoupon', {
+            state: {
+                editingCoupon: coupon
+            }
+        });
+    };
+
     return (
         <>
           <GeneralNavBar userRole="merchant" />
@@ -86,6 +95,7 @@ const ManageCoupon = () => {
                                 descriptionHeader={coupon.couponName}
                                 description={coupon.description}
                                 children="merchant"
+                                onEditClick={() => handleEditClick(coupon)}
                                 />
                             ))
                         )}

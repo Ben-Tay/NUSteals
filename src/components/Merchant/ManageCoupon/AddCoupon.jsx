@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import GeneralNavBar from '../../../layout/GeneralNavBar';
 import { Row, Col, Button, Form } from 'react-bootstrap';
 import './AddCoupon.css';
 
 const AddCoupon = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [couponName, setCouponName] = useState('');
   const [discount, setDiscount] = useState('');
   const [discountType, setDiscountType] = useState('flat'); // 'flat' or 'percentage'
@@ -15,7 +16,7 @@ const AddCoupon = () => {
   const [category, setCategory] = useState('');
   const [totalCoupons, setTotalCoupons] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
-  const [editingCoupon, setEditingCoupon] = useState(null);
+  const [editingCoupon, setEditingCoupon] = useState(location.state?.editingCoupon || null);
   const [showModal, setShowModal] = useState(false);
   const [couponToDelete, setCouponToDelete] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
