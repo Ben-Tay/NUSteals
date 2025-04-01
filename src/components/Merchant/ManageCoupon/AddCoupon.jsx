@@ -38,7 +38,13 @@ const AddCoupon = () => {
       setTerms(editingCoupon.termsConditions);
       setCategory(editingCoupon.category);
       setTotalCoupons(editingCoupon.totalNum);
-      setExpiryDate(editingCoupon.expiryDate);
+
+      // Convert ISO date to yyyy-mm-dd
+      if (editingCoupon.expiryDate) {
+        const date = new Date(editingCoupon.expiryDate);
+        const formattedDate = date.toISOString().split('T')[0];
+        setExpiryDate(formattedDate);
+      }
     }
   }, [editingCoupon]);
 
@@ -80,10 +86,14 @@ const AddCoupon = () => {
 
   // EDIT COUPON
   const handleSaveChanges = async (couponId) => {
-    if (!editingCoupon) return;
+    console.log("Editing coupon data:", editingCoupon);
+    if (!editingCoupon || !editingCoupon._id) {
+      console.error("No coupon ID available for updating");
+      return;
+    }
 
     try {
-      const response = await fetch(`http://localhost:3000/api/coupons/${couponId}`, {
+      const response = await fetch(`http://localhost:3000/api/coupons/${editingCoupon._id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
