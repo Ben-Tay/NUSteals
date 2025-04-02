@@ -1,183 +1,119 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import GeneralNavBar from '../../../layout/GeneralNavBar';
-import { Row, Col, Button, Form } from 'react-bootstrap';
-import './ManageCoupon.css';
+import { Row, Col, Container, Card } from 'react-bootstrap';
+import GeneralCoupon from '../../../layout/GeneralCoupon';
 
 const ManageCoupon = () => {
-  const [couponName, setCouponName] = useState('');
-  const [discount, setDiscount] = useState('');
-  const [discountType, setDiscountType] = useState('flat'); // 'flat' or 'percentage'
-  const [description, setDescription] = useState('');
-  const [terms, setTerms] = useState('');
-  const [category, setCategory] = useState('');
-  const [totalCoupons, setTotalCoupons] = useState('');
-  const [expiryDate, setExpiryDate] = useState('');
+    const navigate = useNavigate();
+    const [merchantName] = useState('John Doe');
+    const [loading, setLoading] = useState(true);
+    const [coupons, setCoupons] = useState([]);
 
-  // Standard T&C template string; adjust as needed
-  const standardTemplate = `Standard Terms & Conditions:
-1. Offer valid until the expiry date.
-2. Applicable only on select items.
-3. Cannot be combined with any other offer.
-4. Subject to change without prior notice.`;
+    // SHOW ALL COUPONS
+    useEffect(() => {
+        const fetchCoupons = async () => {
+            try {
+            const response = await fetch("http://localhost:3000/api/coupons", {
+                method: "GET",
+                credentials: "include",
+            });
 
-  const handleCreateCoupon = () => {
-    // Handle coupon creation logic
-    console.log({
-      couponName,
-      discount,
-      discountType,
-      description,
-      terms,
-      category,
-      totalCoupons,
-      expiryDate,
-    });
-  };
+            if (!response.ok) {
+                throw new Error("Failed to fetch coupons");
+            }
 
-  // Function to fill in standard T&C
-  const fillTemplate = () => {
-    setTerms(standardTemplate);
-  };
+            const data = await response.json();
+            setCoupons(data);
+            } catch (error) {
+            console.error("Error fetching coupons:", error);
+            } finally {
+            setLoading(false);
+            }
+        };
 
-  return (
-    <>
-      <GeneralNavBar userRole="merchant" />
-      <div className="content-wrapper">
-        <h1>ADD COUPON</h1>
-        <br />
+        fetchCoupons();
+        }, []);
 
-        <Row className="g-5">
-          {/* LEFT SIDE */}
-          <Col>
-            {/* Coupon Name */}
-            <Row className="mb-4">
-              <div className="box-orange">
-                <h3>Coupon Name:</h3>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter coupon name"
-                  value={couponName}
-                  onChange={(e) => setCouponName(e.target.value)}
-                />
-              </div>
-            </Row>
+    // GO TO EDIT COUPON
+    const handleEditClick = (coupon) => {
+        navigate('/addCoupon', {
+            state: {
+                editingCoupon: coupon
+            }
+        });
+    };
 
-            {/* Discount with two options */}
-            <Row className="mb-4">
-              <div className="box-orange">
-                <h2>DISCOUNT:</h2>
-                <Form>
-                  <Form.Group>
-                    <Form.Check
-                      inline
-                      type="radio"
-                      label="Flat Value"
-                      name="discountType"
-                      id="flatDiscount"
-                      value="flat"
-                      checked={discountType === 'flat'}
-                      onChange={(e) => setDiscountType(e.target.value)}
-                    />
-                    <Form.Check
-                      inline
-                      type="radio"
-                      label="Percentage"
-                      name="discountType"
-                      id="percentageDiscount"
-                      value="percentage"
-                      checked={discountType === 'percentage'}
-                      onChange={(e) => setDiscountType(e.target.value)}
-                    />
-                  </Form.Group>
-                  <Form.Control
-                    type="number"
-                    placeholder={
-                      discountType === 'flat'
-                        ? 'Enter flat discount amount (e.g., 5 for $5 off)'
-                        : 'Enter discount percentage (e.g., 10 for 10% off)'
-                    }
-                    value={discount}
-                    onChange={(e) => setDiscount(e.target.value)}
-                  />
-                </Form>
-              </div>
-            </Row>
+    return (
+        <>
+          <GeneralNavBar userRole="merchant" />
+          <div className="content-wrapper mb-4">
+            <Row className="g-5">
+                    {/* LEFT SIDE */}
+                    <Col md={4}>
+                    <Container className="mb-4">
+                        <h3>My Store</h3>
+                    </Container>
+                        <Card className="mb-4" style={{ width: '210px' }}>
+                            <Card.Body className="p-4 d-flex flex-column align-items-center justify-content-center">
+                                <div
+                                style={{
+                                width: '150px',
+                                height: '150px',
+                                borderRadius: '50%',
+                                backgroundColor: '#ccc',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '1.2rem',
+                                color: '#666',
+                                marginBottom: '1rem'
+                                }}
+                            >
+                                {/* Display first letters or an icon */}
+                                {merchantName.split(' ').map((part) => part[0]).join('')}
+                            </div>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                    {/* RIGHT SIDE */}
+                    <Col md={8}>
+                        <Container className="mb-4">
+                            <h3>All Coupons</h3>
+                        </Container>
 
-            {/* Description */}
-            <Row className="mb-4">
-              <div className="box-orange">
-                <h2>DESCRIPTION:</h2>
-                <Form.Control
-                  as="textarea"
-                  rows={3}
-                  placeholder="Enter a short description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
-            </Row>
+                        {loading ? (
+                            <p>Loading...</p>
+                        ) : coupons.length === 0 ? (
+                        <p>No coupons found</p>
+                        ) : (
+                            coupons.map((coupon) => (
+                                <GeneralCoupon
+                                key={coupon._id}
+                                discount={`${coupon.discount}`}
+                                discountBottom={coupon.discountType}
+                                descriptionHeader={coupon.couponName}
+                                description={coupon.description}
+                                children="merchant"
+                                onEditClick={() => handleEditClick(coupon)}
+                                />
+                            ))
+                        )}
+                        <div className="d-flex justify-content-end mt-4">
+                            <a href="/addCoupon">
+                            <button className="px-10 py-2 bg-[#F88B2C] text-white border-none rounded text-center" >Add Coupon</button>
+                            </a>
 
-            {/* Terms & Conditions with Template Button */}
-            <Row className="mb-4">
-              <div className="box-orange">
-                <h2>TERMS & CONDITIONS:</h2>
-                <Form.Control
-                  as="textarea"
-                  rows={3}
-                  placeholder="Enter terms & conditions"
-                  value={terms}
-                  onChange={(e) => setTerms(e.target.value)}
-                />
-                <Button variant="secondary" size="sm" className="mt-2" onClick={fillTemplate}>
-                  Use Standard Template
-                </Button>
-              </div>
-            </Row>
+                        </div>
 
-            {/* Create Button */}
-            <Button variant="warning" onClick={handleCreateCoupon}>
-              Create
-            </Button>
-          </Col>
+                    </Col>
+                </Row>
 
-          {/* RIGHT SIDE */}
-          <Col>
-            <div className="bigger-box-orange">
-              <Row className="mb-4">
-                <div className="box-orange">
-                  <p>Coupon Category:</p>
-                  <Form.Control
-                    type="text"
-                    placeholder="e.g., Electronics, Clothing, etc."
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                  />
-                </div>
-              </Row>
-              <Row className="mb-4">
-                <div className="box-orange">
-                  <p>Total Number of Coupons:</p>
-                  <Form.Control
-                    type="number"
-                    placeholder="Enter total coupons"
-                    value={totalCoupons}
-                    onChange={(e) => setTotalCoupons(e.target.value)}
-                  />
-                  <br />
-                  <p>Expiry Date:</p>
-                  <Form.Control
-                    type="date"
-                    value={expiryDate}
-                    onChange={(e) => setExpiryDate(e.target.value)}
-                  />
-                </div>
-              </Row>
-            </div>
-          </Col>
-        </Row>
-      </div>
-    </>
-  );
+            
+            <br />
+        </div>
+
+        </>
+      );
 };
-
 export default ManageCoupon;

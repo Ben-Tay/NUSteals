@@ -5,7 +5,7 @@ import Button from 'react-bootstrap/Button';
 import moment from 'moment';
 import {jwtDecode} from 'jwt-decode'; // Importing jwtDecode
 import { Spinner } from 'react-bootstrap';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
     const [user, setUser] = useState({}); 

@@ -25,7 +25,7 @@ const MerchantProfile = () => {
   return (
     <>
       <GeneralNavBar userRole="merchant" />
-      <Container className="mt-4">
+      <Container className="mt-4 mb-4">
         <h1>Merchant Profile</h1>
         <Row className="mt-3">
           {/* Left Column: Display or edit personal info */}

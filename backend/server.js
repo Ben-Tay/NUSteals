@@ -46,6 +46,8 @@ mongoose.connect(process.env.MONGO_URI)
         // Listen for requests only when we have connected to the database
         app.listen(process.env.PORT, () => {
             console.log("Connected to db + Listening on port " + process.env.PORT);
+
+            
         })
     })
     .catch((error) => {

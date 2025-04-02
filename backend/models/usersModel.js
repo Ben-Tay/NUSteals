@@ -14,8 +14,7 @@ const userSchema = new Schema({
     timestamps: true,
 });
 
-// Apply the uniqueValidator plugin to the schema
-// userSchema.plugin(uniqueValidator);
+
 
 // Create and export the model
 const User = mongoose.model('User', userSchema);

@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
-import GeneralNavBar from '../../../layout/GeneralNavBar'
-import { Row, Col, Button, Form, Modal } from 'react-bootstrap';
-import './ManageCoupon.css'; // Reuse styles from ManageCoupon.css
-import Coupon from '../../../layout/GeneralCoupon'; //Import general coupon template
-import StudentCouponNavbar from '../../../layout/StudentCouponNavbar';
+import React, { useState } from "react";
+import { Row, Col, Button, Form, Modal } from "react-bootstrap";
+import { NavLink } from "react-router-dom"; // Import NavLink for navigation
+import "./ManageCoupon.css"; // Reuse styles from ManageCoupon.css
+import Coupon from "../../../layout/GeneralCoupon"; // Import general coupon template
 
 // Define RedeemButton component
 const RedeemButton = ({ onClick }) => {
   return (
-    <button className="bg-green-500 text-white py-2 px-4 rounded" onClick={onClick}>
+    <button
+      className="bg-green-500 text-white py-2 px-4 rounded"
+      onClick={onClick}
+    >
       Redeem
     </button>
   );
@@ -40,7 +42,7 @@ const StudentCoupon = () => {
   ];
 
   // State for search bar and filters
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [selectedCoupon, setSelectedCoupon] = useState(null);
@@ -59,13 +61,34 @@ const StudentCoupon = () => {
 
   return (
     <>
-      <GeneralNavBar userRole="student" />
-      <StudentCouponNavbar />
-
-      {/* Search & Filter Section */}
+      {/* Search & Navigation Section */}
       <div className="content-wrapper">
         <Row className="mb-3 align-items-center">
+          <Col xs={12} className="text-center mb-3">
+            {/* Navigation Buttons */}
+            <NavLink
+              to="/studentLogin/studentCoupon"
+              className={({ isActive }) =>
+                `px-4 py-2 mx-2 ${
+                  isActive ? "text-orange-500 font-bold" : "text-black"
+                }`
+              }
+            >
+              All Coupons
+            </NavLink>
+            <NavLink
+              to="/studentLogin/studentCoupon/history"
+              className={({ isActive }) =>
+                `px-4 py-2 mx-2 ${
+                  isActive ? "text-orange-500 font-bold" : "text-black"
+                }`
+              }
+            >
+              View My History
+            </NavLink>
+          </Col>
           <Col xs={9}>
+            {/* Search Bar */}
             <Form.Control
               type="text"
               placeholder="Search Coupons..."
@@ -90,17 +113,23 @@ const StudentCoupon = () => {
             <Form.Check
               type="checkbox"
               label="Starbucks"
-              onChange={() => setSelectedFilters([...selectedFilters, 'Starbucks'])}
+              onChange={() =>
+                setSelectedFilters([...selectedFilters, "Starbucks"])
+              }
             />
             <Form.Check
               type="checkbox"
               label="Netflix"
-              onChange={() => setSelectedFilters([...selectedFilters, 'Netflix'])}
+              onChange={() =>
+                setSelectedFilters([...selectedFilters, "Netflix"])
+              }
             />
             <Form.Check
               type="checkbox"
               label="Percentage Discount"
-              onChange={() => setSelectedFilters([...selectedFilters, 'Percentage Discount'])}
+              onChange={() =>
+                setSelectedFilters([...selectedFilters, "Percentage Discount"])
+              }
             />
           </div>
         )}
@@ -108,7 +137,11 @@ const StudentCoupon = () => {
         {/* Coupons List */}
         <div className="coupon-list">
           {coupons
-            .filter(coupon => coupon.description.toLowerCase().includes(searchTerm.toLowerCase()))
+            .filter((coupon) =>
+              coupon.description
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase())
+            )
             .map((coupon) => (
               <Coupon
                 key={coupon.id}
@@ -119,7 +152,9 @@ const StudentCoupon = () => {
                 description={coupon.description}
               >
                 {coupon.status === "redeemed" ? (
-                  <Button variant="danger" disabled>Already Redeemed</Button>
+                  <Button variant="danger" disabled>
+                    Already Redeemed
+                  </Button>
                 ) : (
                   <div className="flex flex-col items-center">
                     <RedeemButton onClick={() => handleRedeemClick(coupon)} />
@@ -132,7 +167,8 @@ const StudentCoupon = () => {
 
         {/* Pagination */}
         <div className="text-center mt-3">
-          <Button variant="light">1</Button> <Button variant="light">2</Button> ... <Button variant="light">9</Button>
+          <Button variant="light">1</Button> <Button variant="light">2</Button>{" "}
+          ... <Button variant="light">9</Button>
         </div>
 
         {/* Coupon Redemption Modal */}
@@ -142,13 +178,24 @@ const StudentCoupon = () => {
               <Modal.Title>Coupon Redemption</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <h5>{selectedCoupon.brand} - {selectedCoupon.discount}</h5>
+              <h5>
+                {selectedCoupon.brand} - {selectedCoupon.discount}
+              </h5>
               <p>{selectedCoupon.description}</p>
-              <p><strong>Code:</strong> {selectedCoupon.code}</p>
-              <p><i>Please inform staff to enter the code at checkout.</i></p>
+              <p>
+                <strong>Code:</strong> {selectedCoupon.code}
+              </p>
+              <p>
+                <i>Please inform staff to enter the code at checkout.</i>
+              </p>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="primary" onClick={() => navigator.clipboard.writeText(selectedCoupon.code)}>
+              <Button
+                variant="primary"
+                onClick={() =>
+                  navigator.clipboard.writeText(selectedCoupon.code)
+                }
+              >
                 Copy Code
               </Button>
               <Button variant="secondary" onClick={() => setShowModal(false)}>
