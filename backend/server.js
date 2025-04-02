@@ -37,7 +37,7 @@ app.use(express.static("public"));
 dotenv.config({ path: path.resolve('backend', '.env') });
 
 // define routes for specific requests to each collection
-app.use('/api/users', userRoutes);
+app.use('/api/users', userRoutes); // add authentication 
 app.use('/api/coupons', couponRoutes);
 
 // connect to db

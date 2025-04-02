@@ -11,53 +11,72 @@ const GeneralNavBar = ({ userRole }) => {
       ? "text-blue py-3 px-3 no-underline"
       : "text-black py-3 px-3 no-underline";
 
+  const handleLogout = () => {
+     // Clear the access token from localStorage
+     localStorage.removeItem('accessToken')
+  }
+
   const renderLinks = () => {
     switch (userRole) {
       // MERCHANT NAVBAR
       case "merchant":
         return (
           <>
-            <Nav.Item>
-              <NavLink to="/merchantDashboard" className={linkClass}>
-                Dashboard
-              </NavLink>
-            </Nav.Item>
-            <Nav.Item>
-              <NavLink to="/manageCoupons" className={linkClass}>
-                Manage Coupons
-              </NavLink>
-            </Nav.Item>
-            <Nav.Item>
-              <NavLink to="/merchantProfile" className={linkClass}>
-                Profile
-              </NavLink>
-            </Nav.Item>
-            <Nav.Item>
-              <NavLink to="/merchantFaqs" className={linkClass}>
-                FAQs
-              </NavLink>
-            </Nav.Item>
+            <div className="flex justify-content-end">
+              <Nav.Item className="flex">
+                <NavLink to="/merchantDashboard" className={linkClass}>
+                  Dashboard
+                </NavLink>
+              </Nav.Item>
+              <Nav.Item className="flex">
+                <NavLink to="/manageCoupons" className={linkClass}>
+                  Manage Coupons
+                </NavLink>
+              </Nav.Item>
+              <Nav.Item className="flex">
+                <NavLink to="/merchantProfile" className={linkClass}>
+                  Profile
+                </NavLink>
+              </Nav.Item>
+              <Nav.Item className="flex">
+                <NavLink to="/merchantFaqs" className={linkClass}>
+                  FAQs
+                </NavLink>
+              </Nav.Item>
+              <Nav.Item className="flex">
+                <NavLink to="/" className={linkClass} style = {{ marginTop: "3px"}} onClick={handleLogout}>
+                    <TbLogout className="mr-3 text-xl" />
+                </NavLink>
+              </Nav.Item>
+            </div>
           </>
         );
       // STUDENT NAVBAR
       case "student":
         return (
           <>
-            <Nav.Item>
-              <NavLink to="/studentLogin/studentCoupon" className={linkClass}>
-                Redeem Coupons
-              </NavLink>
-            </Nav.Item>
-            <Nav.Item>
-              <NavLink to="/studentLogin/profile" className={linkClass}>
-                Profile
-              </NavLink>
-            </Nav.Item>
-            <Nav.Item>
-              <NavLink to="/studentLogin/faq" className={linkClass}>
-                FAQs
-              </NavLink>
-            </Nav.Item>
+            <div className="flex justify-content-end">
+              <Nav.Item className="flex">
+                <NavLink to="/studentLogin/studentCoupon" className={linkClass}>
+                  Redeem Coupons
+                </NavLink>
+              </Nav.Item>
+              <Nav.Item className="flex"> 
+                <NavLink to="/studentLogin/profile" className={linkClass}>
+                  Profile
+                </NavLink>
+              </Nav.Item>
+              <Nav.Item className="flex"> 
+                <NavLink to="/studentLogin/faq" className={linkClass}>
+                  FAQs
+                </NavLink>
+              </Nav.Item>
+              <Nav.Item className="flex"> 
+                  <NavLink to="/" className={linkClass} style = {{ marginTop: "3px"}} onClick={handleLogout}>
+                    <TbLogout className="mr-3 text-xl" />
+                  </NavLink>
+              </Nav.Item>
+            </div>
           </>
         );
       // ADMIN NAVBAR
@@ -85,15 +104,11 @@ const GeneralNavBar = ({ userRole }) => {
                 >
                   Manage Coupons
                 </NavLink>
-              </Nav.Item>
-              <Nav.Item className="flex">
-                <NavLink
-                  to="/"
-                  className={linkClass}
-                  style={{ marginTop: "3px" }}
-                >
-                  <TbLogout className="mr-3 text-xl" />
-                </NavLink>
+              </Nav.Item> 
+              <Nav.Item className="flex"> 
+                  <NavLink to="/" className={linkClass} style = {{ marginTop: "3px"}} onClick={handleLogout}>
+                    <TbLogout className="mr-3 text-xl" />
+                  </NavLink>
               </Nav.Item>
             </div>
           </>

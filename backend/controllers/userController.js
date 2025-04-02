@@ -1,6 +1,8 @@
 import users from '../models/usersModel.js';
 import mongoose from 'mongoose';
 import { validationResult } from 'express-validator';
+import jwt from 'jsonwebtoken';
+
 
 // Create a single user
 const createUser = async (req, res) => {
@@ -21,6 +23,11 @@ const createUser = async (req, res) => {
         const existingUser = await users.findOne({ email });
         if (existingUser) {
             return res.status(409).json({ error: "Email is already registered" });
+        }
+
+        const existingUsername = await users.findOne({ name});
+        if (existingUsername) {
+            return res.status(409).json({ error: "Username already exists"});
         }
 
         console.log("Creating user:", { name, email, role });
@@ -67,11 +74,10 @@ const getSingleUser = async (req, res) => {
     if (!user) {
         return res.status(404).json({ error: "User not found" });
     }
+    
     res.status(200).json(user);
 
 }
-
-
 
 // Get all users
 const getAllUsers = async (req, res) => {
@@ -83,6 +89,33 @@ const getAllUsers = async (req, res) => {
         res.status(500).json({ error: "Internal server error", details: error.message });
     }
 }
+
+// Get user by login
+const getUserByLogin = async(req, res) => {
+    const { email, password} = req.body; // Get email and password from req body
+    
+    if (!email || !password) {
+        return res.status(400).json({error: "Email and password are required"});
+    }
+
+    try {
+        const foundUser = await users.findOne({ email }) // Find user by email
+        if (foundUser && foundUser.password === password) {
+            // handle authentication to sign on found User's id
+            const userDetails = { uid: foundUser._id} 
+            const accessToken = jwt.sign(userDetails, process.env.JWT_SECRET, { expiresIn: "12h"});
+            res.status(200).json({accessToken}); // return user data if credentials correct
+        }
+        else {
+            return res.status(401).json({ message: "Invalid login credentials"});
+        }
+
+        
+    } catch(error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error', details: error.message });    
+    }
+};
 
 // Delete a user
 const deleteUser = async (req, res) => {
@@ -100,7 +133,7 @@ const deleteUser = async (req, res) => {
 
     // Send response back to postman for verification
     res.status(200).json({ message: "User deleted successfully", user: deletedUser })
-}
+};
 
 // Edit a user
 const editUser = async (req, res) => {
@@ -133,5 +166,54 @@ const editUser = async (req, res) => {
     }
 };
 
+const resetPassword = async (req, res) => {
+    const { email, password } = req.body;
+    if (!email) {
+        return res.status(400).json({ message: "Email input required!"});
+    } 
+
+    try {
+        // Can use email, as we made sure email is unique
+        const findUser = await users.findOne({ email });
+        if (!findUser) {
+            return res.status(404).json({ message: "User not found!"});
+        }
+
+        const updatedUser = await users.findByIdAndUpdate(
+            findUser._id,
+            { password }, 
+            { new: true }
+        )
+        // Send the updated user back
+        res.status(200).json({updatedUser});
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server Error' });
+    }
+    
+}
+
+const requireAuthJWT = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+        const token = authHeader.split(" ")[1];
+
+        if (!token) {
+            return res.status(401).json({ message: "Unauthorized: No token provided" });
+        }
+
+        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+            if (!err) {
+                req.user = user;
+                next();
+            } else {
+                //most likely token expired
+                res.sendStatus(401);
+                return;
+            }
+        });
+    } else { res.sendStatus(401); }
+} //end requireAuthJWT
+
 // Export the user handler methods to the routes page
-export { createUser, getAllUsers, getSingleUser, deleteUser, editUser } 
+export { createUser, getUserByLogin, getAllUsers, getSingleUser, deleteUser, editUser, resetPassword, requireAuthJWT } 

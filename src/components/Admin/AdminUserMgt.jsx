@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Container, Table, Form, Button, Modal } from "react-bootstrap";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom';
+
 
 const AdminUserMgt = () => {
   const [users, setUsers] = useState([]);
@@ -12,11 +14,23 @@ const AdminUserMgt = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [emailError, setEmailError] = useState("");
   const [nameError, setNameError] = useState("");
+  const [authToken, setAuthToken] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUsers = async () => {
+      const token = localStorage.getItem('accessToken');
+      setAuthToken(token);
+      if (!token) {
+        navigate('/login');
+      }
+    
       try {
-        const response = await fetch("http://localhost:3000/api/users", {
+        const response = await fetch("https://nusteals-express.onrender.com/api/users", {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           method: "GET",
           credentials: "include",
         });
@@ -32,6 +46,7 @@ const AdminUserMgt = () => {
       } finally {
         setLoading(false);
       }
+      
     };
 
     fetchUsers();
@@ -60,7 +75,7 @@ const AdminUserMgt = () => {
 
       // Proceed with saving the changes if no duplicates
       const response = await fetch(
-        `http://localhost:3000/api/users/${editingUser._id}`,
+        `https://nusteals-express.onrender.com/api/users/${editingUser._id}`,
         {
           method: "PATCH",
           headers: {
@@ -105,9 +120,12 @@ const AdminUserMgt = () => {
 
   const handleUserDelete = async (userId) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
+      const response = await fetch(`https://nusteals-express.onrender.com/api/users/${userId}`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",             
+          Authorization: `Bearer ${authToken}`,
+        },
         credentials: "include",
       });
 
@@ -141,7 +159,7 @@ const AdminUserMgt = () => {
       <h2 className="my-4">User Management</h2>
       <Form.Control
         type="text"
-        placeholder="Search"
+        placeholder="Search by username"
         className="mb-3"
         value={searchQuery}
         onChange={handleSearchChange}
@@ -150,7 +168,7 @@ const AdminUserMgt = () => {
       <Table striped bordered hover responsive>
         <thead>
           <tr>
-            <th>Name</th>
+            <th>Username</th>
             <th>Email</th>
             <th>Role</th>
             <th>Address</th>
@@ -205,7 +223,7 @@ const AdminUserMgt = () => {
           {editingUser && (
             <Form>
               <Form.Group>
-                <Form.Label>Name</Form.Label>
+                <Form.Label>Username</Form.Label>
                 <Form.Control
                   type="text"
                   value={editingUser.name}

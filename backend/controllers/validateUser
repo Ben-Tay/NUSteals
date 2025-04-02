@@ -1,4 +1,4 @@
-import { body, validationResult } from 'express-validator';
+import { body } from 'express-validator';
 
 // Validation chain - for ensuring user pass in right stuff
 const validateUser = [
