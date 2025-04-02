@@ -1,17 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import GeneralCoupon from '../../layout/GeneralCoupon';
 import { Button } from 'react-bootstrap';
-
-const RedeemButton = ({ onClick }) => {
-  return (
-    <button className="bg-green-500 text-white py-2 px-4 rounded" onClick={onClick}>
-      Redeem
-    </button>
-  );
-};
+import { useNavigate } from 'react-router-dom';
 
 const AdminCouponMgt = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem('accessToken');
+
+      if (!token) {
+          navigate('/login'); // prevent access admin route if not logged in
+      }
+    }
+    fetchUser();
+},[]);
+
+  const RedeemButton = ({ onClick }) => {
+    return (
+      <button className="bg-green-500 text-white py-2 px-4 rounded" onClick={onClick}>
+        Redeem
+      </button>
+    );
+  };
 
   const coupons = [
     {

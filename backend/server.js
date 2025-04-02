@@ -13,11 +13,13 @@ const app = express();
 // Middleware
 // This must come before other middleware
 app.use(cors({
-    origin: 'http://localhost:5173', // Allow only your frontend origin
-    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    origin: 'http://localhost:5173', // Allow only your frontend origin, need to make this dynamic
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
     allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
     credentials: true, // Allow credentials (cookies, tokens, etc.)
 }));
+
+
 
 // allow us to access req body for post and edit requests in json format
 app.use(express.json());
@@ -35,7 +37,7 @@ app.use(express.static("public"));
 dotenv.config({ path: path.resolve('backend', '.env') });
 
 // define routes for specific requests to each collection
-app.use('/api/users', userRoutes);
+app.use('/api/users', userRoutes); // add authentication 
 app.use('/api/coupons', couponRoutes);
 
 // connect to db
@@ -44,6 +46,8 @@ mongoose.connect(process.env.MONGO_URI)
         // Listen for requests only when we have connected to the database
         app.listen(process.env.PORT, () => {
             console.log("Connected to db + Listening on port " + process.env.PORT);
+
+            
         })
     })
     .catch((error) => {

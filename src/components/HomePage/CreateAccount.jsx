@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import GeneralNavBar from '../../layout/GeneralNavBar'
+import GeneralNavBar from '../../layout/GeneralNavBar';
 import Footer from './Footer';
-
-
 
 function ControlledForm() {
   const [name, setName] = useState("");
@@ -14,19 +12,21 @@ function ControlledForm() {
   const [password, setPassword] = useState("");
   const [validated, setValidated] = useState(false);
   const [role, setRole] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [error, setError] = useState("");
 
-  const navigate = useNavigate(); // Initialize the navigate function
-
-
+  const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
-    const form = event.currentTarget;
     event.preventDefault();
+    const form = event.currentTarget;
 
-    // Debug: Log what's being sent
-    console.log("Submitting:", { name, email, password, role, address });
+    // Reset error messages
+    setNameError("");
+    setEmailError("");
+    setError("");
 
-    // Check if form is valid
     if (form.checkValidity() === false) {
       event.stopPropagation();
       setValidated(true);
@@ -34,34 +34,33 @@ function ControlledForm() {
     }
 
     try {
-      const response = await fetch('https://nusteals-express.onrender.com/api/users', { // Full URL for testing
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-          role: role,
-          address: address || null
-        }),
-        credentials: 'include' // If using cookies
-
+      const response = await fetch("https://nusteals-express.onrender.com/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, role, address: address || null }),
+        credentials: "include",
       });
 
+      const data = await response.json();
+
       if (response.status === 201) {
-        // If submission is successful, navigate to another page (e.g., login page)
-        navigate('/Login'); // You can change the route as per your requirement
+        navigate("/Login"); // Redirect on success
+      } else if (response.status === 409 && data.error) {
+        // Handle email already registered error
+        if (data.error === "Email is already registered") {
+          setEmailError("This email is already registered. Please use a different email.");
+        } else if (data.error === "Username already exists") {
+          setNameError("This username already exists");
+        } else {
+          setError("Signup failed. Please try again.");
+        }
+      } else {
+        setError("Unexpected error occurred.");
       }
-
-      console.log("Response status:", response.status);
-      const responseText = await response.text();
-      console.log("Raw response:", responseText);
-
-
 
     } catch (error) {
       console.error("Signup error:", error);
-      return;
+      setError("Network error. Please try again.");
     }
   };
 
@@ -75,21 +74,23 @@ function ControlledForm() {
               <h2 className="text-center text-2xl font-bold mb-2">Sign up</h2>
               <Form noValidate validated={validated} onSubmit={handleSubmit}>
 
-                {/* This is for name field */}
+                {/* Name Field */}
                 <Form.Group className="mb-3" controlId="formName">
-                  <Form.Label>Name</Form.Label>
+                  <Form.Label>Username</Form.Label>
                   <Form.Control
                     type="text"
                     placeholder="Enter Name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
+                    isInvalid={!!nameError}
                   />
                   <Form.Control.Feedback type="invalid">
-                    Please enter a correct username
+                    {nameError || "Please enter a valid name"}
                   </Form.Control.Feedback>
-
                 </Form.Group>
+
+                {/* Address Field */}
                 <Form.Group className="mb-3" controlId="formAddress">
                   <Form.Label>Address</Form.Label>
                   <Form.Control
@@ -100,25 +101,24 @@ function ControlledForm() {
                   />
                 </Form.Group>
 
-
-                {/* This is for email field */}
+                {/* Email Field */}
                 <Form.Group className="mb-3" controlId="formEmail">
                   <Form.Label>Email address</Form.Label>
                   <Form.Control
-                    type="email" // Use type="email" for default email validation
+                    type="email"
                     placeholder="Enter email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     autoComplete="off"
+                    isInvalid={!!emailError}
                   />
                   <Form.Control.Feedback type="invalid">
-                    Please provide a valid email address.
+                    {emailError || "Please enter a valid email address"}
                   </Form.Control.Feedback>
                 </Form.Group>
 
-
-                {/* This is for password field */}
+                {/* Password Field */}
                 <Form.Group className="mb-3" controlId="formPassword">
                   <Form.Label>Password</Form.Label>
                   <Form.Control
@@ -126,15 +126,16 @@ function ControlledForm() {
                     placeholder="Enter password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    minLength={6}
                     required
                     autoComplete="new-password"
                   />
                   <Form.Control.Feedback type="invalid">
-                    Please enter a valid password
+                    {password.length < 6 ? "Password must be at least 6 characters long" : "Please enter a valid password"}                 
                   </Form.Control.Feedback>
                 </Form.Group>
 
-                {/* Role Selection Field */}
+                {/* Role Selection */}
                 <Form.Group className="mb-3" controlId="formRole">
                   <Form.Label>Role</Form.Label>
                   <Form.Select
@@ -156,7 +157,6 @@ function ControlledForm() {
                 </Button>
               </Form>
             </div>
-
           </div>
           <Footer />
         </div>
