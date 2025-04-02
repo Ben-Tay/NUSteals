@@ -1,13 +1,14 @@
-import React from 'react'
-import GeneralNavBar from '../../layout/GeneralNavBar'
+import React from "react";
+import { Outlet } from "react-router-dom";
+import GeneralNavBar from "../../layout/GeneralNavBar";
 
-// feel free to change this
 const Student = () => {
   return (
     <>
-        <GeneralNavBar userRole="student"/>
+      <GeneralNavBar userRole="student" />
+      <Outlet />
     </>
-  )
-}
+  );
+};
 
-export default Student
+export default Student;
