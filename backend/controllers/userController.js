@@ -144,13 +144,13 @@ const editUser = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, password, role, address } = req.body;
+    const { name, email, password, role, address, photo } = req.body;
     const { id } = req.params;
 
     try {
         const updatedUser = await users.findByIdAndUpdate(
             id,
-            { name, email, password, role, address },
+            { name, email, password, role, address, photo },
             { new: true }
         );
 
