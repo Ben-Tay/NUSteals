@@ -13,7 +13,8 @@ const GeneralNavBar = ({ userRole }) => {
 
   const handleLogout = () => {
      // Clear the access token from localStorage
-     localStorage.removeItem('accessToken')
+     localStorage.removeItem('accessToken');
+     localStorage.removeItem('userId');
   }
 
   const renderLinks = () => {
