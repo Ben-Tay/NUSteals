@@ -9,12 +9,12 @@ const MerchantDashboard = () => {
   const userId = localStorage.getItem('userId');
   const API_URL = 'https://nusteals-express.onrender.com';
 
-  // State to control loading and authorization
   const [loading, setLoading] = useState(true);
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
-    if (!token) {
+    // If no token, redirect to login
+    if (!token || !userId) {
       navigate('/login');
       return;
     }
@@ -28,20 +28,35 @@ const MerchantDashboard = () => {
           },
         });
         if (!response.ok) {
-          throw new Error('Failed to verify user');
+          if (response.status === 401) {
+            console.error('Unauthorized response');
+            navigate('/login');
+            return;
+          }
+          throw new Error('Failed to fetch user data');
         }
         const data = await response.json();
-        // Immediately redirect if the user role is not 'merchant'
-        if (data.role !== 'merchant') {
-          alert('Access denied. You do not have permission to view this page.');
-          navigate('/');
-          return; // exit the function so no further state is updated
+        console.log("Fetched user data:", data);
+        if (data.role === 'merchant') {
+          setAuthorized(true);
+        } else if (data.role === 'admin') {
+          alert("Access denied. You are an admin. Redirecting to Admin Dashboard.");
+          navigate('/adminLogin');
+          return;
+        } else if (data.role === 'student') {
+          alert("Access denied. You are a student. Redirecting to Student Dashboard.");
+          navigate('/studentLogin');
+          return;
         } else {
-          setIsAuthorized(true);
+          alert("Access denied. Redirecting back.");
+          navigate(-1);
+          return;
         }
       } catch (error) {
-        console.error('Error verifying user:', error);
-        navigate('/login');
+        console.error("Error verifying user:", error);
+        // On error, simply go back to previous page
+        navigate(-1);
+        return;
       } finally {
         setLoading(false);
       }
@@ -50,7 +65,6 @@ const MerchantDashboard = () => {
     verifyUser();
   }, [token, userId, API_URL, navigate]);
 
-  // While verifying, show a spinner
   if (loading) {
     return (
       <>
@@ -62,8 +76,7 @@ const MerchantDashboard = () => {
     );
   }
 
-  // If not authorized, render nothing (redirection already occurred)
-  if (!isAuthorized) {
+  if (!authorized) {
     return null;
   }
 
@@ -73,7 +86,7 @@ const MerchantDashboard = () => {
       <div className="container mt-4">
         <h1>Merchant Dashboard</h1>
         <p>This is the Merchant Dashboard content.</p>
-        {/* Add additional dashboard content here */}
+        {/* Add your merchant dashboard content here */}
       </div>
     </>
   );

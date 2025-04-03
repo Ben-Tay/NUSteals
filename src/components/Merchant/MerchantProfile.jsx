@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 const MerchantProfile = () => {
   const navigate = useNavigate();
 
-  // Retrieve token and userId from localStorage (set during login)
   let token = localStorage.getItem('accessToken');
   let userId = localStorage.getItem('userId');
   if (!userId && token) {
@@ -19,38 +18,33 @@ const MerchantProfile = () => {
       console.error('Error decoding token:', err);
     }
   }
-  // If still no userId, redirect to login
   if (!userId) {
     navigate('/login');
     return null;
   }
 
-  // Use the deployed API URL (to match the login endpoint)
   const API_URL = 'https://nusteals-express.onrender.com';
 
-  // Loading state and authorization state
+  // Loading and authorization state
   const [loading, setLoading] = useState(true);
   const [isMerchant, setIsMerchant] = useState(false);
 
-  // State variables for the user's profile fields
+  // State for profile fields
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState(''); // For updating only
+  const [password, setPassword] = useState('');
   const [address, setAddress] = useState('');
   const [photo, setPhoto] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Ref for the hidden file input (for photo upload)
   const fileInputRef = useRef(null);
 
-  // Check if the user is logged in; if not, redirect to login
   useEffect(() => {
     if (!token) {
       navigate('/login');
     }
   }, [token, navigate]);
 
-  // Fetch the user's profile data and verify their role
   useEffect(() => {
     const fetchProfile = async () => {
       if (!token || !userId) {
@@ -68,13 +62,16 @@ const MerchantProfile = () => {
           throw new Error('Failed to fetch profile');
         }
         const data = await response.json();
-        // Verify that the user's role is "merchant"
+        // Check if the user's role is "merchant"
         if (data.role !== 'merchant') {
           alert('Access denied. You do not have permission to view this page.');
-          // Clear stored login data to prevent accidental reuse
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('userId');
-          navigate('/');
+          if (data.role === 'admin') {
+            navigate('/adminLogin');
+          } else if (data.role === 'student') {
+            navigate('/studentLogin');
+          } else {
+            navigate('/login');
+          }
           return;
         }
         setIsMerchant(true);
@@ -96,7 +93,7 @@ const MerchantProfile = () => {
     fetchProfile();
   }, [userId, token, API_URL, navigate]);
 
-  // Handle file selection (convert the image to Base64)
+  // File input handler
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -107,7 +104,7 @@ const MerchantProfile = () => {
     reader.readAsDataURL(file);
   };
 
-  // Trigger the hidden file input
+  // Trigger the file input dialog
   const handleChangePhoto = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
@@ -116,10 +113,10 @@ const MerchantProfile = () => {
 
   // Toggle password visibility
   const togglePasswordVisibility = () => {
-    setShowPassword((prev) => !prev);
+    setShowPassword(prev => !prev);
   };
 
-  // Update profile data by sending a PATCH request
+  // Update profile data via PATCH request
   const handleUpdateProfile = async () => {
     if (!token || !userId) {
       alert('No token or userId found; cannot update profile.');
@@ -128,7 +125,7 @@ const MerchantProfile = () => {
     const updatedProfile = {
       name,
       email,
-      password, // If left blank, backend should ignore updating the password
+      password,
       address,
       photo,
     };
@@ -142,11 +139,9 @@ const MerchantProfile = () => {
         },
         body: JSON.stringify(updatedProfile),
       });
-
       if (!response.ok) {
         throw new Error('Failed to update profile');
       }
-
       const data = await response.json();
       console.log('Profile updated:', data);
       alert('Profile updated successfully!');
@@ -168,7 +163,6 @@ const MerchantProfile = () => {
   }
 
   if (!isMerchant) {
-    // This should rarely be reached because the useEffect already redirects
     return null;
   }
 
@@ -178,7 +172,6 @@ const MerchantProfile = () => {
       <Container className="mt-4 mb-4">
         <h1>Merchant Profile</h1>
         <Row className="mt-3">
-          {/* Left Column: Profile Form */}
           <Col md={6}>
             <Form>
               <Form.Group className="mb-3" controlId="formName">
@@ -224,7 +217,6 @@ const MerchantProfile = () => {
                   onChange={(e) => setAddress(e.target.value)}
                 />
               </Form.Group>
-              {/* Hidden file input for photo upload */}
               <input
                 type="file"
                 accept="image/*"
@@ -237,7 +229,6 @@ const MerchantProfile = () => {
               </Button>
             </Form>
           </Col>
-          {/* Right Column: Display Photo or Placeholder */}
           <Col md={6} className="d-flex flex-column align-items-center justify-content-center">
             {photo ? (
               <img

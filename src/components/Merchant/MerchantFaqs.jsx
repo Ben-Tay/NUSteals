@@ -11,11 +11,12 @@ const MerchantFaqs = () => {
   const API_URL = 'https://nusteals-express.onrender.com';
 
   useEffect(() => {
-    // If no token, redirect to login
-    if (!token) {
+    // If no token or userId, redirect to login
+    if (!token || !userId) {
       navigate('/login');
       return;
     }
+
     // Fetch user details to check role
     fetch(`${API_URL}/api/users/${userId}`, {
       headers: {
@@ -25,14 +26,26 @@ const MerchantFaqs = () => {
     })
       .then(res => {
         if (!res.ok) {
+          // If unauthorized, redirect to login
+          if (res.status === 401) {
+            navigate('/login');
+          }
           throw new Error('Failed to verify user');
         }
         return res.json();
       })
       .then(data => {
+        console.log("Fetched user data:", data);
         if (data.role !== 'merchant') {
           alert('Access denied. You do not have permission to view this page.');
-          navigate('/');
+          // Redirect based on the user's role:
+          if (data.role === 'admin') {
+            navigate('/adminLogin');
+          } else if (data.role === 'student') {
+            navigate('/studentLogin');
+          } else {
+            navigate('/login');
+          }
         }
       })
       .catch(error => {

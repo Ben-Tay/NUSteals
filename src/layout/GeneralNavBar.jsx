@@ -15,6 +15,7 @@ const GeneralNavBar = ({ userRole }) => {
      // Clear the access token from localStorage
      localStorage.removeItem('accessToken');
      localStorage.removeItem('userId');
+     localStorage.removeItem('userRole');
   }
 
   const renderLinks = () => {
