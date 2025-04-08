@@ -56,7 +56,7 @@ const AdminAddCoupon = () => {
     if (!editingCoupon || !editingCoupon._id) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/coupons/${editingCoupon._id}/toggle`, {
+      const response = await fetch(`https://nusteals-express.onrender.com/api/coupons/${editingCoupon._id}/toggle`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
       });

@@ -1,6 +1,6 @@
 import express from 'express';
 import { createUser, getUserByLogin, getAllUsers, getSingleUser, 
-         deleteUser, editUser, resetPassword, requireAuthJWT} from '../controllers/userController.js';
+         deleteUser, editUser, resetPassword, getUserSignUps, requireAuthJWT} from '../controllers/userController.js';
 
 import validateUser from '../controllers/validateUser';
 
@@ -11,6 +11,9 @@ router.get('/', getAllUsers);
 
 // Login a user
 router.post('/login', getUserByLogin)
+
+// Get user signups by month
+router.get('/user-signups', getUserSignUps)
 
 // Get a single user
 router.get('/:id', requireAuthJWT, getSingleUser);
@@ -26,5 +29,6 @@ router.delete('/:id', requireAuthJWT,  deleteUser)
 
 // Edit a user profile based on parameters
 router.patch('/:id', validateUser, editUser);
+
 
 export default router;

@@ -193,6 +193,55 @@ const resetPassword = async (req, res) => {
     
 }
 
+const getUserSignUps = async(req, res) => {
+    
+    try {
+        const { year, month } = req.query; 
+        const match = {};
+    
+        // Optional filter if year + month provided
+        if (year && month) {
+          match.createdAt = {
+            $gte: new Date(year, month - 1, 1),
+            $lt: new Date(year, month, 1) // exclusive upper bound
+          };
+        }
+    
+        const result = await users.aggregate([
+          { $match: match },
+          {
+            $group: {
+              _id: {
+                year: { $year: "$createdAt" },
+                month: { $month: "$createdAt" }
+              },
+              count: { $sum: 1 }
+            }
+          },
+          {
+            $sort: {
+              "_id.year": 1,
+              "_id.month": 1
+            }
+          }
+        ]);
+    
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    
+        const formatted = result.map(r => ({
+          label: `${monthNames[r._id.month - 1]} ${r._id.year}`,
+          count: r.count
+        }));
+    
+        res.json(formatted);
+      } catch (error) {
+        console.error("Error fetching signup stats:", error);
+        res.status(500).json({ message: "Server error" });
+      }
+    
+}
+
 const requireAuthJWT = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (authHeader) {
@@ -216,4 +265,4 @@ const requireAuthJWT = (req, res, next) => {
 } //end requireAuthJWT
 
 // Export the user handler methods to the routes page
-export { createUser, getUserByLogin, getAllUsers, getSingleUser, deleteUser, editUser, resetPassword, requireAuthJWT } 
+export { createUser, getUserByLogin, getAllUsers, getSingleUser, deleteUser, editUser, resetPassword, getUserSignUps, requireAuthJWT } 
