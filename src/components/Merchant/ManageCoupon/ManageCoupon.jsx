@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GeneralNavBar from '../../../layout/GeneralNavBar';
 import { Row, Col, Container, Card } from 'react-bootstrap';
-import AdminCoupon from '../../../layout/AdminCoupon';
+import GeneralCoupon from '../../../layout/GeneralCoupon';
 
 const ManageCoupon = () => {
     const navigate = useNavigate();
@@ -88,7 +88,7 @@ const ManageCoupon = () => {
                             <p>No coupons found</p>
                         ) : (
                             coupons.map((coupon) => (
-                                <AdminCoupon
+                                <GeneralCoupon
                                     key={coupon._id}
                                     discount={`${coupon.discount}`}
                                     discountBottom={coupon.discountType}
