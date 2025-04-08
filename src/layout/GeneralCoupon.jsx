@@ -4,23 +4,23 @@ const Coupon = ({ brandLogo, brandName, discount, descriptionHeader, description
     // Split discount into 2 parts so they can be stacked
     const [discountTop, discountBottom] = discount ? discount.split(' ') : ['0%', 'off'];
 
-    {/* RIGHT SIDE OF COUPON */}
+    {/* RIGHT SIDE OF COUPON */ }
     const renderButtons = () => {
         switch (children) {
             // MERCHANT COUPON
             case 'merchant':
                 return (
-                <div className="flex flex-col gap-2">
-                    <button className="px-10 py-2 bg-[#F88B2C] text-white border-none rounded text-center"onClick={() => onEditClick(coupon)}>Edit Coupon</button>
+                    <div className="flex flex-col gap-2">
+                        <button className="px-10 py-2 bg-[#F88B2C] text-white border-none rounded text-center" onClick={() => onEditClick(coupon)}>Edit Coupon</button>
 
-                    <a 
-                    href="#" 
-                    className="px-10 py-2 bg-white text-[#F32626] border-3 border-[#F32626] rounded cursor-not-allowed no-underline text-center"
-                    >
-                    Disabled
-                    </a>
+                        <a
+                            href="#"
+                            className="px-10 py-2 bg-white text-[#F32626] border-3 border-[#F32626] rounded cursor-not-allowed no-underline text-center"
+                        >
+                            Disabled
+                        </a>
 
-                </div>
+                    </div>
                 );
             default:
                 return null;

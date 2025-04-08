@@ -9,7 +9,7 @@ const AddCoupon = () => {
   const location = useLocation();
   const [couponName, setCouponName] = useState('');
   const [discount, setDiscount] = useState('');
-  const [discountType, setDiscountType] = useState('flat'); // 'flat' or 'percentage'
+  const [discountType, setDiscountType] = useState('flat');
   const [description, setDescription] = useState('');
   const [terms, setTerms] = useState('');
   const [category, setCategory] = useState('');
@@ -17,11 +17,9 @@ const AddCoupon = () => {
   const [expiryDate, setExpiryDate] = useState('');
   const [editingCoupon, setEditingCoupon] = useState(location.state?.editingCoupon || null);
   const [showModal, setShowModal] = useState(false);
-  const [couponToDelete, setCouponToDelete] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [couponNameError, setCouponNameError] = useState("");
+  const [isDisabled, setIsDisabled] = useState(editingCoupon?.isDisabled || false);
 
-  // Standard T&C template string; adjust as needed
   const standardTemplate = `Standard Terms & Conditions:
 1. Offer valid until the expiry date.
 2. Applicable only on select items.
@@ -37,8 +35,8 @@ const AddCoupon = () => {
       setTerms(editingCoupon.termsConditions);
       setCategory(editingCoupon.category);
       setTotalCoupons(editingCoupon.totalNum);
+      setIsDisabled(editingCoupon.isDisabled || false);
 
-      // Convert ISO date to yyyy-mm-dd
       if (editingCoupon.expiryDate) {
         const date = new Date(editingCoupon.expiryDate);
         const formattedDate = date.toISOString().split('T')[0];
@@ -47,7 +45,6 @@ const AddCoupon = () => {
     }
   }, [editingCoupon]);
 
-  // CREATE COUPON
   const handleCreateCoupon = async () => {
     if (!couponName || !discount || !expiryDate) {
       alert('Please fill in all required fields');
@@ -75,17 +72,15 @@ const AddCoupon = () => {
         throw new Error('Failed to create coupon');
       }
 
-      const newCoupon = await response.json();
-      navigate('/manageCoupons'); // Redirect after success
+      await response.json();
+      navigate('/manageCoupons');
     } catch (error) {
       console.error('Error creating coupon:', error);
       alert('Failed to create coupon');
     }
   };
 
-  // EDIT COUPON
-  const handleSaveChanges = async (couponId) => {
-    console.log("Editing coupon data:", editingCoupon);
+  const handleSaveChanges = async () => {
     if (!editingCoupon || !editingCoupon._id) {
       console.error("No coupon ID available for updating");
       return;
@@ -111,198 +106,170 @@ const AddCoupon = () => {
         throw new Error('Failed to update coupon');
       }
 
-      const updatedCoupon = await response.json();
       alert('Coupon updated successfully!');
       setEditingCoupon(null);
       setShowModal(false);
-      navigate('/adminLogin/adminManageCoupon'); // Redirect after success
+      navigate('/adminLogin/adminManageCoupon');
     } catch (error) {
       console.error('Error updating coupon:', error);
       alert('Failed to update coupon');
     }
   };
 
-  // DELETE COUPON
-  const handleCouponDelete = async (couponId) => {
+  const handleToggleDisable = async () => {
+    if (!editingCoupon || !editingCoupon._id) return;
+
     try {
-      const response = await fetch(`http://localhost:3000/api/coupons/${couponId}`, {
-        method: 'DELETE',
+      const response = await fetch(`http://localhost:3000/api/coupons/${editingCoupon._id}/toggleDisable`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        body: JSON.stringify({ isDisabled: !isDisabled }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to delete coupon');
-      }
+      if (!response.ok) throw new Error('Toggle failed');
 
-      alert('Coupon deleted successfully!');
-      setShowDeleteModal(false);
-      setCouponToDelete(null);
-      navigate('/manageCoupons'); // Redirect after delete
+      setIsDisabled(!isDisabled);
+      alert(`Coupon ${!isDisabled ? 'disabled' : 'enabled'} successfully!`);
     } catch (error) {
-      console.error('Error deleting coupon:', error);
-      alert('Failed to delete coupon');
+      console.error('Error toggling coupon status:', error);
+      alert('Failed to update coupon status');
     }
   };
 
-  const handleDeleteClick = (coupon) => {
-    setCouponToDelete(coupon);
-    setShowDeleteModal(true);
-  };
-
   return (
-    <>
-      <div className="content-wrapper mb-4">
-        <h1>{editingCoupon ? 'EDIT COUPON' : 'ADD COUPON'}</h1>
-        <br />
+    <div className="content-wrapper mb-4">
+      <h1>{editingCoupon ? 'EDIT COUPON' : 'ADD COUPON'}</h1>
+      <br />
+      <Row className="g-5">
+        <Col>
+          <Row className="mb-4">
+            <div className="box-orange">
+              <h3>Coupon Name:</h3>
+              <Form.Control
+                type="text"
+                placeholder="Enter coupon name"
+                value={couponName}
+                onChange={(e) => setCouponName(e.target.value)}
+              />
+              {couponNameError && <div className="error">{couponNameError}</div>}
+            </div>
+          </Row>
 
-        <Row className="g-5">
-          <Col>
-            {/* Coupon Name */}
+          <Row className="mb-4">
+            <div className="box-orange">
+              <h2>DISCOUNT:</h2>
+              <Form>
+                <Form.Group>
+                  <Form.Check
+                    inline
+                    type="radio"
+                    label="Flat Value"
+                    name="discountType"
+                    id="flatDiscount"
+                    value="flat"
+                    checked={discountType === 'flat'}
+                    onChange={(e) => setDiscountType(e.target.value)}
+                  />
+                  <Form.Check
+                    inline
+                    type="radio"
+                    label="Percentage"
+                    name="discountType"
+                    id="percentageDiscount"
+                    value="percentage"
+                    checked={discountType === 'percentage'}
+                    onChange={(e) => setDiscountType(e.target.value)}
+                  />
+                </Form.Group>
+                <Form.Control
+                  type="number"
+                  placeholder={discountType === 'flat' ? 'Flat discount amount' : 'Percentage'}
+                  value={discount}
+                  onChange={(e) => setDiscount(e.target.value)}
+                />
+              </Form>
+            </div>
+          </Row>
+
+          <Row className="mb-4">
+            <div className="box-orange">
+              <h2>DESCRIPTION:</h2>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                placeholder="Enter a short description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+          </Row>
+
+          <Row className="mb-4">
+            <div className="box-orange">
+              <h2>TERMS & CONDITIONS:</h2>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                placeholder="Enter terms & conditions"
+                value={terms}
+                onChange={(e) => setTerms(e.target.value)}
+              />
+              <Button variant="secondary" size="sm" className="mt-2" onClick={() => setTerms(standardTemplate)}>
+                Use Standard Template
+              </Button>
+            </div>
+          </Row>
+
+          <Button variant="warning" onClick={editingCoupon ? handleSaveChanges : handleCreateCoupon}>
+            {editingCoupon ? 'Save Changes' : 'Create'}
+          </Button>
+
+          {editingCoupon && (
+            <Button
+              variant={isDisabled ? "success" : "danger"}
+              className="ms-2"
+              onClick={handleToggleDisable}
+            >
+              {isDisabled ? "Enable Coupon" : "Disable Coupon"}
+            </Button>
+          )}
+        </Col>
+
+        <Col>
+          <div className="bigger-box-orange">
             <Row className="mb-4">
               <div className="box-orange">
-                <h3>Coupon Name:</h3>
+                <p>Coupon Category:</p>
                 <Form.Control
                   type="text"
-                  placeholder="Enter coupon name"
-                  value={couponName}
-                  onChange={(e) => setCouponName(e.target.value)}
+                  placeholder="e.g., Electronics, Clothing, etc."
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
                 />
-                {couponNameError && <div className="error">{couponNameError}</div>}
               </div>
             </Row>
-
-            {/* Discount with two options */}
             <Row className="mb-4">
               <div className="box-orange">
-                <h2>DISCOUNT:</h2>
-                <Form>
-                  <Form.Group>
-                    <Form.Check
-                      inline
-                      type="radio"
-                      label="Flat Value"
-                      name="discountType"
-                      id="flatDiscount"
-                      value="flat"
-                      checked={discountType === 'flat'}
-                      onChange={(e) => setDiscountType(e.target.value)}
-                    />
-                    <Form.Check
-                      inline
-                      type="radio"
-                      label="Percentage"
-                      name="discountType"
-                      id="percentageDiscount"
-                      value="percentage"
-                      checked={discountType === 'percentage'}
-                      onChange={(e) => setDiscountType(e.target.value)}
-                    />
-                  </Form.Group>
-                  <Form.Control
-                    type="number"
-                    placeholder={discountType === 'flat' ? 'Flat discount amount' : 'Percentage'}
-                    value={discount}
-                    onChange={(e) => setDiscount(e.target.value)}
-                  />
-                </Form>
-              </div>
-            </Row>
-
-            {/* Description */}
-            <Row className="mb-4">
-              <div className="box-orange">
-                <h2>DESCRIPTION:</h2>
+                <p>Total Number of Coupons:</p>
                 <Form.Control
-                  as="textarea"
-                  rows={3}
-                  placeholder="Enter a short description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  type="number"
+                  placeholder="Enter total coupons"
+                  value={totalCoupons}
+                  onChange={(e) => setTotalCoupons(e.target.value)}
                 />
-              </div>
-            </Row>
-
-            {/* Terms & Conditions */}
-            <Row className="mb-4">
-              <div className="box-orange">
-                <h2>TERMS & CONDITIONS:</h2>
+                <br />
+                <p>Expiry Date:</p>
                 <Form.Control
-                  as="textarea"
-                  rows={3}
-                  placeholder="Enter terms & conditions"
-                  value={terms}
-                  onChange={(e) => setTerms(e.target.value)}
+                  type="date"
+                  value={expiryDate}
+                  onChange={(e) => setExpiryDate(e.target.value)}
                 />
-                <Button variant="secondary" size="sm" className="mt-2" onClick={() => setTerms(standardTemplate)}>
-                  Use Standard Template
-                </Button>
               </div>
             </Row>
-
-            <Button variant="warning" onClick={editingCoupon ? handleSaveChanges : handleCreateCoupon}>
-              {editingCoupon ? 'Save Changes' : 'Create'}
-            </Button>
-
-            {editingCoupon && (
-              <Button variant="danger" className="ms-2" onClick={() => handleDeleteClick(editingCoupon)}>
-                Delete Coupon
-              </Button>
-            )}
-
-            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
-              <Modal.Header closeButton>
-                <Modal.Title>Delete Coupon</Modal.Title>
-              </Modal.Header>
-              <Modal.Body>
-                <p>Are you sure you want to delete this coupon?</p>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
-                <Button variant="danger" onClick={() => handleCouponDelete(couponToDelete._id)}>Delete</Button>
-              </Modal.Footer>
-            </Modal>
-
-          </Col>
-
-          {/* Right Side */}
-          <Col>
-            <div className="bigger-box-orange">
-              {/* Category, Total Coupons, Expiry Date */}
-              <Row className="mb-4">
-                <div className="box-orange">
-                  <p>Coupon Category:</p>
-                  <Form.Control
-                    type="text"
-                    placeholder="e.g., Electronics, Clothing, etc."
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                  />
-                </div>
-              </Row>
-              <Row className="mb-4">
-                <div className="box-orange">
-                  <p>Total Number of Coupons:</p>
-                  <Form.Control
-                    type="number"
-                    placeholder="Enter total coupons"
-                    value={totalCoupons}
-                    onChange={(e) => setTotalCoupons(e.target.value)}
-                  />
-                  <br />
-                  <p>Expiry Date:</p>
-                  <Form.Control
-                    type="date"
-                    value={expiryDate}
-                    onChange={(e) => setExpiryDate(e.target.value)}
-                  />
-                </div>
-              </Row>
-            </div>
-          </Col>
-        </Row>
-      </div>
-    </>
+          </div>
+        </Col>
+      </Row>
+    </div>
   );
 };
 
