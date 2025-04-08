@@ -15,10 +15,12 @@ import StudentCoupon from "./components/Student/ManageCoupon/StudentCoupon";
 import StudentCouponHistory from "./components/Student/ManageCoupon/StudentCouponHistory";
 import Admin from "./components/Admin/Admin";
 import AdminDashboard from "./components/Admin/AdminDashboard";
-import AdminCouponMgt from "./components/Admin/AdminCouponMgt";
+import AdminCouponMgt from "./components/Admin/AdminManageCoupon/AdminCouponMgt";
 import AdminUserMgt from "./components/Admin/AdminUserMgt";
 import StudentFaqs from "./components/Student/StudentFaqs";
 import StudentProfile from "./components/Student/StudentProfile";
+import AdminManageCoupon from "./components/Admin/AdminManageCoupon/AdminCouponMgt";
+import AdminAddCoupon from "./components/Admin/AdminManageCoupon/AdminAddCoupon";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const App = () => {
@@ -51,13 +53,14 @@ const App = () => {
       element: <Merchant />,
       // can add children if need be
     },
+
     {
       path: "/manageCoupons",
       element: <ManageCoupon />,
     },
     {
       path: "/addCoupon",
-      element: <AddCoupon/>
+      element: <AddCoupon />
     },
     {
       path: "/merchantDashboard",
@@ -113,6 +116,13 @@ const App = () => {
           path: "adminManageCoupon",
           element: <AdminCouponMgt />,
         },
+        //edit this to be the editing page route
+        {
+          path: "adminAddCoupons",
+          element: <AdminAddCoupon />,
+
+        },
+
         {
           path: "adminManageUsers",
           element: <AdminUserMgt />,
