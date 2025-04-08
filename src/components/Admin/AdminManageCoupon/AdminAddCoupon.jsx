@@ -80,7 +80,13 @@ const AdminAddCoupon = () => {
 
   return (
     <div className="content-wrapper mb-4">
-      <h1>{editingCoupon ? 'EDIT COUPON' : 'ADD COUPON'}</h1>
+      <h1>
+        {editingCoupon
+          ? isDisabled
+            ? 'ENABLE COUPON'
+            : 'DISABLE COUPON'
+          : 'ADD COUPON'}
+      </h1>
       <br />
       <Row className="g-5">
         <Col>
@@ -92,6 +98,7 @@ const AdminAddCoupon = () => {
                 placeholder="Enter coupon name"
                 value={couponName}
                 onChange={(e) => setCouponName(e.target.value)}
+                disabled
               />
               {couponNameError && <div className="error">{couponNameError}</div>}
             </div>
@@ -111,6 +118,7 @@ const AdminAddCoupon = () => {
                     value="flat"
                     checked={discountType === 'flat'}
                     onChange={(e) => setDiscountType(e.target.value)}
+                    disabled
                   />
                   <Form.Check
                     inline
@@ -121,6 +129,7 @@ const AdminAddCoupon = () => {
                     value="percentage"
                     checked={discountType === 'percentage'}
                     onChange={(e) => setDiscountType(e.target.value)}
+                    disabled
                   />
                 </Form.Group>
                 <Form.Control
@@ -128,6 +137,7 @@ const AdminAddCoupon = () => {
                   placeholder={discountType === 'flat' ? 'Flat discount amount' : 'Percentage'}
                   value={discount}
                   onChange={(e) => setDiscount(e.target.value)}
+                  disabled
                 />
               </Form>
             </div>
@@ -142,6 +152,7 @@ const AdminAddCoupon = () => {
                 placeholder="Enter a short description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                disabled
               />
             </div>
           </Row>
@@ -155,10 +166,8 @@ const AdminAddCoupon = () => {
                 placeholder="Enter terms & conditions"
                 value={terms}
                 onChange={(e) => setTerms(e.target.value)}
+                disabled
               />
-              <Button variant="secondary" size="sm" className="mt-2" onClick={() => setTerms(standardTemplate)}>
-                Use Standard Template
-              </Button>
             </div>
           </Row>
           <Button variant="secondary" onClick={() => navigate(-1)}>
@@ -185,6 +194,7 @@ const AdminAddCoupon = () => {
                   placeholder="e.g., Electronics, Clothing, etc."
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
+                  disabled
                 />
               </div>
             </Row>
@@ -196,6 +206,7 @@ const AdminAddCoupon = () => {
                   placeholder="Enter total coupons"
                   value={totalCoupons}
                   onChange={(e) => setTotalCoupons(e.target.value)}
+                  disabled
                 />
                 <br />
                 <p>Expiry Date:</p>
@@ -203,6 +214,7 @@ const AdminAddCoupon = () => {
                   type="date"
                   value={expiryDate}
                   onChange={(e) => setExpiryDate(e.target.value)}
+                  disabled
                 />
               </div>
             </Row>
