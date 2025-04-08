@@ -45,67 +45,32 @@ const ManageCoupon = () => {
 
   return (
     <>
-      <div className="content-wrapper mb-4">
-        <Row className="g-5">
-          {/* LEFT SIDE */}
-          <Col md={4}>
-            <Container className="mb-4">
-              <h3>My Store</h3>
-            </Container>
-            <Card className="mb-4" style={{ width: '210px' }}>
-              <Card.Body className="p-4 d-flex flex-column align-items-center justify-content-center">
-                <div
-                  style={{
-                    width: '150px',
-                    height: '150px',
-                    borderRadius: '50%',
-                    backgroundColor: '#ccc',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.2rem',
-                    color: '#666',
-                    marginBottom: '1rem'
-                  }}
-                >
-                  {/* Display first letters or an icon */}
-                  {merchantName.split(' ').map((part) => part[0]).join('')}
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-          {/* RIGHT SIDE */}
-          <Col md={8}>
-            <Container className="mb-4">
-              <h3>All Coupons</h3>
-            </Container>
+      <div className="d-flex flex-column align-items-center content-wrapper mb-4">
+        <Container className="mb-4 text-center">
+          <h3>Coupon Management</h3>
+        </Container>
 
-            {loading ? (
-              <p>Loading...</p>
-            ) : coupons.length === 0 ? (
-              <p>No coupons found</p>
-            ) : (
-              coupons.map((coupon) => (
-                <AdminCoupon
-                  key={coupon._id}
-                  discount={`${coupon.discount}`}
-                  discountBottom={coupon.discountType}
-                  descriptionHeader={coupon.couponName}
-                  description={coupon.description}
-                  children="merchant"
-                  onEditClick={() => handleEditClick(coupon)}
-                />
-              ))
-            )}
-
-
-          </Col>
-        </Row>
-
-
-        <br />
+        {loading ? (
+          <p>Loading...</p>
+        ) : coupons.length === 0 ? (
+          <p>No coupons found</p>
+        ) : (
+          coupons.map((coupon) => (
+            <AdminCoupon
+              key={coupon._id}
+              coupon={coupon}
+              discount={`${coupon.discount}`}
+              discountBottom={coupon.discountType}
+              descriptionHeader={coupon.couponName}
+              description={coupon.description}
+              children="merchant"
+              onEditClick={() => handleEditClick(coupon)}
+              disabled={coupon.isDisabled}
+              onToggleClick={() => handleEditClick(coupon)}
+            />
+          ))
+        )}
       </div>
-
     </>
   );
 };
