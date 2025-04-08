@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Row, Col, Button, Form } from 'react-bootstrap';
 import './AddCoupon.css';
 
-const AddCoupon = () => {
+const AdminAddCoupon = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [couponName, setCouponName] = useState('');
@@ -18,7 +18,7 @@ const AddCoupon = () => {
   const [editingCoupon, setEditingCoupon] = useState(location.state?.editingCoupon || null);
   const [showModal, setShowModal] = useState(false);
   const [couponNameError, setCouponNameError] = useState("");
-  const [isDisabled, setIsDisabled] = useState(editingCoupon?.isDisabled || false);
+  const [isDisabled, setIsDisabled] = useState(false); // default to false
 
   const standardTemplate = `Standard Terms & Conditions:
 1. Offer valid until the expiry date.
@@ -27,109 +27,51 @@ const AddCoupon = () => {
 4. Subject to change without prior notice.`;
 
   useEffect(() => {
-    if (editingCoupon) {
-      setCouponName(editingCoupon.couponName);
-      setDiscount(editingCoupon.discount);
-      setDiscountType(editingCoupon.discountType);
-      setDescription(editingCoupon.description);
-      setTerms(editingCoupon.termsConditions);
-      setCategory(editingCoupon.category);
-      setTotalCoupons(editingCoupon.totalNum);
-      setIsDisabled(editingCoupon.isDisabled || false);
+    if (!editingCoupon) {
+      console.warn('No coupon found in location.state. Redirecting.');
+      navigate('/admin-dashboard'); // or wherever
+      return;
+    }
 
-      if (editingCoupon.expiryDate) {
-        const date = new Date(editingCoupon.expiryDate);
-        const formattedDate = date.toISOString().split('T')[0];
-        setExpiryDate(formattedDate);
-      }
+    // Populate fields
+    setCouponName(editingCoupon.couponName || '');
+    setDiscount(editingCoupon.discount || '');
+    setDiscountType(editingCoupon.discountType || 'flat');
+    setDescription(editingCoupon.description || '');
+    setTerms(editingCoupon.termsConditions || '');
+    setCategory(editingCoupon.category || '');
+    setTotalCoupons(editingCoupon.totalNum || '');
+
+    // Use `disable` from backend
+    setIsDisabled(editingCoupon.disable ?? false);
+
+    if (editingCoupon.expiryDate) {
+      const date = new Date(editingCoupon.expiryDate);
+      const formattedDate = date.toISOString().split('T')[0];
+      setExpiryDate(formattedDate);
     }
   }, [editingCoupon]);
-
-  const handleCreateCoupon = async () => {
-    if (!couponName || !discount || !expiryDate) {
-      alert('Please fill in all required fields');
-      return;
-    }
-
-    try {
-      const response = await fetch('http://localhost:3000/api/coupons', {
-        method: 'POST',
-        credentials: "include",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          couponName,
-          discount: Number(discount),
-          discountType,
-          description,
-          termsConditions: terms,
-          category,
-          totalNum: Number(totalCoupons),
-          expiryDate,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create coupon');
-      }
-
-      await response.json();
-      navigate('/manageCoupons');
-    } catch (error) {
-      console.error('Error creating coupon:', error);
-      alert('Failed to create coupon');
-    }
-  };
-
-  const handleSaveChanges = async () => {
-    if (!editingCoupon || !editingCoupon._id) {
-      console.error("No coupon ID available for updating");
-      return;
-    }
-
-    try {
-      const response = await fetch(`http://localhost:3000/api/coupons/${editingCoupon._id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          couponName,
-          discount,
-          discountType,
-          description,
-          termsConditions: terms,
-          category,
-          totalNum: totalCoupons,
-          expiryDate,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update coupon');
-      }
-
-      alert('Coupon updated successfully!');
-      setEditingCoupon(null);
-      setShowModal(false);
-      navigate('/adminLogin/adminManageCoupon');
-    } catch (error) {
-      console.error('Error updating coupon:', error);
-      alert('Failed to update coupon');
-    }
-  };
 
   const handleToggleDisable = async () => {
     if (!editingCoupon || !editingCoupon._id) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/coupons/${editingCoupon._id}/toggleDisable`, {
+      const response = await fetch(`http://localhost:3000/api/coupons/${editingCoupon._id}/toggle`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isDisabled: !isDisabled }),
       });
 
       if (!response.ok) throw new Error('Toggle failed');
 
-      setIsDisabled(!isDisabled);
-      alert(`Coupon ${!isDisabled ? 'disabled' : 'enabled'} successfully!`);
+      const updated = await response.json();
+
+      // ✅ Backend returns full coupon object in `updated.coupon`
+      const updatedCoupon = updated.coupon;
+
+      setIsDisabled(updatedCoupon.disable);
+      setEditingCoupon(prev => ({ ...prev, disable: updatedCoupon.disable }));
+
+      alert(`Coupon ${updatedCoupon.disable ? 'disabled' : 'enabled'} successfully!`);
     } catch (error) {
       console.error('Error toggling coupon status:', error);
       alert('Failed to update coupon status');
@@ -219,11 +161,9 @@ const AddCoupon = () => {
               </Button>
             </div>
           </Row>
-
-          <Button variant="warning" onClick={editingCoupon ? handleSaveChanges : handleCreateCoupon}>
-            {editingCoupon ? 'Save Changes' : 'Create'}
+          <Button variant="secondary" onClick={() => navigate(-1)}>
+            ← Back
           </Button>
-
           {editingCoupon && (
             <Button
               variant={isDisabled ? "success" : "danger"}
@@ -273,4 +213,4 @@ const AddCoupon = () => {
   );
 };
 
-export default AddCoupon;
+export default AdminAddCoupon;

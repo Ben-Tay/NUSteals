@@ -1,5 +1,5 @@
 import express from 'express';
-import { createCoupon, getAllCoupons, getSingleCoupon, deleteCoupon, editCoupon } from '../controllers/couponController.js';
+import { createCoupon, getAllCoupons, getSingleCoupon, deleteCoupon, editCoupon, toggleDisableCoupon } from '../controllers/couponController.js';
 import validateCoupon from '../controllers/validateCoupon.js';
 
 const router = express.Router();
@@ -15,6 +15,10 @@ router.post('/', validateCoupon, createCoupon);
 
 // delete a single coupon
 router.delete('/:id', deleteCoupon);
+
+//toggle disable coupon
+router.patch('/:id/toggle', toggleDisableCoupon);
+
 
 // edit a single coupon
 router.patch('/:id', validateCoupon, editCoupon);

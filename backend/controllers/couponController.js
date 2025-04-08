@@ -4,10 +4,10 @@ import { validationResult } from 'express-validator';
 
 // Create a single coupon
 const createCoupon = async (req, res) => {
-    const { couponName, discount, discountType, description, termsConditions, category, totalNum, expiryDate } = req.body;
+    const { couponName, discount, discountType, description, termsConditions, category, totalNum, expiryDate, disable } = req.body;
 
     // Validate input (400 - invalid data)
-    if (!couponName || !discount || !description || !discountType || !termsConditions || !category || !totalNum || !expiryDate ) {
+    if (!couponName || !discount || !description || !discountType || !termsConditions || !category || !totalNum || !expiryDate) {
         return res.status(400).json({
             error: "Missing required fields",
             required: ["couponName", "discount", "description", "discountType", "termsConditions", "category", "totalNum", "expiryDate"]
@@ -27,13 +27,14 @@ const createCoupon = async (req, res) => {
 
         const newCoupon = await Coupon.create({
             couponName,
-            discount, 
-            description, 
+            discount,
+            description,
             discountType,
-            termsConditions, 
-            category, 
-            totalNum, 
-            expiryDate
+            termsConditions,
+            category,
+            totalNum,
+            expiryDate,
+            disable
         });
 
         // Return safe coupon data 
@@ -44,7 +45,8 @@ const createCoupon = async (req, res) => {
             description: newCoupon.description,
             discountType: newCoupon.discountType,
             category: newCoupon.category,
-            createdAt: newCoupon.createdAt
+            createdAt: newCoupon.createdAt,
+            disable: newCoupon.disable,
         });
 
     } catch (error) {
@@ -103,6 +105,34 @@ const deleteCoupon = async (req, res) => {
     res.status(200).json({ message: "Coupon deleted successfully", coupon: deletedCoupon })
 }
 
+
+// Disable a coupon (toggle)
+const toggleDisableCoupon = async (req, res) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ error: "Invalid couponId" });
+    }
+
+    try {
+        const coupon = await Coupon.findById(id);
+
+        if (!coupon) {
+            return res.status(404).json({ error: "Coupon not found" });
+        }
+
+        // Toggle the isDisabled field
+        coupon.disable = !coupon.disable;
+        console.log("Toggling coupon status:", coupon.disable);
+        await coupon.save();
+
+        res.status(200).json({ message: `Coupon ${coupon.disable ? 'disabled' : 'enabled'} successfully`, coupon });
+    } catch (error) {
+        console.error("Error toggling coupon status:", error);
+        res.status(500).json({ error: "Internal server error", details: error.message });
+    }
+};
+
 // Edit a coupon
 const editCoupon = async (req, res) => {
     // Check for validation errors
@@ -112,7 +142,7 @@ const editCoupon = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { couponName, discount, description, discountType, termsConditions, category, totalNum, expiryDate} = req.body;
+    const { couponName, discount, description, discountType, termsConditions, category, totalNum, expiryDate } = req.body;
     const { id } = req.params;
 
     try {
@@ -136,4 +166,4 @@ const editCoupon = async (req, res) => {
 
 
 // Export the coupon handler methods to the routes page
-export { createCoupon, getAllCoupons, getSingleCoupon, deleteCoupon, editCoupon } 
+export { createCoupon, getAllCoupons, getSingleCoupon, deleteCoupon, editCoupon, toggleDisableCoupon }; 
