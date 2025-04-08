@@ -5,7 +5,7 @@ import Button from "react-bootstrap/Button";
 import GeneralNavBar from '../../layout/GeneralNavBar';
 import Footer from './Footer';
 
-function ControlledForm() {
+const CreateAccount = () => {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
@@ -158,11 +158,11 @@ function ControlledForm() {
               </Form>
             </div>
           </div>
-          <Footer />
         </div>
+        <Footer />
       </div>
     </>
   );
 }
 
-export default ControlledForm;
+export default CreateAccount;
