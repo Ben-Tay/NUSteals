@@ -31,7 +31,7 @@ const SignupsChart = ({ onGrowthUpdate }) => {
 
   useEffect(() => {
     const fetchStats = async () => {
-      const res = await fetch("http://localhost:3000/api/users/user-signups");
+      const res = await fetch("https://nusteals-express.onrender.com/api/users/user-signups");
       const raw = await res.json();
       const extended = extendSignupDataForFullYear(raw);
       const withGrowth = addGrowthRates(extended);

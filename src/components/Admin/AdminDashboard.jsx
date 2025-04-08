@@ -95,7 +95,7 @@ useEffect(() => {
 
 
         try {
-            const getSignUps = await fetch(`http://localhost:3000/api/users/user-signups?year=${year}&month=${month}`, {
+            const getSignUps = await fetch(`https://nusteals-express.onrender.com/api/users/user-signups?year=${year}&month=${month}`, {
                 headers: {
                     "Content-Type": "application/json"
                 },

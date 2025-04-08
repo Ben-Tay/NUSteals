@@ -13,7 +13,7 @@ const ManageCoupon = () => {
   useEffect(() => {
     const fetchCoupons = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/coupons", {
+        const response = await fetch("https://nusteals-express.onrender.com/api/coupons", {
           method: "GET",
           credentials: "include",
         });
