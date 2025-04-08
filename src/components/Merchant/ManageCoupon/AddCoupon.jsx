@@ -21,6 +21,7 @@ const AddCoupon = () => {
   const [couponToDelete, setCouponToDelete] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [couponNameError, setCouponNameError] = useState("");
+  const [disable, setDisable] = useState(false);
 
   // Standard T&C template string; adjust as needed
   const standardTemplate = `Standard Terms & Conditions:
@@ -69,6 +70,7 @@ const AddCoupon = () => {
           category,
           totalNum: Number(totalCoupons),
           expiryDate,
+            disable,
         }),
       });
 

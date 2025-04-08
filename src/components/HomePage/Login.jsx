@@ -60,6 +60,8 @@ const Login = () => {
         // Decode JWT token to get User ID
         const decodedToken = jwtDecode(data.accessToken);
         const userId = decodedToken.uid; // Access the user ID from the decoded token
+        // added this to retrieve profile information
+        localStorage.setItem('userId', userId);
 
         const token = localStorage.getItem('accessToken');
         const findUser = await fetch(`https://nusteals-express.onrender.com/api/users/${userId}`, {
@@ -79,6 +81,8 @@ const Login = () => {
         } 
 
         const user = await findUser.json();
+        // added this to store role for access to different pages
+        localStorage.setItem('userRole', user.role);
 
         if (user) {
           // If user is found, navigate based on their role

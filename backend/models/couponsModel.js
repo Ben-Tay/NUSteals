@@ -13,12 +13,14 @@ const couponSchema = new Schema({
     description: { type: String, required: true },
 
     termsConditions: { type: String, required: true },
-    
+
     category: { type: String, required: true },
-    
-    totalNum: { type: Number, required: true, min: 1 }, 
-    
-    expiryDate: { type: Date, required: true }, 
+
+    totalNum: { type: Number, required: true, min: 1 },
+
+    expiryDate: { type: Date, required: true },
+
+    disable: { type: Boolean, default: false },
 }, {
     timestamps: true,
 });
