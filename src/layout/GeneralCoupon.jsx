@@ -28,7 +28,7 @@ const Coupon = ({ brandLogo, brandName, discount, descriptionHeader, description
     };
 
     return (
-        <div className="flex w-full max-w-[1000px] border border-gray-300 rounded-lg overflow-hidden">
+        <div className="flex w-full max-w-[1000px] border border-gray-300 rounded-lg overflow-hidden mb-3">
 
             {/* LEFT: Discount (10% width) */}
             <div className="basis-[10%] bg-gray-100 p-4 flex flex-col items-center justify-center">

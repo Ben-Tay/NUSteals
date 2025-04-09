@@ -21,6 +21,13 @@ const couponSchema = new Schema({
     expiryDate: { type: Date, required: true },
 
     disable: { type: Boolean, default: false },
+
+    uniqueCodes: [{
+        code: { type: String, unique: true },
+        isUsed: { type: Boolean, default: false },
+        usedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // tracks user who used the coupon
+        usedAt: { type: Date }
+    }]
 }, {
     timestamps: true,
 });
