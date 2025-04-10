@@ -275,6 +275,18 @@ const editCoupon = async (req, res) => {
             return res.status(404).json({ message: 'Coupon not found' });
         }
 
+        // update basic fields
+        coupon.couponName = couponName || coupon.couponName;
+        coupon.discount = discount || coupon.discount;
+        coupon.description = description || coupon.description;
+        coupon.discountType = discountType || coupon.discountType;
+        coupon.termsConditions = termsConditions || coupon.termsConditions;
+        coupon.category = category || coupon.category;
+        coupon.expiryDate = expiryDate || coupon.expiryDate;
+        // coupon.disable = req.body.disable !== undefined ? req.body.disable : coupon.disable; // toggle disable
+        coupon.disable = false; // always set to false after editing
+
+        // update coupon number of codes
         // if user wants to change total code num
         const currentCodes = coupon.uniqueCodes;
         const currentCodeNum = currentCodes.length;
@@ -283,7 +295,7 @@ const editCoupon = async (req, res) => {
         // if decrease code count < alr redeemed code count
         if (newTotalNum !== currentCodeNum) {
             if (newTotalNum < redeemedCodesNum) {
-                return res.status(400).json({ message: 'Cannot reduce total codes below ${redeemedCodes} (already redeemed codes)' });
+                return res.status(400).json({ message: `Cannot reduce total codes below ${redeemedCodesNum} (already redeemed codes)` });
             }
 
             // if decrease code count
@@ -321,11 +333,8 @@ const editCoupon = async (req, res) => {
             }
         }
 
-        const updatedCoupon = await Coupon.findByIdAndUpdate(
-            id,
-            { couponName, discount, description, discountType, termsConditions, category, totalNum, expiryDate },
-            { new: true }
-        );
+        coupon.totalNum = newTotalNum; // update totalNum
+        const updatedCoupon = await coupon.save(); // save the updated coupon
 
         if (!updatedCoupon) {
             return res.status(404).json({ message: 'Coupon not found' });
