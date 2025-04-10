@@ -1,5 +1,5 @@
 import express from 'express';
-import { createCoupon, getAllCoupons, getSingleCoupon, deleteCoupon, editCoupon, toggleDisableCoupon, redeemCoupon } from '../controllers/couponController.js';
+import { createCoupon, getAllCoupons, getSingleCoupon, deleteCoupon, editCoupon, toggleDisableCoupon, redeemCoupon, getACouponCode } from '../controllers/couponController.js';
 import { requireAuthJWT } from '../controllers/userController.js';
 import validateCoupon from '../controllers/validateCoupon.js';
 
@@ -19,6 +19,9 @@ router.delete('/:id', deleteCoupon);
 
 //toggle disable coupon
 router.patch('/:id/toggle', toggleDisableCoupon);
+
+// get a coupon code
+router.get('/:couponId/get-code', getACouponCode);
 
 // redeem a coupon
 router.post('/redeem', requireAuthJWT, redeemCoupon);

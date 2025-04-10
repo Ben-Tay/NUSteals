@@ -44,6 +44,42 @@ const generateAndAddCodes = async (couponId, quantity) => {
         return newCodes; // return the generated codes
 };
 
+// get a random available coupon code from a coupon
+const getACouponCode = async (req, res) => {
+    const { couponId } = req.params;
+    const userId = req.user._id;
+
+    try {
+        const coupon = await Coupon.findOne({
+            _id: couponId,
+            totalNum: { $gt: 0 }, // ensure there are codes available
+            disable: false, // ensure the coupon is not disabled
+            'uniqueCodes.isUsed': false, // ensure there are unused codes
+            expiryDate: { $gt: new Date() } // expirydate > current date
+        });
+        
+        if (!coupon) {
+            return res.status(404).json({ error: "Coupon not found or all  codes redeemed" });
+        }
+
+        // find all available codes
+        const availableCodes = coupon.uniqueCodes.filter(c => !c.isUsed); // filter out used codes
+
+        const randomCode = availableCodes[Math.floor(Math.random() * availableCodes.length)]; // get a random code from the available codes
+
+        // TODO: atomically reserve this code for the user
+
+
+        res.status(200).json({
+            couponName: coupon.couponName,
+            code: randomCode.code
+        });
+    } catch (error) {
+        console.error("Error fetching coupon code:", error);
+        res.status(500).json({ error: "Failed to retrieve coupon code", details: error.message });
+    }
+};
+
 // Redeem a coupon
 const redeemCoupon = async (req, res) => {
     const { code } = req.body; // code to redeem
@@ -350,4 +386,4 @@ const editCoupon = async (req, res) => {
 
 
 // Export the coupon handler methods to the routes page
-export { createCoupon, getAllCoupons, getSingleCoupon, deleteCoupon, editCoupon, toggleDisableCoupon, redeemCoupon }; 
+export { createCoupon, getAllCoupons, getSingleCoupon, deleteCoupon, editCoupon, toggleDisableCoupon, redeemCoupon, getACouponCode }; 
