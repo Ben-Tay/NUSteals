@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, data } from 'react-router-dom';
 import GeneralNavBar from '../../../layout/GeneralNavBar';
 import { Row, Col, Button, Form } from 'react-bootstrap';
 import './AddCoupon.css';
@@ -22,6 +22,16 @@ const AddCoupon = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [couponNameError, setCouponNameError] = useState("");
   const [disable, setDisable] = useState(false);
+  const [errors, setErrors] = useState({
+    couponName: '',
+    discountType: '',
+    discount: '',
+    description: '',
+    termsConditions: '',
+    category: '',
+    totalNum: '',
+    expiryDate: ''
+  });
 
   // Standard T&C template string; adjust as needed
   const standardTemplate = `Standard Terms & Conditions:
@@ -51,10 +61,17 @@ const AddCoupon = () => {
 
   // CREATE COUPON
   const handleCreateCoupon = async () => {
-    if (!couponName || !discount || !expiryDate) {
-      alert('Please fill in all required fields');
-      return;
-    }
+      // Clear previous errors
+      setErrors({
+        couponName: '',
+        discountType: '',
+        discount: '',
+        description: '',
+        termsConditions: '',
+        category: '',
+        totalNum: '',
+        expiryDate: ''
+      });
 
     try {
       const response = await fetch('http://localhost:3000/api/coupons', {
@@ -70,19 +87,29 @@ const AddCoupon = () => {
           category,
           totalNum: Number(totalCoupons),
           expiryDate,
-            disable,
+          disable,
+
         }),
       });
+      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error('Failed to create coupon');
+        if (data.errors) {
+          // transform error array into error obj
+          const validationErrors = {};
+          data.errors.forEach(error => {
+            validationErrors[error.path] = error.msg;
+          });
+          setErrors(validationErrors);
+        } else {
+          throw new Error(data.message || 'Failed to create coupon');
+        }
+        return;
       }
-
-      const newCoupon = await response.json();
       navigate('/manageCoupons'); // Redirect after success
     } catch (error) {
       console.error('Error creating coupon:', error);
-      alert('Failed to create coupon');
+      alert(error.message || 'Failed to create coupon');
     }
   };
 
@@ -164,21 +191,26 @@ const AddCoupon = () => {
           <Col>
             {/* Coupon Name */}
             <Row className="mb-4">
-              <div className="box-orange">
+              <div className="box-orange error-container">
                 <h3>Coupon Name:</h3>
                 <Form.Control
                   type="text"
                   placeholder="Enter coupon name"
                   value={couponName}
                   onChange={(e) => setCouponName(e.target.value)}
+                  isInvalid={!!errors.couponName}
                 />
-                {couponNameError && <div className="error">{couponNameError}</div>}
+                {errors.couponName && (
+                  <div className="floating-error">
+                    {errors.couponName}
+                  </div>
+                )}
               </div>
             </Row>
 
             {/* Discount with two options */}
             <Row className="mb-4">
-              <div className="box-orange">
+              <div className="box-orange error-container">
                 <h2>DISCOUNT:</h2>
                 <Form>
                   <Form.Group>

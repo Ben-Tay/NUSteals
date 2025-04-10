@@ -1,5 +1,6 @@
 import express from 'express';
 import { createCoupon, getAllCoupons, getSingleCoupon, deleteCoupon, editCoupon, toggleDisableCoupon, redeemCoupon } from '../controllers/couponController.js';
+import { requireAuthJWT } from '../controllers/userController.js';
 import validateCoupon from '../controllers/validateCoupon.js';
 
 const router = express.Router();
@@ -20,7 +21,7 @@ router.delete('/:id', deleteCoupon);
 router.patch('/:id/toggle', toggleDisableCoupon);
 
 // redeem a coupon
-router.post('/redeem', redeemCoupon);
+router.post('/redeem', requireAuthJWT, redeemCoupon);
 
 // edit a single coupon
 router.patch('/:id', validateCoupon, editCoupon);

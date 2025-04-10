@@ -1,4 +1,5 @@
 import Coupon from '../models/couponsModel.js';
+console.log("Coupon Schema Definition:", Coupon.schema.obj);
 import mongoose from 'mongoose';
 import { validationResult } from 'express-validator';
 
@@ -104,10 +105,12 @@ const redeemCoupon = async (req, res) => {
 
 // Create a single coupon
 const createCoupon = async (req, res) => {
+    console.log("Received create coupon request with body:", req.body);
     const { couponName, discount, discountType, description, termsConditions, category, totalNum, expiryDate, disable } = req.body;
 
     // Validate input (400 - invalid data)
     if (!couponName || !discount || !description || !discountType || !termsConditions || !category || !totalNum || !expiryDate) {
+        console.log("Validation failed - missing fields");
         return res.status(400).json({
             error: "Missing required fields",
             required: ["couponName", "discount", "description", "discountType", "termsConditions", "category", "totalNum", "expiryDate"]
@@ -123,7 +126,7 @@ const createCoupon = async (req, res) => {
             return res.status(409).json({ error: "Coupon already exists" });
         }
 
-        console.log("Creating coupon:", { couponName, discount });
+        console.log("Creating coupon with totalNum:", totalNum);
 
         const newCoupon = await Coupon.create({
             couponName,
@@ -136,21 +139,37 @@ const createCoupon = async (req, res) => {
             expiryDate,
             disable
         });
+        console.log("New coupon created (before codes):", {
+            _id: newCoupon._id,
+            hasUniqueCodes: Array.isArray(newCoupon.uniqueCodes),
+            uniqueCodesCount: newCoupon.uniqueCodes?.length || 0
+        });
+        try {
+            const generatedCodes = await generateAndAddCodes(newCoupon._id, totalNum); // generate and add unique codes to the coupon
+            console.log(`Successfully generated ${generatedCodes.length} codes`);
+        } catch (error) {
+            console.error('Error generating codes:', error);
+         throw new Error("Error generating codes");
+    }
 
-        await generateAndAddCodes(newCoupon._id, totalNum); // generate and add unique codes to the coupon
-
+        const updatedCoupon = await Coupon.findById(newCoupon._id);
+        console.log("Updated coupon with codes:", {
+            uniqueCodesCount: updatedCoupon.uniqueCodes.length,
+            sampleCode: updatedCoupon.uniqueCodes[0]?.code
+        });
+        
         // Return safe coupon data 
         res.status(201).json({
-            id: newCoupon._id,
-            couponName: newCoupon.couponName,
-            discount: newCoupon.discount,
-            description: newCoupon.description,
-            discountType: newCoupon.discountType,
-            category: newCoupon.category,
-            createdAt: newCoupon.createdAt,
-            disable: newCoupon.disable,
-            uniqueCodes: newCoupon.uniqueCodes.map(code => code.code), // return only the codes
-            totalNum: newCoupon.totalNum,
+            id: updatedCoupon._id,
+            couponName: updatedCoupon.couponName,
+            discount: updatedCoupon.discount,
+            description: updatedCoupon.description,
+            discountType: updatedCoupon.discountType,
+            category: updatedCoupon.category,
+            createdAt: updatedCoupon.createdAt,
+            disable: updatedCoupon.disable,
+            uniqueCodes: updatedCoupon.uniqueCodes, 
+            totalNum: updatedCoupon.totalNum,
         });
 
     } catch (error) {
@@ -185,6 +204,7 @@ const getAllCoupons = async (req, res) => {
     try {
         const allCoupons = await Coupon.find({}).sort({ createdAt: -1 }); // Fetch all coupons from DB from most recent
         res.status(200).json(allCoupons);
+        console.log("First coupon codes:", allCoupons[0]?.uniqueCodes);
     } catch (error) {
         console.error("Error fetching coupons:", error);
         res.status(500).json({ error: "Internal server error", details: error.message });
