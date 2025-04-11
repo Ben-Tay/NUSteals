@@ -46,42 +46,80 @@ const generateAndAddCodes = async (couponId, quantity) => {
 
 // get a random available coupon code from a coupon
 const getACouponCode = async (req, res) => {
-    const { couponId } = req.params;
-    const userId = req.user._id;
-
+    const session = await mongoose.startSession(); // start a session for atomic operations
+    
     try {
+        const { couponId } = req.params;
+        const userId = req.user._id;
+
+        session.startTransaction();
+
+        // 1. find the coupon with available codes
         const coupon = await Coupon.findOne({
             _id: couponId,
-            totalNum: { $gt: 0 }, // ensure there are codes available
+            totalNum: { $gt: 0 }, // totalNum > 0
             disable: false, // ensure the coupon is not disabled
             'uniqueCodes.isUsed': false, // ensure there are unused codes
             expiryDate: { $gt: new Date() } // expirydate > current date
-        });
+        }).session(session);
         
         if (!coupon) {
+            await session.abortTransaction(); // abort the transaction if coupon not found
             return res.status(404).json({ error: "Coupon not found or all  codes redeemed" });
         }
 
-        // find all available codes
+        // 2. find all available codes
         const availableCodes = coupon.uniqueCodes.filter(c => !c.isUsed); // filter out used codes
 
         const randomCode = availableCodes[Math.floor(Math.random() * availableCodes.length)]; // get a random code from the available codes
 
-        // TODO: atomically reserve this code for the user
+        // 3. atomically reserve this specific code for the user
+        const updatedCoupon = await Coupon.findOneAndUpdate({
+            _id: couponId,
+            'uniqueCodes.code': randomCode._id,
+            'uniqueCodes.isUsed': false // ensure the code is not used
+        }, {
+            $set: {
+                'uniqueCodes.$.isUsed': true,
+                'uniqueCodes.$.usedBy': userId,
+                'uniqueCodes.$.usedAt': new Date()
+            },
+            $inc: { totalNum: -1 } // decrement the totalNum of codes
+        }, { new: true,
+            session
+         }); // return the updated coupon
+        
+        if (!updatedCoupon) {
+            await session.abortTransaction(); // abort the transaction if the update fails
+            return res.status(409).json({ error: "Code was just taken" });
+        }
 
+        // 4. verify reservation
+        const reservedCode = updatedCoupon.uniqueCodes.find( c => c._id.equals(randomCode._id) );
 
+        await session.commitTransaction();
         res.status(200).json({
-            couponName: coupon.couponName,
-            code: randomCode.code
+            couponName: updatedCoupon.couponName,
+            code: reservedCode.code,
+            discount: updatedCoupon.discount,
+            expiryDate: updatedCoupon.expiryDate
         });
     } catch (error) {
+        await session.abortTransaction(); // abort the transaction on error
         console.error("Error fetching coupon code:", error);
-        res.status(500).json({ error: "Failed to retrieve coupon code", details: error.message });
+        res.status(500).json({ 
+            error: "Failed to retrieve coupon code", 
+            details: error.message });
+    } finally {
+        session.endSession(); 
     }
 };
 
 // Redeem a coupon
 const redeemCoupon = async (req, res) => {
+    // TODO: add session for redeeming coupon
+    //const session = await mongoose.startSession(); 
+    
     const { code } = req.body; // code to redeem
     const userId = req.user._id;
     try {
