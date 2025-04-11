@@ -18,6 +18,8 @@ const couponSchema = new Schema({
 
     totalNum: { type: Number, required: true, min: 1 },
 
+    redeemedNum: { type: Number, default: 0},
+
     expiryDate: { type: Date, required: true },
 
     disable: { type: Boolean, default: false },

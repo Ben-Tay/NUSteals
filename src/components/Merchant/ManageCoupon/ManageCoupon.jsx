@@ -94,6 +94,9 @@ const ManageCoupon = () => {
                                     discountBottom={coupon.discountType}
                                     descriptionHeader={coupon.couponName}
                                     description={coupon.description}
+                                    redeemedNum={coupon.redeemedNum}
+                                    totalNum={coupon.totalNum}
+                                    disabled={coupon.disable}
                                     children="merchant"
                                     onEditClick={() => handleEditClick(coupon)}
                                 />

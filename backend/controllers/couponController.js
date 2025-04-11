@@ -49,15 +49,15 @@ const getACouponCode = async (req, res) => {
     const session = await mongoose.startSession(); // start a session for atomic operations
     
     try {
+        session.startTransaction();
+
         const { couponId } = req.params;
         const userId = req.user._id;
-
-        session.startTransaction();
 
         // 1. find the coupon with available codes
         const coupon = await Coupon.findOne({
             _id: couponId,
-            totalNum: { $gt: 0 }, // totalNum > 0
+            $expr: { $gt: [{ $subtract: ["$totalNum", "$redeemedNum"] }, 0] }, // num > 0
             disable: false, // ensure the coupon is not disabled
             'uniqueCodes.isUsed': false, // ensure there are unused codes
             expiryDate: { $gt: new Date() } // expirydate > current date
@@ -76,7 +76,7 @@ const getACouponCode = async (req, res) => {
         // 3. atomically reserve this specific code for the user
         const updatedCoupon = await Coupon.findOneAndUpdate({
             _id: couponId,
-            'uniqueCodes.code': randomCode._id,
+            'uniqueCodes.code': randomCode.code,
             'uniqueCodes.isUsed': false // ensure the code is not used
         }, {
             $set: {
@@ -84,7 +84,7 @@ const getACouponCode = async (req, res) => {
                 'uniqueCodes.$.usedBy': userId,
                 'uniqueCodes.$.usedAt': new Date()
             },
-            $inc: { totalNum: -1 } // decrement the totalNum of codes
+            $inc: { redeemedNum: 1 } // increment the redeemedNum
         }, { new: true,
             session
          }); // return the updated coupon
@@ -119,7 +119,7 @@ const getACouponCode = async (req, res) => {
 const redeemCoupon = async (req, res) => {
     // TODO: add session for redeeming coupon
     //const session = await mongoose.startSession(); 
-    
+
     const { code } = req.body; // code to redeem
     const userId = req.user._id;
     try {
@@ -154,7 +154,7 @@ const redeemCoupon = async (req, res) => {
         couponCode.usedBy = userId;
         couponCode.usedAt = new Date();
 
-        coupon.totalNum -= 1; // decrement totalNum
+        coupon.redeemedNum += 1; 
         await coupon.save();
         // success response
         res.status(200).json({
@@ -168,7 +168,8 @@ const redeemCoupon = async (req, res) => {
                 category: coupon.category,
                 expiryDate: coupon.expiryDate,
                 disable: coupon.disable,
-                totalNum: coupon.totalNum
+                totalNum: coupon.totalNum, 
+                redeemedNum: coupon.redeemedNum
             }
         });
     } catch (error) {
@@ -244,6 +245,7 @@ const createCoupon = async (req, res) => {
             disable: updatedCoupon.disable,
             uniqueCodes: updatedCoupon.uniqueCodes, 
             totalNum: updatedCoupon.totalNum,
+            redeemedNum: updatedCoupon.redeemedNum || 0,
         });
 
     } catch (error) {

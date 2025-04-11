@@ -1,8 +1,7 @@
 import React from 'react';
 
-const Coupon = ({ brandLogo, brandName, discount, descriptionHeader, description, children, coupon, onEditClick }) => {
-    // Split discount into 2 parts so they can be stacked
-    const [discountTop, discountBottom] = discount ? discount.split(' ') : ['0%', 'off'];
+const Coupon = ({ brandLogo, brandName, discount, descriptionHeader, description, redeemedNum, totalNum, disabled, children, coupon, onEditClick }) => {
+    const [discountTop] = discount;
 
     {/* RIGHT SIDE OF COUPON */ }
     const renderButtons = () => {
@@ -13,13 +12,16 @@ const Coupon = ({ brandLogo, brandName, discount, descriptionHeader, description
                     <div className="flex flex-col gap-2">
                         <button className="px-10 py-2 bg-[#F88B2C] text-white border-none rounded text-center" onClick={() => onEditClick(coupon)}>Edit Coupon</button>
 
+                        {disabled ? (
                         <a
                             href="#"
                             className="px-10 py-2 bg-white text-[#F32626] border-3 border-[#F32626] rounded cursor-not-allowed no-underline text-center"
                         >
                             Disabled
                         </a>
-
+                        ) : (
+                            <p className="text-xl text-center text-[#865122]">Total: {redeemedNum}/{totalNum}</p>
+                        )}
                     </div>
                 );
             default:
@@ -32,8 +34,8 @@ const Coupon = ({ brandLogo, brandName, discount, descriptionHeader, description
 
             {/* LEFT: Discount (10% width) */}
             <div className="basis-[10%] bg-gray-100 p-4 flex flex-col items-center justify-center">
-                <span className="text-2xl font-bold text-warning">{discountTop}</span>
-                <span className="text-2xl font-bold text-warning">{discountBottom}%</span>
+                <span className="text-3xl text-[#F88B2C] font-bold">{discountTop}%</span>
+                <span className="text-3xl text-[#F88B2C]">off</span>
             </div>
 
             {/* MIDDLE: Description (60% width) */}
