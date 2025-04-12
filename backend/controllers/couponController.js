@@ -46,138 +46,104 @@ const generateAndAddCodes = async (couponId, quantity) => {
 
 // get a random available coupon code from a coupon
 const getACouponCode = async (req, res) => {
-    const session = await mongoose.startSession(); // start a session for atomic operations
-    
     try {
-        session.startTransaction();
-
         const couponId = mongoose.Types.ObjectId.createFromHexString(req.params.couponId);
-        const userId = req.user.uid;
 
-        console.log("Received request to get coupon code for couponId:", couponId, "and userId:", userId);
-        // 1. find the coupon with available codes
+        // Just find an available code without updating anything
         const coupon = await Coupon.findOne({
             _id: couponId,
-            $expr: { $gt: [{ $subtract: ["$totalNum", "$redeemedNum"] }, 0] }, // num > 0
-            disable: false, // ensure the coupon is not disabled
-            'uniqueCodes.isUsed': false, // ensure there are unused codes
-            expiryDate: { $gt: new Date() } // expirydate > current date
-        }).session(session);
-
-        console.log("Coupon found:", coupon);
-        
-        if (!coupon) {
-            await session.abortTransaction(); // abort the transaction if coupon not found
-            return res.status(404).json({ error: "Coupon not found or all codes redeemed" });
-        }
-
-        // 2. find all available codes
-        const availableCodes = coupon.uniqueCodes.filter(c => !c.isUsed); // filter out used codes
-
-        const randomCode = availableCodes[Math.floor(Math.random() * availableCodes.length)]; // get a random code from the available codes
-
-        // 3. atomically reserve this specific code for the user
-        const updatedCoupon = await Coupon.findOneAndUpdate({
-            _id: couponId,
-            'uniqueCodes.code': randomCode.code,
-            'uniqueCodes.isUsed': false // ensure the code is not used
-        }, {
-            $set: {
-                'uniqueCodes.$.isUsed': true,
-                'uniqueCodes.$.usedBy': userId,
-                'uniqueCodes.$.usedAt': new Date()
-            },
-            $inc: { redeemedNum: 1 } // increment the redeemedNum
-        }, { new: true,
-            session
-         }); // return the updated coupon
-        
-        if (!updatedCoupon) {
-            await session.abortTransaction(); // abort the transaction if the update fails
-            return res.status(409).json({ error: "Code was just taken" });
-        }
-
-        // 4. verify reservation
-        const reservedCode = updatedCoupon.uniqueCodes.find( c => c._id.equals(randomCode._id) );
-
-        await session.commitTransaction();
-        res.status(200).json({
-            couponName: updatedCoupon.couponName,
-            code: reservedCode.code,
-            discount: updatedCoupon.discount,
-            expiryDate: updatedCoupon.expiryDate
+            disable: false,
+            'uniqueCodes.isUsed': false,
+            expiryDate: { $gt: new Date() }
         });
+
+        if (!coupon) {
+            return res.status(404).json({ error: "No available codes" });
+        }
+
+        // Get random available code
+        const availableCodes = coupon.uniqueCodes.filter(c => !c.isUsed);
+        const randomCode = availableCodes[Math.floor(Math.random() * availableCodes.length)];
+
+        // Only return the code - no database updates
+        res.status(200).json({
+            couponName: coupon.couponName,
+            code: randomCode.code,
+            discount: coupon.discount,
+            expiryDate: coupon.expiryDate
+        });
+
     } catch (error) {
-        await session.abortTransaction(); // abort the transaction on error
         console.error("Error fetching coupon code:", error);
-        res.status(500).json({ 
-            error: "Failed to retrieve coupon code", 
-            details: error.message });
-    } finally {
-        session.endSession(); 
+        res.status(500).json({ error: "Failed to get code" });
     }
 };
 
 // Redeem a coupon
 const redeemCoupon = async (req, res) => {
-    // TODO: add session for redeeming coupon
-    //const session = await mongoose.startSession(); 
-
-    const { code } = req.body; // code to redeem
-    const userId = req.user.uid;
+    const session = await mongoose.startSession();
     try {
-        // find coupon using code
-        const coupon = await Coupon.findOne({
-            'uniqueCodes.code': code,           
-        });
-        if (!coupon) {
-            return res.status(404).json({ error: "Coupon not found" });
-        } 
+        session.startTransaction();
 
-        // find the specific code in the coupon's uniqueCodes array
-        const couponCode = coupon.uniqueCodes.find(c => c.code === code);
-        if (!couponCode) {
-            return res.status(404).json({ error: "Code not found" });
+        const { code } = req.body;
+        const userId = req.user.uid;
+
+        // Attempt to atomically find and update the coupon
+        const updatedCoupon = await Coupon.findOneAndUpdate(
+            {
+                'uniqueCodes.code': code,
+                'uniqueCodes.isUsed': false,  // Must not be used
+                disable: false,               // Must not be disabled
+                expiryDate: { $gt: new Date() }  // Must not be expired
+            },
+            {
+                $set: {
+                    'uniqueCodes.$.isUsed': true,
+                    'uniqueCodes.$.usedBy': userId,
+                    'uniqueCodes.$.usedAt': new Date()
+                },
+                $inc: { redeemedNum: 1 }
+            },
+            { 
+                new: true,
+                session,
+                runValidators: true
+            }
+        );
+
+        if (!updatedCoupon) {
+            await session.abortTransaction();
+            return res.status(409).json({ 
+                error: "Coupon redemption failed", 
+                details: "Code may have been taken by someone else or is no longer valid"
+            });
         }
 
-        if (couponCode.isUsed) {
-            return res.status(400).json({ error: "Coupon already redeemed" });
-        }
-
-        if (coupon.expiryDate < new Date()) {
-            return res.status(400).json({ error: "Coupon has expired" });
-        } 
-
-        if (coupon.disable) {
-            return res.status(400).json({ error: "Coupon is disabled" });
-        }
-
-        // update coupon and code
-        couponCode.isUsed = true;
-        couponCode.usedBy = userId;
-        couponCode.usedAt = new Date();
-
-        coupon.redeemedNum += 1; 
-        await coupon.save();
-        // success response
+        await session.commitTransaction();
         res.status(200).json({
             message: "Coupon redeemed successfully",
             coupon: {
-                id: coupon._id,
-                couponName: coupon.couponName,
-                discount: coupon.discount,
-                description: coupon.description,
-                discountType: coupon.discountType,
-                category: coupon.category,
-                expiryDate: coupon.expiryDate,
-                disable: coupon.disable,
-                totalNum: coupon.totalNum, 
-                redeemedNum: coupon.redeemedNum
+                id: updatedCoupon._id,
+                couponName: updatedCoupon.couponName,
+                discount: updatedCoupon.discount,
+                description: updatedCoupon.description,
+                discountType: updatedCoupon.discountType,
+                category: updatedCoupon.category,
+                expiryDate: updatedCoupon.expiryDate,
+                disable: updatedCoupon.disable,
+                totalNum: updatedCoupon.totalNum,
+                redeemedNum: updatedCoupon.redeemedNum
             }
         });
     } catch (error) {
+        await session.abortTransaction();
         console.error("Error redeeming coupon:", error);
-        res.status(500).json({ error: "Coupon redemption failed", details: error.message });
+        res.status(500).json({ 
+            error: "Redemption failed", 
+            details: error.message 
+        });
+    } finally {
+        session.endSession();
     }
 };
 
