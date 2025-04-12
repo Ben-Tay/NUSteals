@@ -105,7 +105,7 @@ const AddCoupon = () => {
         }
         return;
       }
-      navigate('/manageCoupons'); // Redirect after success
+      navigate('/merchantLogin/manageCoupons'); // Redirect after success
     } catch (error) {
       console.error('Error creating coupon:', error);
       alert(error.message || 'Failed to create coupon');
@@ -144,7 +144,7 @@ const AddCoupon = () => {
       alert('Coupon updated successfully!');
       setEditingCoupon(null);
       setShowModal(false);
-      navigate('/manageCoupons'); // Redirect after success
+      navigate('/merchantLogin/manageCoupons'); // Redirect after success
     } catch (error) {
       console.error('Error updating coupon:', error);
       alert('Failed to update coupon');
@@ -167,7 +167,7 @@ const AddCoupon = () => {
       alert('Coupon deleted successfully!');
       setShowDeleteModal(false);
       setCouponToDelete(null);
-      navigate('/manageCoupons'); // Redirect after delete
+      navigate('/merchantLogin/manageCoupons'); // Redirect after delete
     } catch (error) {
       console.error('Error deleting coupon:', error);
       alert('Failed to delete coupon');

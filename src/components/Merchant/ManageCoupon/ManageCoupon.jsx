@@ -56,7 +56,7 @@ const ManageCoupon = () => {
 
     // GO TO EDIT COUPON
     const handleEditClick = (coupon) => {
-        navigate('/addCoupon', {
+        navigate('/merchantLogin/addCoupon', {
             state: {
                 editingCoupon: coupon
             }
