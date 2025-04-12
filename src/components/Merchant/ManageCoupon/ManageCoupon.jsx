@@ -90,14 +90,8 @@ const ManageCoupon = () => {
                             coupons.map((coupon) => (
                                 <GeneralCoupon
                                     key={coupon._id}
-                                    discount={`${coupon.discount}`}
-                                    discountBottom={coupon.discountType}
-                                    descriptionHeader={coupon.couponName}
-                                    description={coupon.description}
-                                    redeemedNum={coupon.redeemedNum}
-                                    totalNum={coupon.totalNum}
-                                    disabled={coupon.disable}
-                                    children="merchant"
+                                    coupon = {coupon}
+                                    role="merchant"
                                     onEditClick={() => handleEditClick(coupon)}
                                 />
                             ))

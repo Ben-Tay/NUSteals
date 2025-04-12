@@ -51,9 +51,10 @@ const getACouponCode = async (req, res) => {
     try {
         session.startTransaction();
 
-        const { couponId } = req.params;
-        const userId = req.user._id;
+        const couponId = mongoose.Types.ObjectId.createFromHexString(req.params.couponId);
+        const userId = req.user.uid;
 
+        console.log("Received request to get coupon code for couponId:", couponId, "and userId:", userId);
         // 1. find the coupon with available codes
         const coupon = await Coupon.findOne({
             _id: couponId,
@@ -62,10 +63,12 @@ const getACouponCode = async (req, res) => {
             'uniqueCodes.isUsed': false, // ensure there are unused codes
             expiryDate: { $gt: new Date() } // expirydate > current date
         }).session(session);
+
+        console.log("Coupon found:", coupon);
         
         if (!coupon) {
             await session.abortTransaction(); // abort the transaction if coupon not found
-            return res.status(404).json({ error: "Coupon not found or all  codes redeemed" });
+            return res.status(404).json({ error: "Coupon not found or all codes redeemed" });
         }
 
         // 2. find all available codes
@@ -121,7 +124,7 @@ const redeemCoupon = async (req, res) => {
     //const session = await mongoose.startSession(); 
 
     const { code } = req.body; // code to redeem
-    const userId = req.user._id;
+    const userId = req.user.uid;
     try {
         // find coupon using code
         const coupon = await Coupon.findOne({
@@ -424,6 +427,39 @@ const editCoupon = async (req, res) => {
     }
 };
 
+// Get all valid coupons for a user
+const getAllValidCoupons = async (req, res) => {
+    try {
+        const userId = req.user.uid; // get userId from token
+        const coupons = await Coupon.find({
+            disable: false, // filter out disabled coupons
+            $expr: { $lt: ["$redeemedNum", "$totalNum"] }, // filter out fully redeemed coupons
+            expiryDate: { $gt: new Date() },  // filter out expired coupons
+            'uniqueCodes': { // filter out coupons that have been redeemed by user
+                $not: {
+                    $elemMatch: {
+                        'usedBy': userId
+                    }
+                }
+            }
+        }).sort({ createdAt: -1 });
+        res.status(200).json(coupons);
+    } catch (error) {
+        console.error("Error fetching valid coupons:", error);
+        res.status(500).json({ error: "Internal server error", details: error.message });
+    }
+};
+
 
 // Export the coupon handler methods to the routes page
-export { createCoupon, getAllCoupons, getSingleCoupon, deleteCoupon, editCoupon, toggleDisableCoupon, redeemCoupon, getACouponCode }; 
+export { 
+    createCoupon, 
+    getAllCoupons, 
+    getSingleCoupon, 
+    deleteCoupon, 
+    editCoupon, 
+    toggleDisableCoupon, 
+    redeemCoupon, 
+    getACouponCode, 
+    getAllValidCoupons
+ }; 

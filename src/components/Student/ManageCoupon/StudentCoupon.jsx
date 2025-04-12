@@ -1,8 +1,11 @@
-import React, { useState } from "react";
-import { Row, Col, Button, Form, Modal } from "react-bootstrap";
-import { NavLink } from "react-router-dom"; // Import NavLink for navigation
+import React, { useState, useEffect, use } from "react";
+import { Row, Col, Button, Form, Modal, Spinner } from "react-bootstrap";
+import { NavLink, useNavigate } from "react-router-dom"; // Import NavLink for navigation
+import { jwtDecode } from "jwt-decode"; // Import jwtDecode for decoding JWT tokens
 import "./ManageCoupon.css"; // Reuse styles from ManageCoupon.css
 import Coupon from "../../../layout/GeneralCoupon"; // Import general coupon template
+
+const apiURL = "http://localhost:3000"; // API URL
 
 // Define RedeemButton component
 const RedeemButton = ({ onClick }) => {
@@ -17,36 +20,63 @@ const RedeemButton = ({ onClick }) => {
 };
 
 const StudentCoupon = () => {
-  // Sample coupons (could be replaced with API fetch)
-  const coupons = [
-    {
-      id: 1,
-      brand: "Denny's",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Denny%27s_Logo.svg/2560px-Denny%27s_Logo.svg.png",
-      discount: "20% off",
-      description: "20% off your next visit when you join the Rewards Program!",
-      usage: "422 used today",
-      status: "redeemed", // or "available"
-      code: "RX89ggG9430",
-    },
-    {
-      id: 2,
-      brand: "Denny's",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Denny%27s_Logo.svg/2560px-Denny%27s_Logo.svg.png",
-      discount: "$5 off",
-      description: "Get $5 off online orders of $25 or more!",
-      usage: "312 used today",
-      status: "available",
-      code: "ABC123XYZ",
-    },
-  ];
+  const navigate = useNavigate(); // Initialize navigate function
 
   // State for search bar and filters
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
-  const [selectedCoupon, setSelectedCoupon] = useState(null);
+  const [selectedCoupon, setSelectedCoupon] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [coupons, setCoupons] = useState([]);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCoupons = async () => {
+      try {
+        // Fetch token from local storage and decode it to get logged in user ID
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          navigate("/login");
+          return;
+        }
+        const decodedToken = jwtDecode(token);
+        const userId = decodedToken.uid;
+
+        // Fetch coupons from the API
+        const response = await fetch(`${apiURL}/api/coupons/user/${userId}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          method: "GET",
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          setError(errorData.message || "Failed to fetch coupon data");
+          setIsLoading(false);
+          return;
+        }
+
+        // Cache all valid coupons
+        const couponData = await response.json();
+        console.log(couponData);
+        setCoupons(couponData);
+        setIsLoading(false);
+
+      } catch (err) {
+        console.error("Error fetching coupon data:", err);
+        setError("Failed to fetch coupon data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCoupons();
+  }, []);
+
 
   // Handle Search
   const handleSearch = (e) => {
@@ -54,10 +84,51 @@ const StudentCoupon = () => {
   };
 
   // Open Coupon Redemption Modal
-  const handleRedeemClick = (coupon) => {
-    setSelectedCoupon(coupon);
-    setShowModal(true);
+  const handleRedeemClick = async (coupon) => {
+    try {
+
+      console.log("Redeeming coupon:", coupon._id);
+      // Call API to get a unique code
+      const response = await fetch(`${apiURL}/api/coupons/${coupon._id}/get-code`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
+        }
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to get coupon code');
+      }
+  
+      const { code } = await response.json();
+      
+      // Set the selected coupon with the retrieved code
+      setSelectedCoupon({
+        ...coupon,
+        code: code
+      });
+      setShowModal(true);
+    } catch (error) {
+      console.error('Error getting coupon code:', error);
+      setError(error.message || 'Failed to get coupon code');
+    }
   };
+
+  // Render loading spinner
+  if (isLoading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: "100vh" }}>
+        <Spinner animation="border" variant="primary" />
+      </div>
+    );
+  }
+
+  //Render error message if any
+  if (error) {
+    return <div className="text-danger">{error}</div>;
+  }
 
   return (
     <>
@@ -69,8 +140,7 @@ const StudentCoupon = () => {
             <NavLink
               to="/studentLogin/studentCoupon"
               className={({ isActive }) =>
-                `px-4 py-2 mx-2 ${
-                  isActive ? "text-orange-500 font-bold" : "text-black"
+                `px-4 py-2 mx-2 ${isActive ? "text-orange-500 font-bold" : "text-black"
                 }`
               }
             >
@@ -79,8 +149,7 @@ const StudentCoupon = () => {
             <NavLink
               to="/studentLogin/studentCoupon/history"
               className={({ isActive }) =>
-                `px-4 py-2 mx-2 ${
-                  isActive ? "text-orange-500 font-bold" : "text-black"
+                `px-4 py-2 mx-2 ${isActive ? "text-orange-500 font-bold" : "text-black"
                 }`
               }
             >
@@ -144,31 +213,15 @@ const StudentCoupon = () => {
             )
             .map((coupon) => (
               <Coupon
-                key={coupon.id}
-                brandLogo={coupon.logo}
-                brandName={coupon.brand}
-                discount={coupon.discount}
-                descriptionHeader={coupon.brand}
-                description={coupon.description}
+                key={coupon._id}
+                brandName="Unknown"
+                coupon={coupon}
+                role="student"
+                onRedeemClick={() => handleRedeemClick(coupon)}
               >
-                {coupon.status === "redeemed" ? (
-                  <Button variant="danger" disabled>
-                    Already Redeemed
-                  </Button>
-                ) : (
-                  <div className="flex flex-col items-center">
-                    <RedeemButton onClick={() => handleRedeemClick(coupon)} />
-                    <p className="text-sm text-gray-500 mt-2">{coupon.usage}</p>
-                  </div>
-                )}
+                
               </Coupon>
             ))}
-        </div>
-
-        {/* Pagination */}
-        <div className="text-center mt-3">
-          <Button variant="light">1</Button> <Button variant="light">2</Button>{" "}
-          ... <Button variant="light">9</Button>
         </div>
 
         {/* Coupon Redemption Modal */}

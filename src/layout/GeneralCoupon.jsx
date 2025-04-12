@@ -1,28 +1,58 @@
 import React from 'react';
+import { Card, Button, Container, Row, Col } from 'react-bootstrap';
 
-const Coupon = ({ brandLogo, brandName, discount, descriptionHeader, description, redeemedNum, totalNum, disabled, children, coupon, onEditClick }) => {
-    const [discountTop] = discount;
+const Coupon = (props) => {
+    const {
+        brandLogo,
+        brandName,
+        role,
+        coupon,
+        onEditClick,
+        onRedeemClick  // prop for student redeem function
+    } = props;
 
-    {/* RIGHT SIDE OF COUPON */ }
+    const discountTop = coupon.discountType === 'flat' 
+        ? `$${coupon.discount}`
+        : coupon.discountType === 'percentage'
+            ? `${coupon.discount}%`
+            : null;
+
     const renderButtons = () => {
-        switch (children) {
-            // MERCHANT COUPON
+        switch (role) {
             case 'merchant':
                 return (
-                    <div className="flex flex-col gap-2">
-                        <button className="px-10 py-2 bg-[#F88B2C] text-white border-none rounded text-center" onClick={() => onEditClick(coupon)}>Edit Coupon</button>
-
-                        {disabled ? (
-                        <a
-                            href="#"
-                            className="px-10 py-2 bg-white text-[#F32626] border-3 border-[#F32626] rounded cursor-not-allowed no-underline text-center"
+                    <div className="d-flex flex-column gap-2">
+                        <Button 
+                            variant="warning" 
+                            onClick={() => onEditClick(coupon)}
                         >
-                            Disabled
-                        </a>
+                            Edit Coupon
+                        </Button>
+
+                        {coupon.disable ? (
+                            <Button 
+                                variant="outline-danger" 
+                                disabled
+                                className="text-center"
+                            >
+                                Disabled
+                            </Button>
                         ) : (
-                            <p className="text-xl text-center text-[#865122]">Total: {redeemedNum}/{totalNum}</p>
+                            <p className="h5 text-center text-muted">
+                                Total: {coupon.redeemedNum}/{coupon.totalNum}
+                            </p>
                         )}
                     </div>
+                );
+            case 'student':
+                return (
+                    <Button 
+                        variant="success"
+                        onClick={() => onRedeemClick(coupon)}
+                        className="w-100"
+                    >
+                        Redeem
+                    </Button>
                 );
             default:
                 return null;
@@ -30,26 +60,30 @@ const Coupon = ({ brandLogo, brandName, discount, descriptionHeader, description
     };
 
     return (
-        <div className="flex w-full max-w-[1000px] border border-gray-300 rounded-lg overflow-hidden mb-3">
+        <Card className="mb-3">
+            <Container fluid>
+                <Row className="g-0">
+                    {/* LEFT: Discount (10%) */}
+                    <Col xs={2} className="bg-light p-3 text-center">
+                        <h2 className="text-warning mb-0">{discountTop}</h2>
+                        <span className="text-warning">off</span>
+                    </Col>
 
-            {/* LEFT: Discount (10% width) */}
-            <div className="basis-[10%] bg-gray-100 p-4 flex flex-col items-center justify-center">
-                <span className="text-3xl text-[#F88B2C] font-bold">{discountTop}%</span>
-                <span className="text-3xl text-[#F88B2C]">off</span>
-            </div>
+                    {/* MIDDLE: Description (60%) */}
+                    <Col xs={7} className="p-3">
+                        <Card.Title>{coupon.couponName}</Card.Title>
+                        <Card.Text className="small">
+                            {coupon.description}
+                        </Card.Text>
+                    </Col>
 
-            {/* MIDDLE: Description (60% width) */}
-            <div className="basis-[60%] p-4 flex flex-col">
-                <h3 className="text-lg font-semibold mb-2">{descriptionHeader}</h3>
-                <p className="text-sm">{description}</p>
-            </div>
-
-            {/* RIGHT: Buttons + Info (30% width) */}
-            <div className="basis-[30%] bg-white p-4 flex justify-end items-start">
-                {renderButtons()}
-            </div>
-
-        </div>
+                    {/* RIGHT: Buttons + Info (30%) */}
+                    <Col xs={3} className="p-3 d-flex justify-content-end">
+                        {renderButtons()}
+                    </Col>
+                </Row>
+            </Container>
+        </Card>
     );
 };
 
