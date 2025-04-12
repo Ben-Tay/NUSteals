@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 import { Spinner } from 'react-bootstrap';
 
-const API_URL = "http://localhost:3000"; // Replace with your API URL
+const API_URL = "https://nusteals-express.onrender.com"; // Replace with your API URL
 
 const StudentProfile = () => {
   const navigate = useNavigate();

@@ -7,7 +7,7 @@ import Coupon from "../../../layout/GeneralCoupon"; // Import general coupon tem
 import RedemptionModal from "../components/RedemptionModal"; // Import RedemptionModal component
 import StudentCouponNavbar from "../../../layout/StudentCouponNavbar";
 
-const apiURL = "http://localhost:3000"; // API URL
+const apiURL = "https://nusteals-express.onrender.com"; // API URL
 
 
 const StudentCoupon = () => {

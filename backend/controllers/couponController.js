@@ -82,8 +82,8 @@ const redeemCoupon = async (req, res) => {
     try {
         session.startTransaction();
 
-        const { code } = req.body;
-        const userId = req.user.uid;
+        const code = req.body.code; // Get code from request body
+        const studentId = req.body.studentId; // Get studentId from request body
 
         // Attempt to atomically find and update the coupon
         const updatedCoupon = await Coupon.findOneAndUpdate(
@@ -96,7 +96,7 @@ const redeemCoupon = async (req, res) => {
             {
                 $set: {
                     'uniqueCodes.$.isUsed': true,
-                    'uniqueCodes.$.usedBy': userId,
+                    'uniqueCodes.$.usedBy': studentId,
                     'uniqueCodes.$.usedAt': new Date()
                 },
                 $inc: { redeemedNum: 1 }

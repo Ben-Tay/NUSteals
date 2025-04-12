@@ -6,7 +6,7 @@ import "./ManageCoupon.css"; // Reuse styles from ManageCoupon.css
 import Coupon from "../../../layout/GeneralCoupon"; // Import general coupon template
 import StudentCouponNavbar from "../../../layout/StudentCouponNavbar";
 
-const apiURL = "http://localhost:3000"; // API URL
+const apiURL = "https://nusteals-express.onrender.com"; // API URL
 
 
 const StudentCoupon = () => {

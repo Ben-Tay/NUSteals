@@ -12,6 +12,9 @@ const GeneralNavBar = ({ userRole }) => {
       ? "text-blue py-3 px-3 no-underline"
       : "text-black py-3 px-3 no-underline";
 
+
+  const apiURL = "https://nusteals-express.onrender.com"; // API URL
+
   const handleLogout = () => {
     // Clear the access token from localStorage
     localStorage.removeItem('accessToken');
@@ -21,10 +24,29 @@ const GeneralNavBar = ({ userRole }) => {
 
   const [showScanner, setShowScanner] = useState(false);
 
-  const handleScanComplete = (data) => {
+  const handleScanComplete = async (data) => {
     // Handle the scanned QR code data
     console.log('Scanned data:', data);
-    // TODO: Call your redemption API here
+    // Make API call to redeem coupon
+    const response = await fetch(`${apiURL}/api/coupons/redeem`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+      },
+      body: JSON.stringify({
+        code: data.code,
+        studentId: data.studentId,
+        couponId: data.couponId
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to redeem coupon');
+    }
+
+    alert('Coupon redeemed successfully!');
     setShowScanner(false);
   };
 

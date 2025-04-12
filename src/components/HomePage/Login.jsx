@@ -33,7 +33,7 @@ const Login = () => {
 
       try {
         // Fetch all users from the backend
-        const response = await fetch('http://localhost:3000/api/users/login', {
+        const response = await fetch('https://nusteals-express.onrender.com/api/users/login', {
            method: 'POST',
            headers: {
               'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ const Login = () => {
         localStorage.setItem('userId', userId);
 
         const token = localStorage.getItem('accessToken');
-        const findUser = await fetch(`http://localhost:3000/api/users/${userId}`, {
+        const findUser = await fetch(`https://nusteals-express.onrender.com/api/users/${userId}`, {
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,

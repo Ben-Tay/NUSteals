@@ -7,6 +7,18 @@ const QRScannerModal = ({ show, handleClose, onCodeScanned }) => {
     const [isScanning, setIsScanning] = useState(false);
     const scannerRef = useRef(null);
 
+    // Ensure scanned QR contains expected data
+    const validateQRData = (data) => {
+        const requiredFields = ['code', 'studentId', 'couponId'];
+        const missingFields = requiredFields.filter(field => !data[field]);
+        
+        if (missingFields.length > 0) {
+            throw new Error();
+        }
+        
+        return true;
+    };
+
     useEffect(() => {
         let html5QrCode = null;
 
@@ -27,6 +39,7 @@ const QRScannerModal = ({ show, handleClose, onCodeScanned }) => {
                         (decodedText) => {
                             try {
                                 const data = JSON.parse(decodedText);
+                                validateQRData(data);
                                 stopScanner();
                                 onCodeScanned(data);
                             } catch (err) {
