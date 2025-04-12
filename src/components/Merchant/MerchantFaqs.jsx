@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import GeneralNavBar from '../../layout/GeneralNavBar';
 import { Container, Accordion } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import './MerchantStyle.css';
@@ -56,7 +55,6 @@ const MerchantFaqs = () => {
 
   return (
     <>
-      <GeneralNavBar userRole="merchant" />
       <Container className="mt-4">
         <h1>Frequently Asked Questions</h1>
         <Accordion defaultActiveKey="0" className="mt-3">

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import GeneralNavBar from '../../../layout/GeneralNavBar';
 import { Row, Col, Container, Card } from 'react-bootstrap';
 import GeneralCoupon from '../../../layout/GeneralCoupon';
 
@@ -46,7 +45,6 @@ const ManageCoupon = () => {
 
     return (
         <>
-            <GeneralNavBar userRole="merchant" />
             <div className="content-wrapper mb-4">
                 <Row className="g-5">
                     {/* LEFT SIDE */}
@@ -103,7 +101,7 @@ const ManageCoupon = () => {
                             ))
                         )}
                         <div className="d-flex justify-content-end mt-4">
-                            <a href="/addCoupon">
+                            <a href="/merchantLogin/addCoupon">
                                 <button className="px-10 py-2 bg-[#F88B2C] text-white border-none rounded text-center" >Add Coupon</button>
                             </a>
 

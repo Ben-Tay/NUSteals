@@ -11,10 +11,15 @@ import { jwtDecode } from "jwt-decode";
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [validated, setValidated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleCheckboxChange = () => {
+    setShowPassword(!showPassword);
+  };
 
   const handleSubmit = async (event) => {
     const form = event.currentTarget;
@@ -133,10 +138,22 @@ const Login = () => {
                   <Form.Control.Feedback type="invalid">
                     Please enter a correct email address
                   </Form.Control.Feedback>
-
+    
+                  <div class="flex justify-content-between">
                   <Form.Label htmlFor="inputPassword">Password</Form.Label>
+
+                    <div className="checkbox-container">
+                      <Form.Check
+                        type="checkbox"
+                        id="show-password"
+                        label="Show Password"
+                        checked={showPassword}
+                        onChange={handleCheckboxChange}
+                      />
+                    </div>
+                  </div>
                   <Form.Control
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       id="inputPassword"
                       placeholder="********"
                       value={password}
