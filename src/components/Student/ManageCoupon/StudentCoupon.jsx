@@ -24,13 +24,45 @@ const StudentCoupon = () => {
 
   // State for search bar and filters
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedFilters, setSelectedFilters] = useState([]);
+  const [discountTypeFilter, setDiscountTypeFilter] = useState("all");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [coupons, setCoupons] = useState([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [sortBy, setSortBy] = useState("recent");
+
+  // Sorting
+  const sortCoupons = (coupons, sortType) => {
+    switch (sortType) {
+      case "recent":
+        return [...coupons].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+      case "popular":
+        return [...coupons].sort((a, b) => b.redeemedNum - a.redeemedNum);
+      case "percentageHigh":
+        return [...coupons].sort((a, b) => {
+          if (
+            a.discountType === "percentage" &&
+            b.discountType === "percentage"
+          ) {
+            return b.discount - a.discount;
+          }
+          return a.discountType === "percentage" ? -1 : 1;
+        });
+      case "flatHigh":
+        return [...coupons].sort((a, b) => {
+          if (a.discountType === "flat" && b.discountType === "flat") {
+            return b.discount - a.discount;
+          }
+          return a.discountType === "flat" ? -1 : 1;
+        });
+      default:
+        return coupons;
+    }
+  };
 
   useEffect(() => {
     const fetchCoupons = async () => {
@@ -47,8 +79,8 @@ const StudentCoupon = () => {
         // Fetch coupons from the API
         const response = await fetch(`${apiURL}/api/coupons/user/${userId}`, {
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           method: "GET",
         });
@@ -65,7 +97,6 @@ const StudentCoupon = () => {
         console.log(couponData);
         setCoupons(couponData);
         setIsLoading(false);
-
       } catch (err) {
         console.error("Error fetching coupon data:", err);
         setError("Failed to fetch coupon data");
@@ -77,29 +108,48 @@ const StudentCoupon = () => {
     fetchCoupons();
   }, []);
 
-
   // Handle Search
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
 
+  // Handle discount type filter change
+  const handleDiscountTypeChange = (type) => {
+    setDiscountTypeFilter(type);
+  };
+
+  // Filter coupons based on search term and discount type
+  const filteredCoupons = coupons.filter((coupon) => {
+    const matchesSearch = coupon.description
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    const matchesDiscountType =
+      discountTypeFilter === "all" ||
+      coupon.discountType.toLowerCase() === discountTypeFilter.toLowerCase();
+
+    return matchesSearch && matchesDiscountType;
+  });
+
   // Open Coupon Redemption Modal
   const handleRedeemClick = async (coupon) => {
     try {
-
       console.log("Redeeming coupon:", coupon._id);
       // Call API to get a unique code
-      const response = await fetch(`${apiURL}/api/coupons/${coupon._id}/get-code`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
+      const response = await fetch(
+        `${apiURL}/api/coupons/${coupon._id}/get-code`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
         }
-      });
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to get coupon code');
+        throw new Error(errorData.message || "Failed to get coupon code");
       }
 
       const { code } = await response.json();
@@ -107,19 +157,22 @@ const StudentCoupon = () => {
       // Set the selected coupon with the retrieved code
       setSelectedCoupon({
         ...coupon,
-        code: code
+        code: code,
       });
       setShowModal(true);
     } catch (error) {
-      console.error('Error getting coupon code:', error);
-      setError(error.message || 'Failed to get coupon code');
+      console.error("Error getting coupon code:", error);
+      setError(error.message || "Failed to get coupon code");
     }
   };
 
   // Render loading spinner
   if (isLoading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ height: "100vh" }}>
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
         <Spinner animation="border" variant="primary" />
       </div>
     );
@@ -140,7 +193,8 @@ const StudentCoupon = () => {
             <NavLink
               to="/studentLogin/studentCoupon"
               className={({ isActive }) =>
-                `px-4 py-2 mx-2 ${isActive ? "text-orange-500 font-bold" : "text-black"
+                `px-4 py-2 mx-2 ${
+                  isActive ? "text-orange-500 font-bold" : "text-black"
                 }`
               }
             >
@@ -149,7 +203,8 @@ const StudentCoupon = () => {
             <NavLink
               to="/studentLogin/studentCoupon/history"
               className={({ isActive }) =>
-                `px-4 py-2 mx-2 ${isActive ? "text-orange-500 font-bold" : "text-black"
+                `px-4 py-2 mx-2 ${
+                  isActive ? "text-orange-500 font-bold" : "text-black"
                 }`
               }
             >
@@ -175,53 +230,86 @@ const StudentCoupon = () => {
           </Col>
         </Row>
 
-        {/* Filter Dropdown */}
+        {/* Updated Filter Dropdown */}
         {showFilterDropdown && (
           <div className="box-orange">
-            <h5>Filter by:</h5>
+            <h5>Filter by Discount Type:</h5>
             <Form.Check
-              type="checkbox"
-              label="Starbucks"
-              onChange={() =>
-                setSelectedFilters([...selectedFilters, "Starbucks"])
-              }
+              type="radio"
+              name="discountType"
+              label="All Discounts"
+              checked={discountTypeFilter === "all"}
+              onChange={() => handleDiscountTypeChange("all")}
             />
             <Form.Check
-              type="checkbox"
-              label="Netflix"
-              onChange={() =>
-                setSelectedFilters([...selectedFilters, "Netflix"])
-              }
+              type="radio"
+              name="discountType"
+              label="Flat Discount"
+              checked={discountTypeFilter === "flat"}
+              onChange={() => handleDiscountTypeChange("flat")}
             />
             <Form.Check
-              type="checkbox"
+              type="radio"
+              name="discountType"
               label="Percentage Discount"
-              onChange={() =>
-                setSelectedFilters([...selectedFilters, "Percentage Discount"])
-              }
+              checked={discountTypeFilter === "percentage"}
+              onChange={() => handleDiscountTypeChange("percentage")}
             />
           </div>
         )}
 
-        {/* Coupons List */}
+        {/* Sort Buttons */}
+        <Row className="mb-3">
+          <Col>
+            <div className="sort-buttons">
+              <Button
+                variant={sortBy === "recent" ? "primary" : "outline-primary"}
+                onClick={() => setSortBy("recent")}
+              >
+                Most Recent
+              </Button>
+              <Button
+                variant={sortBy === "popular" ? "primary" : "outline-primary"}
+                onClick={() => setSortBy("popular")}
+              >
+                Most Popular
+              </Button>
+              <Button
+                variant={
+                  sortBy === "percentageHigh" ? "primary" : "outline-primary"
+                }
+                onClick={() => setSortBy("percentageHigh")}
+              >
+                Highest % Discount
+              </Button>
+              <Button
+                variant={sortBy === "flatHigh" ? "primary" : "outline-primary"}
+                onClick={() => setSortBy("flatHigh")}
+              >
+                Highest $ Discount
+              </Button>
+            </div>
+          </Col>
+        </Row>
+
+        {/* Update Coupons List */}
         <div className="coupon-list">
-          {coupons
-            .filter((coupon) =>
+          {sortCoupons(
+            coupons.filter((coupon) =>
               coupon.description
                 .toLowerCase()
                 .includes(searchTerm.toLowerCase())
-            )
-            .map((coupon) => (
-              <Coupon
-                key={coupon._id}
-                brandName="Unknown"
-                coupon={coupon}
-                role="student"
-                onRedeemClick={() => handleRedeemClick(coupon)}
-              >
-
-              </Coupon>
-            ))}
+            ),
+            sortBy
+          ).map((coupon) => (
+            <Coupon
+              key={coupon._id}
+              brandName="Unknown"
+              coupon={coupon}
+              role="student"
+              onRedeemClick={() => handleRedeemClick(coupon)}
+            />
+          ))}
         </div>
 
         {/* Coupon Redemption Modal */}

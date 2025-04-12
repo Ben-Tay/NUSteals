@@ -1,17 +1,69 @@
 .content-wrapper {
-    padding-left: 5%;
-    padding-right: 5%;
+  padding-left: 5%;
+  padding-right: 5%;
 }
 .box-orange {
-    border: 1px solid #FFA500;
-    padding: 10px;
-    border-radius: 5px;
-    height: 200px;
+  border: 1px solid #ffa500;
+  padding: 10px;
+  border-radius: 5px;
+  height: 200px;
 }
 .bigger-box-orange {
-    border: 3px solid #FFA500;
-    padding: 30px;
-    border-radius: 15px;
-    max-width: 600px;
-    min-width: 250px;
+  border: 3px solid #ffa500;
+  padding: 30px;
+  border-radius: 15px;
+  max-width: 600px;
+  min-width: 250px;
+}
+.sort-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.sort-buttons .btn {
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
+.sort-buttons .btn-outline-primary {
+  color: #ff8c39;
+  border-color: #ff8c39;
+}
+
+.sort-buttons .btn-outline-primary:hover,
+.sort-buttons .btn-primary {
+  background-color: #ff8c39;
+  border-color: #ff8c39;
+  color: white;
+}
+
+.sort-buttons .btn-primary:hover {
+  background-color: #e67420;
+  border-color: #e67420;
+}
+
+@media (max-width: 768px) {
+  .sort-buttons {
+    justify-content: center;
+  }
+}
+
+/* Discount label styles */
+.coupon-amount {
+  color: #ff8c39;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.discount-text {
+  color: #ff8c39;
+  font-size: 1rem;
+}
+
+.percentage-off,
+.flat-off,
+.off {
+  color: #ff8c39;
 }
