@@ -7,7 +7,7 @@ const StudentCouponNavbar = () => {
       <div className="flex justify-center">
         {/* Link for All Coupons */}
         <NavLink
-          to="/studentCoupon"
+          to="/studentLogin/studentCoupon"
           end
           className={({ isActive }) =>
             `px-4 py-2 mx-2 ${isActive ? "text-orange-500" : "text-black"}`
@@ -18,7 +18,7 @@ const StudentCouponNavbar = () => {
 
         {/* Link for View My History */}
         <NavLink
-          to="/studentCoupon/history"
+          to="/studentLogin/studentCoupon/history"
           end
           className={({ isActive }) =>
             `px-4 py-2 mx-2 ${isActive ? "text-orange-500" : "text-black"}`
