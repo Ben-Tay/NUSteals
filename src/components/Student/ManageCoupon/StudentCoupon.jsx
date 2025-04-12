@@ -4,6 +4,8 @@ import { NavLink, useNavigate } from "react-router-dom"; // Import NavLink for n
 import { jwtDecode } from "jwt-decode"; // Import jwtDecode for decoding JWT tokens
 import "./ManageCoupon.css"; // Reuse styles from ManageCoupon.css
 import Coupon from "../../../layout/GeneralCoupon"; // Import general coupon template
+import RedemptionModal from "../components/RedemptionModal"; // Import RedemptionModal component
+import StudentCouponNavbar from "../../../layout/StudentCouponNavbar";
 
 const apiURL = "http://localhost:3000"; // API URL
 
@@ -35,30 +37,41 @@ const StudentCoupon = () => {
 
   // Sorting
   const sortCoupons = (coupons, sortType) => {
+    if (!Array.isArray(coupons)) return [];
+
     switch (sortType) {
       case "recent":
-        return [...coupons].sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        );
+        return [...coupons].sort((a, b) => {
+          // Remove isHistoryView since it's not defined
+          const dateA = new Date(a?.createdAt || 0);
+          const dateB = new Date(b?.createdAt || 0);
+          return dateB - dateA;
+        });
+
       case "popular":
-        return [...coupons].sort((a, b) => b.redeemedNum - a.redeemedNum);
+        return [...coupons].sort((a, b) =>
+          // Fix syntax error in comparison
+          (b?.redeemedNum || 0) - (a?.redeemedNum || 0)
+        );
+
       case "percentageHigh":
         return [...coupons].sort((a, b) => {
-          if (
-            a.discountType === "percentage" &&
-            b.discountType === "percentage"
-          ) {
-            return b.discount - a.discount;
+          if (a?.discountType === "percentage" && b?.discountType === "percentage") {
+            // Fix syntax error in comparison
+            return (b?.discount || 0) - (a?.discount || 0);
           }
-          return a.discountType === "percentage" ? -1 : 1;
+          return a?.discountType === "percentage" ? -1 : 1;
         });
+
       case "flatHigh":
         return [...coupons].sort((a, b) => {
-          if (a.discountType === "flat" && b.discountType === "flat") {
-            return b.discount - a.discount;
+          if (a?.discountType === "flat" && b?.discountType === "flat") {
+            // Fix syntax error in comparison
+            return (b?.discount || 0) - (a?.discount || 0);
           }
-          return a.discountType === "flat" ? -1 : 1;
+          return a?.discountType === "flat" ? -1 : 1;
         });
+
       default:
         return coupons;
     }
@@ -120,13 +133,14 @@ const StudentCoupon = () => {
 
   // Filter coupons based on search term and discount type
   const filteredCoupons = coupons.filter((coupon) => {
-    const matchesSearch = coupon.description
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
+    if (!coupon) return false;
+
+    const matchesSearch = coupon?.description?.toLowerCase()?.includes(searchTerm.toLowerCase())
+    coupon?.couponName?.toLowerCase()?.includes(searchTerm.toLowerCase());
 
     const matchesDiscountType =
-      discountTypeFilter === "all" ||
-      coupon.discountType.toLowerCase() === discountTypeFilter.toLowerCase();
+      discountTypeFilter === "all"
+    coupon?.discountType?.toLowerCase() === discountTypeFilter.toLowerCase();
 
     return matchesSearch && matchesDiscountType;
   });
@@ -166,6 +180,23 @@ const StudentCoupon = () => {
     }
   };
 
+  // Handle modal close
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedCoupon(null);
+  };
+
+  const handleCopyCode = (code) => {
+    navigator.clipboard.writeText(code)
+      .then(() => {
+        alert("Code copied to clipboard!");
+      })
+      .catch((err) => {
+        console.error('Failed to copy code:', err);
+        alert("Failed to copy code. Please try again.");
+      });
+  };
+
   // Render loading spinner
   if (isLoading) {
     return (
@@ -188,30 +219,9 @@ const StudentCoupon = () => {
       {/* Search & Navigation Section */}
       <div className="content-wrapper">
         <Row className="mb-3 align-items-center">
-          <Col xs={12} className="text-center mb-3">
-            {/* Navigation Buttons */}
-            <NavLink
-              to="/studentLogin/studentCoupon"
-              className={({ isActive }) =>
-                `px-4 py-2 mx-2 ${
-                  isActive ? "text-orange-500 font-bold" : "text-black"
-                }`
-              }
-            >
-              All Coupons
-            </NavLink>
-            <NavLink
-              to="/studentLogin/studentCoupon/history"
-              className={({ isActive }) =>
-                `px-4 py-2 mx-2 ${
-                  isActive ? "text-orange-500 font-bold" : "text-black"
-                }`
-              }
-            >
-              View My History
-            </NavLink>
-          </Col>
+          <StudentCouponNavbar />
           <Col xs={9}>
+
             {/* Search Bar */}
             <Form.Control
               type="text"
@@ -292,85 +302,39 @@ const StudentCoupon = () => {
           </Col>
         </Row>
 
-        {/* Update Coupons List */}
+        {/* Coupons List */}
         <div className="coupon-list">
-          {sortCoupons(
-            coupons.filter((coupon) =>
-              coupon.description
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase())
-            ),
-            sortBy
-          ).map((coupon) => (
-            <Coupon
-              key={coupon._id}
-              brandName="Unknown"
-              coupon={coupon}
-              role="student"
-              onRedeemClick={() => handleRedeemClick(coupon)}
-            />
-          ))}
+          {coupons.length === 0 ? (
+            <div className="text-center text-muted my-5">
+              <h4>
+                No available coupons
+              </h4>
+            </div>
+          ) : (
+            sortCoupons(
+              // Replace this filter with filteredCoupons
+              filteredCoupons,
+              sortBy
+            ).map((coupon) => (
+              <Coupon
+                key={coupon._id}
+                brandName="Unknown"
+                coupon={coupon}
+                role="student"
+                onRedeemClick={handleRedeemClick}
+              />
+            ))
+          )}
         </div>
 
         {/* Coupon Redemption Modal */}
         {selectedCoupon && (
-          <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
-            <Modal.Header closeButton>
-              <Modal.Title>Coupon Redemption</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              {/* Coupon Details */}
-              <h5>
-                {selectedCoupon.couponName} - {selectedCoupon.discount}
-                {selectedCoupon.discountType === 'percentage' ? '%' : '$'} off
-              </h5>
-              <p>{selectedCoupon.description}</p>
-
-              {/* Terms & Conditions */}
-              <div className="mt-4 mb-3">
-                <h6 className="text-secondary">Terms & Conditions</h6>
-                <div className="p-3 bg-light rounded border">
-                  <small className="text-muted">
-                    {selectedCoupon.termsConditions || 'No terms and conditions specified.'}
-                  </small>
-                </div>
-              </div>
-
-              {/* Redemption Code */}
-              <div className="mt-4">
-                <h6>Your Redemption Code</h6>
-                <div className="p-3 bg-light rounded border d-flex justify-content-between align-items-center">
-                  <code className="h5 mb-0">{selectedCoupon.code}</code>
-                  <Button
-                    variant="outline-primary"
-                    size="sm"
-                    onClick={() => navigator.clipboard.writeText(selectedCoupon.code)}
-                  >
-                    Copy Code
-                  </Button>
-                </div>
-                <p className="mt-2 text-muted">
-                  <i className="bi bi-info-circle me-2"></i>
-                  Please inform staff to enter the code at checkout.
-                </p>
-              </div>
-
-              {/* Expiry Information */}
-              <div className="mt-3">
-                <small className="text-danger">
-                  Expires: {new Date(selectedCoupon.expiryDate).toLocaleDateString()}
-                </small>
-              </div>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={() => {
-                setShowModal(false);
-                setSelectedCoupon(null);
-              }}>
-                Close
-              </Button>
-            </Modal.Footer>
-          </Modal>
+          <RedemptionModal
+            selectedCoupon={selectedCoupon}
+            showModal={showModal}
+            handleClose={handleCloseModal}
+            handleCopyCode={handleCopyCode}
+          />
         )}
       </div>
     </>
