@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import { useNavigate, useLocation, data } from 'react-router-dom';
-import GeneralNavBar from '../../../layout/GeneralNavBar';
 import { Row, Col, Button, Form } from 'react-bootstrap';
 import './AddCoupon.css';
 
@@ -182,7 +181,6 @@ const AddCoupon = () => {
 
   return (
     <>
-      <GeneralNavBar userRole="merchant" />
       <div className="content-wrapper mb-4">
         <h1>{editingCoupon ? 'EDIT COUPON' : 'ADD COUPON'}</h1>
         <br />
