@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink, Link } from "react-router-dom";
-import Container from "react-bootstrap/Container";
+import { Container, Button } from "react-bootstrap";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
-import { TbLogout } from "react-icons/tb";
+import { TbLogout, TbScan } from "react-icons/tb";
+import QRScannerModal from "./components/QRScannerModal.jsx";
 
 const GeneralNavBar = ({ userRole }) => {
   const linkClass = ({ isActive }) =>
@@ -12,11 +13,20 @@ const GeneralNavBar = ({ userRole }) => {
       : "text-black py-3 px-3 no-underline";
 
   const handleLogout = () => {
-     // Clear the access token from localStorage
-     localStorage.removeItem('accessToken');
-     localStorage.removeItem('userId');
-     localStorage.removeItem('userRole');
+    // Clear the access token from localStorage
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userRole');
   }
+
+  const [showScanner, setShowScanner] = useState(false);
+
+  const handleScanComplete = (data) => {
+    // Handle the scanned QR code data
+    console.log('Scanned data:', data);
+    // TODO: Call your redemption API here
+    setShowScanner(false);
+  };
 
   const renderLinks = () => {
     switch (userRole) {
@@ -46,11 +56,25 @@ const GeneralNavBar = ({ userRole }) => {
                 </NavLink>
               </Nav.Item>
               <Nav.Item className="flex">
-                <NavLink to="/" className={linkClass} style = {{ marginTop: "3px"}} onClick={handleLogout}>
-                    <TbLogout className="mr-3 text-xl" />
+                <Button
+                  variant="link"
+                  className={linkClass}
+                  onClick={() => setShowScanner(true)}
+                >
+                  <TbScan className="mr-2" />
+                </Button>
+              </Nav.Item>
+              <Nav.Item className="flex">
+                <NavLink to="/" className={linkClass} style={{ marginTop: "3px" }} onClick={handleLogout}>
+                  <TbLogout className="mr-3 text-xl" />
                 </NavLink>
               </Nav.Item>
             </div>
+            <QRScannerModal
+              show={showScanner}
+              handleClose={() => setShowScanner(false)}
+              onCodeScanned={handleScanComplete}
+            />
           </>
         );
       // STUDENT NAVBAR
@@ -63,20 +87,20 @@ const GeneralNavBar = ({ userRole }) => {
                   Redeem Coupons
                 </NavLink>
               </Nav.Item>
-              <Nav.Item className="flex"> 
+              <Nav.Item className="flex">
                 <NavLink to="/studentLogin/profile" className={linkClass}>
                   Profile
                 </NavLink>
               </Nav.Item>
-              <Nav.Item className="flex"> 
+              <Nav.Item className="flex">
                 <NavLink to="/studentLogin/faq" className={linkClass}>
                   FAQs
                 </NavLink>
               </Nav.Item>
-              <Nav.Item className="flex"> 
-                  <NavLink to="/" className={linkClass} style = {{ marginTop: "3px"}} onClick={handleLogout}>
-                    <TbLogout className="mr-3 text-xl" />
-                  </NavLink>
+              <Nav.Item className="flex">
+                <NavLink to="/" className={linkClass} style={{ marginTop: "3px" }} onClick={handleLogout}>
+                  <TbLogout className="mr-3 text-xl" />
+                </NavLink>
               </Nav.Item>
             </div>
           </>
@@ -106,11 +130,11 @@ const GeneralNavBar = ({ userRole }) => {
                 >
                   Manage Coupons
                 </NavLink>
-              </Nav.Item> 
-              <Nav.Item className="flex"> 
-                  <NavLink to="/" className={linkClass} style = {{ marginTop: "3px"}} onClick={handleLogout}>
-                    <TbLogout className="mr-3 text-xl" />
-                  </NavLink>
+              </Nav.Item>
+              <Nav.Item className="flex">
+                <NavLink to="/" className={linkClass} style={{ marginTop: "3px" }} onClick={handleLogout}>
+                  <TbLogout className="mr-3 text-xl" />
+                </NavLink>
               </Nav.Item>
             </div>
           </>

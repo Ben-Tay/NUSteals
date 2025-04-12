@@ -321,7 +321,7 @@ const StudentCoupon = () => {
             selectedCoupon={selectedCoupon}
             showModal={showModal}
             handleClose={handleCloseModal}
-            handleCopyCode={handleCopyCode}
+            userId={jwtDecode(localStorage.getItem("accessToken")).uid} // Pass userId to the modal by decoding the token
           />
         )}
       </div>

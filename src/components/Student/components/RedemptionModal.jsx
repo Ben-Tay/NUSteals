@@ -1,12 +1,21 @@
 import React from 'react';
 import { Modal, Button } from 'react-bootstrap';
+import { QRCodeSVG } from 'qrcode.react';
 
 const RedemptionModal = ({ 
     selectedCoupon, 
     showModal, 
     handleClose,
-    handleCopyCode 
+    userId 
 }) => {
+
+    // Create QR code data object
+    const qrData = JSON.stringify({
+        code: selectedCoupon.code,
+        studentId: userId,
+        couponId: selectedCoupon._id
+    });
+
     return (
         <Modal show={showModal} onHide={handleClose} size="lg">
             <Modal.Header closeButton>
@@ -30,22 +39,21 @@ const RedemptionModal = ({
                     </div>
                 </div>
 
-                {/* Redemption Code */}
-                <div className="mt-4">
-                    <h6>Your Redemption Code</h6>
-                    <div className="p-3 bg-light rounded border d-flex justify-content-between align-items-center">
-                        <code className="h5 mb-0">{selectedCoupon.code}</code>
-                        <Button
-                            variant="outline-primary"
-                            size="sm"
-                            onClick={() => handleCopyCode(selectedCoupon.code)}
-                        >
-                            Copy Code
-                        </Button>
+                {/* QR Code Section */}
+                <div className="mt-4 text-center">
+                    <h6>Your Redemption QR Code</h6>
+                    <div className="p-4 bg-light rounded border d-flex justify-content-center">
+                        <QRCodeSVG 
+                            value={qrData}
+                            size={200}
+                            level="H"
+                            bgColor="#FFFFFF"
+                            fgColor="#000000"
+                        />
                     </div>
-                    <p className="mt-2 text-muted">
+                    <p className="mt-3 text-muted">
                         <i className="bi bi-info-circle me-2"></i>
-                        Please inform staff to enter the code at checkout.
+                        Show this QR code to the staff for scanning
                     </p>
                 </div>
 

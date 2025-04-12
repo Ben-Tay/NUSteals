@@ -247,7 +247,7 @@ const StudentCoupon = () => {
           {coupons.length === 0 ? (
             <div className="text-center text-muted my-5">
               <h4>
-                No available coupons
+                No coupons redeemed yet. Check back later!
               </h4>
             </div>
           ) : (
