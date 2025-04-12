@@ -9,17 +9,6 @@ import StudentCouponNavbar from "../../../layout/StudentCouponNavbar";
 
 const apiURL = "http://localhost:3000"; // API URL
 
-// Define RedeemButton component
-const RedeemButton = ({ onClick }) => {
-  return (
-    <button
-      className="bg-green-500 text-white py-2 px-4 rounded"
-      onClick={onClick}
-    >
-      Redeem
-    </button>
-  );
-};
 
 const StudentCoupon = () => {
   const navigate = useNavigate(); // Initialize navigate function
@@ -49,18 +38,14 @@ const StudentCoupon = () => {
         });
 
       case "popular":
-        return [...coupons].sort(
-          (a, b) =>
-            // Fix syntax error in comparison
-            (b?.redeemedNum || 0) - (a?.redeemedNum || 0)
+        return [...coupons].sort((a, b) =>
+          // Fix syntax error in comparison
+          (b?.redeemedNum || 0) - (a?.redeemedNum || 0)
         );
 
       case "percentageHigh":
         return [...coupons].sort((a, b) => {
-          if (
-            a?.discountType === "percentage" &&
-            b?.discountType === "percentage"
-          ) {
+          if (a?.discountType === "percentage" && b?.discountType === "percentage") {
             // Fix syntax error in comparison
             return (b?.discount || 0) - (a?.discount || 0);
           }
@@ -111,7 +96,6 @@ const StudentCoupon = () => {
 
         // Cache all valid coupons
         const couponData = await response.json();
-        console.log(couponData);
         setCoupons(couponData);
         setIsLoading(false);
       } catch (err) {
@@ -139,13 +123,12 @@ const StudentCoupon = () => {
   const filteredCoupons = coupons.filter((coupon) => {
     if (!coupon) return false;
 
-    const matchesSearch =
-      coupon?.description?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = coupon?.description?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
       coupon?.couponName?.toLowerCase()?.includes(searchTerm.toLowerCase());
 
     const matchesDiscountType =
       discountTypeFilter === "all" ||
-      coupon?.discountType?.toLowerCase() === discountTypeFilter.toLowerCase();
+    coupon?.discountType?.toLowerCase() === discountTypeFilter.toLowerCase();
 
     return matchesSearch && matchesDiscountType;
   });
@@ -192,13 +175,12 @@ const StudentCoupon = () => {
   };
 
   const handleCopyCode = (code) => {
-    navigator.clipboard
-      .writeText(code)
+    navigator.clipboard.writeText(code)
       .then(() => {
         alert("Code copied to clipboard!");
       })
       .catch((err) => {
-        console.error("Failed to copy code:", err);
+        console.error('Failed to copy code:', err);
         alert("Failed to copy code. Please try again.");
       });
   };
@@ -227,6 +209,7 @@ const StudentCoupon = () => {
         <Row className="mb-3 align-items-center">
           <StudentCouponNavbar />
           <Col xs={9}>
+
             {/* Search Bar */}
             <Form.Control
               type="text"
@@ -311,7 +294,9 @@ const StudentCoupon = () => {
         <div className="coupon-list">
           {coupons.length === 0 ? (
             <div className="text-center text-muted my-5">
-              <h4>No available coupons</h4>
+              <h4>
+                No available coupons
+              </h4>
             </div>
           ) : (
             sortCoupons(
