@@ -152,23 +152,23 @@ useEffect(() => {
                     <Row>
                         <div className="flex flex-col mt-3 justify-center space-x-0 space-y-8 md:flex-row md:space-x-16 md:space-y-0">
                             <Card className="p-3 text-center w-full font-roboto max-w-xs md:max-w-xs !bg-gray-50">
-                                <Card.Title className="fw-semibold text-2xl">Total Users</Card.Title>
+                                <Card.Title className="fw-semibold text-2xl !text-blue-700">Total Users</Card.Title>
                                 <Card.Body>
-                                <Card.Text className="text-xl">{userList.length}</Card.Text>
+                                <Card.Text className="text-xl !text-orange-600">{userList.length}</Card.Text>
                                 </Card.Body>
                             </Card>
 
                             <Card className="p-3 text-center w-full font-roboto max-w-xs md:max-w-xs !bg-gray-50">
-                                <Card.Title className="fw-semibold text-2xl"> {today} Sign Ups</Card.Title>
+                                <Card.Title className="fw-semibold text-2xl !text-blue-700"> {today} Sign Ups</Card.Title>
                                 <Card.Body>
-                                <Card.Text className="text-xl">{monthlySignups}</Card.Text>
+                                <Card.Text className="text-xl !text-orange-600">{monthlySignups}</Card.Text>
                                 </Card.Body>
                             </Card>
 
                             <Card className="p-3 text-center w-full font-roboto max-w-xs md:max-w-xs !bg-gray-50">
-                                <Card.Title className="fw-semibold text-2xl ">User Growth Rate</Card.Title>
+                                <Card.Title className="fw-semibold text-2xl !text-blue-700">User Growth Rate</Card.Title>
                                 <Card.Body>
-                                    <Card.Text className="text-xl">{growthLabel}: {growthRate}%</Card.Text>
+                                    <Card.Text className="text-xl !text-orange-600">{growthLabel}: {growthRate}%</Card.Text>
                                 </Card.Body>
                             </Card>
                         </div>
