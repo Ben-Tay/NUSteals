@@ -122,7 +122,7 @@ useEffect(() => {
 
     return (
         <>
-                <Card className="w-full max-w-7xl mx-auto p-4 min-h-[800px]">                
+                <Card className="w-full max-w-7xl mx-auto p-4 min-h-[800px] mb-5">                
                     <Card.Body className="m-3">
                     <div className="flex justify-between">
                         <Card.Title className="flex">
@@ -145,32 +145,30 @@ useEffect(() => {
                             </h5>
                         </div>
                         </Card.Title>
-                        <h5 className="text-primary">{today}</h5>
-
-                       
+                        <h5 className="text-primary">{today}</h5>         
                     </div>
 
 
                     <Row>
                         <div className="flex flex-col mt-3 justify-center space-x-0 space-y-8 md:flex-row md:space-x-16 md:space-y-0">
-                            <Card className="p-3 text-center w-full max-w-xs md:max-w-xs">
+                            <Card className="p-3 text-center w-full font-roboto max-w-xs md:max-w-xs !bg-gray-50">
                                 <Card.Title className="fw-semibold text-2xl">Total Users</Card.Title>
                                 <Card.Body>
                                 <Card.Text className="text-xl">{userList.length}</Card.Text>
                                 </Card.Body>
                             </Card>
 
-                            <Card className="p-3 text-center w-full max-w-xs md:max-w-xs">
+                            <Card className="p-3 text-center w-full font-roboto max-w-xs md:max-w-xs !bg-gray-50">
                                 <Card.Title className="fw-semibold text-2xl"> {today} Sign Ups</Card.Title>
                                 <Card.Body>
                                 <Card.Text className="text-xl">{monthlySignups}</Card.Text>
                                 </Card.Body>
                             </Card>
 
-                            <Card className="p-3 text-center w-full max-w-xs md:max-w-xs">
+                            <Card className="p-3 text-center w-full font-roboto max-w-xs md:max-w-xs !bg-gray-50">
                                 <Card.Title className="fw-semibold text-2xl ">User Growth Rate</Card.Title>
                                 <Card.Body>
-                                    <Card.Text className="text-xl">{growthLabel} : {growthRate}%</Card.Text>
+                                    <Card.Text className="text-xl">{growthLabel}: {growthRate}%</Card.Text>
                                 </Card.Body>
                             </Card>
                         </div>
