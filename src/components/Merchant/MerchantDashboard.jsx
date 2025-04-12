@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import GeneralNavBar from '../../layout/GeneralNavBar';
 import { useNavigate } from 'react-router-dom';
 import { Spinner } from 'react-bootstrap';
 
@@ -68,7 +67,6 @@ const MerchantDashboard = () => {
   if (loading) {
     return (
       <>
-        <GeneralNavBar userRole="merchant" />
         <div className="container mt-4 d-flex justify-content-center">
           <Spinner animation="border" variant="primary" />
         </div>
@@ -82,7 +80,6 @@ const MerchantDashboard = () => {
 
   return (
     <>
-      <GeneralNavBar userRole="merchant" />
       <div className="container mt-4">
         <h1>Merchant Dashboard</h1>
         <p>This is the Merchant Dashboard content.</p>

@@ -51,29 +51,31 @@ const App = () => {
     {
       path: "/merchantLogin",
       element: <Merchant />,
-      // can add children if need be
+      children: [
+            {
+                index: true,
+                element: <MerchantDashboard />
+            },
+            {
+              path: "manageCoupons",
+              element: <ManageCoupon />,
+            },
+            {
+              path: "addCoupon",
+              element: <AddCoupon />
+            },
+          
+            {
+              path: "merchantFaqs",
+              element: <MerchantFaqs />,
+            },
+            {
+              path: "merchantProfile",
+              element: <MerchantProfile />,
+            },
+        ]
     },
 
-    {
-      path: "/manageCoupons",
-      element: <ManageCoupon />,
-    },
-    {
-      path: "/addCoupon",
-      element: <AddCoupon />
-    },
-    {
-      path: "/merchantDashboard",
-      element: <MerchantDashboard />,
-    },
-    {
-      path: "/merchantFaqs",
-      element: <MerchantFaqs />,
-    },
-    {
-      path: "/merchantProfile",
-      element: <MerchantProfile />,
-    },
 
     // Student routes
     {
@@ -120,9 +122,7 @@ const App = () => {
         {
           path: "adminAddCoupons",
           element: <AdminAddCoupon />,
-
         },
-
         {
           path: "adminManageUsers",
           element: <AdminUserMgt />,

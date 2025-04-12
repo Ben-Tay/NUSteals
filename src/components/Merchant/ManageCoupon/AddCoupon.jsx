@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import { useNavigate, useLocation, data } from 'react-router-dom';
-import GeneralNavBar from '../../../layout/GeneralNavBar';
 import { Row, Col, Button, Form } from 'react-bootstrap';
 import './AddCoupon.css';
 
@@ -106,7 +105,7 @@ const AddCoupon = () => {
         }
         return;
       }
-      navigate('/manageCoupons'); // Redirect after success
+      navigate('/merchantLogin/manageCoupons'); // Redirect after success
     } catch (error) {
       console.error('Error creating coupon:', error);
       alert(error.message || 'Failed to create coupon');
@@ -145,7 +144,7 @@ const AddCoupon = () => {
       alert('Coupon updated successfully!');
       setEditingCoupon(null);
       setShowModal(false);
-      navigate('/manageCoupons'); // Redirect after success
+      navigate('/merchantLogin/manageCoupons'); // Redirect after success
     } catch (error) {
       console.error('Error updating coupon:', error);
       alert('Failed to update coupon');
@@ -168,7 +167,7 @@ const AddCoupon = () => {
       alert('Coupon deleted successfully!');
       setShowDeleteModal(false);
       setCouponToDelete(null);
-      navigate('/manageCoupons'); // Redirect after delete
+      navigate('/merchantLogin/manageCoupons'); // Redirect after delete
     } catch (error) {
       console.error('Error deleting coupon:', error);
       alert('Failed to delete coupon');
@@ -182,7 +181,6 @@ const AddCoupon = () => {
 
   return (
     <>
-      <GeneralNavBar userRole="merchant" />
       <div className="content-wrapper mb-4">
         <h1>{editingCoupon ? 'EDIT COUPON' : 'ADD COUPON'}</h1>
         <br />

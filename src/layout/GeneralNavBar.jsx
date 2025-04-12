@@ -36,22 +36,22 @@ const GeneralNavBar = ({ userRole }) => {
           <>
             <div className="flex justify-content-end">
               <Nav.Item className="flex">
-                <NavLink to="/merchantDashboard" className={linkClass}>
+                <NavLink to="/merchantLogin" className={linkClass} end>
                   Dashboard
                 </NavLink>
               </Nav.Item>
               <Nav.Item className="flex">
-                <NavLink to="/manageCoupons" className={linkClass}>
+                <NavLink to="/merchantLogin/manageCoupons" className={linkClass}>
                   Manage Coupons
                 </NavLink>
               </Nav.Item>
               <Nav.Item className="flex">
-                <NavLink to="/merchantProfile" className={linkClass}>
+                <NavLink to="/merchantLogin/merchantProfile" className={linkClass}>
                   Profile
                 </NavLink>
               </Nav.Item>
               <Nav.Item className="flex">
-                <NavLink to="/merchantFaqs" className={linkClass}>
+                <NavLink to="/merchantLogin/merchantFaqs" className={linkClass}>
                   FAQs
                 </NavLink>
               </Nav.Item>

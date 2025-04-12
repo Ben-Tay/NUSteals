@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react';
-import GeneralNavBar from '../../layout/GeneralNavBar';
 import { Container, Row, Col, Form, Button, Spinner } from 'react-bootstrap';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
@@ -154,7 +153,6 @@ const MerchantProfile = () => {
   if (loading) {
     return (
       <>
-        <GeneralNavBar userRole="merchant" />
         <div className="container mt-4 d-flex justify-content-center">
           <Spinner animation="border" variant="primary" />
         </div>
@@ -168,7 +166,6 @@ const MerchantProfile = () => {
 
   return (
     <>
-      <GeneralNavBar userRole="merchant" />
       <Container className="mt-4 mb-4">
         <h1>Merchant Profile</h1>
         <Row className="mt-3">

@@ -13,7 +13,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Roboto", "sans-serif"],
+        'poppins': ['Poppins', 'sans-serif'],
+        'roboto': ['Roboto', 'sans-serif'],
+        'lora': ['Lora', 'serif'],
       },
       gridTemplateColumns: {
         "70/30": "70% 28%",

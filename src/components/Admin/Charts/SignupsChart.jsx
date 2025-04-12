@@ -59,7 +59,7 @@ const SignupsChart = ({ onGrowthUpdate }) => {
   }, [onGrowthUpdate]);
 
   return (
-    <div className="flex flex-col space-y-24 space-x-0 mt-5 mb-5 md:flex-row md:space-y-0 md: space-x-12">
+    <div className="flex flex-col space-y-24 mt-5 mb-5 md:flex-row md:space-x-24 md:space-y-0">
       <div className="min-w-[500px] max-h-[400px]">
         <h3 className="text-2xl font-bold mb-4 text-center">User Signups by Month</h3>
         <ResponsiveContainer width="100%" height="100%">
