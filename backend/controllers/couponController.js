@@ -67,10 +67,7 @@ const getACouponCode = async (req, res) => {
 
         // Only return the code - no database updates
         res.status(200).json({
-            couponName: coupon.couponName,
             code: randomCode.code,
-            discount: coupon.discount,
-            expiryDate: coupon.expiryDate
         });
 
     } catch (error) {

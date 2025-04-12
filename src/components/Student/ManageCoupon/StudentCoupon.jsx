@@ -26,7 +26,7 @@ const StudentCoupon = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
-  const [selectedCoupon, setSelectedCoupon] = useState([]);
+  const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [coupons, setCoupons] = useState([]);
   const [error, setError] = useState("");
@@ -96,14 +96,14 @@ const StudentCoupon = () => {
           'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
         }
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to get coupon code');
       }
-  
+
       const { code } = await response.json();
-      
+
       // Set the selected coupon with the retrieved code
       setSelectedCoupon({
         ...coupon,
@@ -219,39 +219,66 @@ const StudentCoupon = () => {
                 role="student"
                 onRedeemClick={() => handleRedeemClick(coupon)}
               >
-                
+
               </Coupon>
             ))}
         </div>
 
         {/* Coupon Redemption Modal */}
         {selectedCoupon && (
-          <Modal show={showModal} onHide={() => setShowModal(false)}>
+          <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
             <Modal.Header closeButton>
               <Modal.Title>Coupon Redemption</Modal.Title>
             </Modal.Header>
             <Modal.Body>
+              {/* Coupon Details */}
               <h5>
-                {selectedCoupon.brand} - {selectedCoupon.discount}
+                {selectedCoupon.couponName} - {selectedCoupon.discount}
+                {selectedCoupon.discountType === 'percentage' ? '%' : '$'} off
               </h5>
               <p>{selectedCoupon.description}</p>
-              <p>
-                <strong>Code:</strong> {selectedCoupon.code}
-              </p>
-              <p>
-                <i>Please inform staff to enter the code at checkout.</i>
-              </p>
+
+              {/* Terms & Conditions */}
+              <div className="mt-4 mb-3">
+                <h6 className="text-secondary">Terms & Conditions</h6>
+                <div className="p-3 bg-light rounded border">
+                  <small className="text-muted">
+                    {selectedCoupon.termsConditions || 'No terms and conditions specified.'}
+                  </small>
+                </div>
+              </div>
+
+              {/* Redemption Code */}
+              <div className="mt-4">
+                <h6>Your Redemption Code</h6>
+                <div className="p-3 bg-light rounded border d-flex justify-content-between align-items-center">
+                  <code className="h5 mb-0">{selectedCoupon.code}</code>
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    onClick={() => navigator.clipboard.writeText(selectedCoupon.code)}
+                  >
+                    Copy Code
+                  </Button>
+                </div>
+                <p className="mt-2 text-muted">
+                  <i className="bi bi-info-circle me-2"></i>
+                  Please inform staff to enter the code at checkout.
+                </p>
+              </div>
+
+              {/* Expiry Information */}
+              <div className="mt-3">
+                <small className="text-danger">
+                  Expires: {new Date(selectedCoupon.expiryDate).toLocaleDateString()}
+                </small>
+              </div>
             </Modal.Body>
             <Modal.Footer>
-              <Button
-                variant="primary"
-                onClick={() =>
-                  navigator.clipboard.writeText(selectedCoupon.code)
-                }
-              >
-                Copy Code
-              </Button>
-              <Button variant="secondary" onClick={() => setShowModal(false)}>
+              <Button variant="secondary" onClick={() => {
+                setShowModal(false);
+                setSelectedCoupon(null);
+              }}>
                 Close
               </Button>
             </Modal.Footer>
