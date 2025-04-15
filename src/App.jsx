@@ -14,12 +14,11 @@ import MerchantProfile from "./components/Merchant/MerchantProfile";
 import StudentCoupon from "./components/Student/ManageCoupon/StudentCoupon";
 import StudentCouponHistory from "./components/Student/ManageCoupon/StudentCouponHistory";
 import Admin from "./components/Admin/Admin";
-import AdminDashboard from "./components/Admin/AdminDashboard";
+import AdminDashboardTab from "./components/Admin/AdminDashboardMgt/AdminDashboardTab";
 import AdminCouponMgt from "./components/Admin/AdminManageCoupon/AdminCouponMgt";
 import AdminUserMgt from "./components/Admin/AdminUserMgt";
 import StudentFaqs from "./components/Student/StudentFaqs";
 import StudentProfile from "./components/Student/StudentProfile";
-import AdminManageCoupon from "./components/Admin/AdminManageCoupon/AdminCouponMgt";
 import AdminAddCoupon from "./components/Admin/AdminManageCoupon/AdminAddCoupon";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -112,7 +111,7 @@ const App = () => {
       children: [
         {
           index: true, // the first one that is shown when go to adminLogin
-          element: <AdminDashboard />,
+          element: <AdminDashboardTab />,
         },
         {
           path: "adminManageCoupon",
