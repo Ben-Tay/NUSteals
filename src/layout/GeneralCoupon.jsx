@@ -10,14 +10,18 @@ const Coupon = (props) => {
     coupon,
     onEditClick,
     onRedeemClick, // prop for student redeem function
+    onViewClick,   // new prop for admin view function
   } = props;
+
+  // Debug log (this is fine, but ensure no extra semicolon outside the curly braces)
+  { console.log("role:", role) }
 
   const discountTop =
     coupon.discountType === "flat"
       ? `$${coupon.discount}`
       : coupon.discountType === "percentage"
-      ? `${coupon.discount}%`
-      : null;
+        ? `${coupon.discount}%`
+        : null;
 
   const renderButtons = () => {
     switch (role) {
@@ -27,7 +31,6 @@ const Coupon = (props) => {
             <Button variant="warning" onClick={() => onEditClick(coupon)}>
               Edit Coupon
             </Button>
-
             {coupon.disable ? (
               <Button variant="outline-danger" disabled className="text-center">
                 Disabled
@@ -36,6 +39,20 @@ const Coupon = (props) => {
               <p className="h5 text-center text-muted">
                 Total: {coupon.redeemedNum}/{coupon.totalNum}
               </p>
+            )}
+          </div>
+        );
+      case "admin":
+        // Update this branch if you want admin to respect the disable flag.
+        return (
+          <div className="d-flex flex-column gap-2">
+            <Button variant="primary" onClick={() => onEditClick(coupon)}>
+              View Coupon
+            </Button>
+            {coupon.disable && (
+              <Button variant="outline-danger" disabled className="text-center">
+                Disabled
+              </Button>
             )}
           </div>
         );

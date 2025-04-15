@@ -17,31 +17,31 @@ const generateUniqueCode = (length) => {
 // helper function to save unique codes to a coupon
 const generateAndAddCodes = async (couponId, quantity) => {
 
-        const coupon = await Coupon.findById(couponId);
-        if (!coupon) {
-            throw new Error("Coupon not found");
-        }
+    const coupon = await Coupon.findById(couponId);
+    if (!coupon) {
+        throw new Error("Coupon not found");
+    }
 
-        // generate unique code function
-        const newCodes = [];
-        for (let i = 0; i < quantity; i++) {
-            let code;
-            do {
-                code = generateUniqueCode(8); // generate a unique code of length 8
-            } while (coupon.uniqueCodes.some(c => c.code === code));
+    // generate unique code function
+    const newCodes = [];
+    for (let i = 0; i < quantity; i++) {
+        let code;
+        do {
+            code = generateUniqueCode(8); // generate a unique code of length 8
+        } while (coupon.uniqueCodes.some(c => c.code === code));
 
-            newCodes.push({ 
-                code, 
-                isUsed: false,
-                createdAt: new Date(),
-                usedBy: null,
-                usedAt: null
-             });
-        }
-        // save new codes to the coupon
-        coupon.uniqueCodes.push(...newCodes);
-        await coupon.save();
-        return newCodes; // return the generated codes
+        newCodes.push({
+            code,
+            isUsed: false,
+            createdAt: new Date(),
+            usedBy: null,
+            usedAt: null
+        });
+    }
+    // save new codes to the coupon
+    coupon.uniqueCodes.push(...newCodes);
+    await coupon.save();
+    return newCodes; // return the generated codes
 };
 
 // get a random available coupon code from a coupon
@@ -101,7 +101,7 @@ const redeemCoupon = async (req, res) => {
                 },
                 $inc: { redeemedNum: 1 }
             },
-            { 
+            {
                 new: true,
                 session,
                 runValidators: true
@@ -110,8 +110,8 @@ const redeemCoupon = async (req, res) => {
 
         if (!updatedCoupon) {
             await session.abortTransaction();
-            return res.status(409).json({ 
-                error: "Coupon redemption failed", 
+            return res.status(409).json({
+                error: "Coupon redemption failed",
                 details: "Code may have been taken by someone else or is no longer valid"
             });
         }
@@ -135,9 +135,9 @@ const redeemCoupon = async (req, res) => {
     } catch (error) {
         await session.abortTransaction();
         console.error("Error redeeming coupon:", error);
-        res.status(500).json({ 
-            error: "Redemption failed", 
-            details: error.message 
+        res.status(500).json({
+            error: "Redemption failed",
+            details: error.message
         });
     } finally {
         session.endSession();
@@ -147,7 +147,7 @@ const redeemCoupon = async (req, res) => {
 // Create a single coupon
 const createCoupon = async (req, res) => {
     console.log("Received create coupon request with body:", req.body);
-    const { couponName, discount, discountType, description, termsConditions, category, totalNum, expiryDate, disable } = req.body;
+    const { couponName, discount, discountType, description, termsConditions, category, totalNum, expiryDate, disable, disabledMessage } = req.body;
 
     // Validate input (400 - invalid data)
     if (!couponName || !discount || !description || !discountType || !termsConditions || !category || !totalNum || !expiryDate) {
@@ -178,7 +178,8 @@ const createCoupon = async (req, res) => {
             category,
             totalNum,
             expiryDate,
-            disable
+            disable,
+            disabledMessage
         });
         console.log("New coupon created (before codes):", {
             _id: newCoupon._id,
@@ -190,15 +191,15 @@ const createCoupon = async (req, res) => {
             console.log(`Successfully generated ${generatedCodes.length} codes`);
         } catch (error) {
             console.error('Error generating codes:', error);
-         throw new Error("Error generating codes");
-    }
+            throw new Error("Error generating codes");
+        }
 
         const updatedCoupon = await Coupon.findById(newCoupon._id);
         console.log("Updated coupon with codes:", {
             uniqueCodesCount: updatedCoupon.uniqueCodes.length,
             sampleCode: updatedCoupon.uniqueCodes[0]?.code
         });
-        
+
         // Return safe coupon data 
         res.status(201).json({
             id: updatedCoupon._id,
@@ -209,7 +210,7 @@ const createCoupon = async (req, res) => {
             category: updatedCoupon.category,
             createdAt: updatedCoupon.createdAt,
             disable: updatedCoupon.disable,
-            uniqueCodes: updatedCoupon.uniqueCodes, 
+            uniqueCodes: updatedCoupon.uniqueCodes,
             totalNum: updatedCoupon.totalNum,
             redeemedNum: updatedCoupon.redeemedNum || 0,
         });
@@ -272,9 +273,10 @@ const deleteCoupon = async (req, res) => {
 }
 
 
-// Disable a coupon (toggle)
 const toggleDisableCoupon = async (req, res) => {
     const { id } = req.params;
+    const { disabledMessage } = req.body;
+    console.log("[TOGGLE] Received message:", disabledMessage);
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(404).json({ error: "Invalid couponId" });
@@ -282,17 +284,23 @@ const toggleDisableCoupon = async (req, res) => {
 
     try {
         const coupon = await Coupon.findById(id);
-
         if (!coupon) {
             return res.status(404).json({ error: "Coupon not found" });
         }
 
-        // Toggle the isDisabled field
+        // Toggle the disable field
         coupon.disable = !coupon.disable;
-        console.log("Toggling coupon status:", coupon.disable);
+
+        // Handle the disable message
+        coupon.disabledMessage = disabledMessage || ''; // set message if provided
+
+
         await coupon.save();
 
-        res.status(200).json({ message: `Coupon ${coupon.disable ? 'disabled' : 'enabled'} successfully`, coupon });
+        res.status(200).json({
+            message: `Coupon ${coupon.disable ? 'disabled' : 'enabled'} successfully`,
+            coupon,
+        });
     } catch (error) {
         console.error("Error toggling coupon status:", error);
         res.status(500).json({ error: "Internal server error", details: error.message });
@@ -309,8 +317,8 @@ const editCoupon = async (req, res) => {
     }
 
     const { id } = req.params;
-    const { couponName, discount, description, discountType, termsConditions, category, totalNum: newTotalNum, expiryDate } = req.body;
-    
+    const { couponName, discount, description, discountType, termsConditions, category, totalNum: newTotalNum, expiryDate, disabledMessage } = req.body;
+
     try {
         const coupon = await Coupon.findById(id);
         if (!coupon) {
@@ -327,6 +335,7 @@ const editCoupon = async (req, res) => {
         coupon.expiryDate = expiryDate || coupon.expiryDate;
         // coupon.disable = req.body.disable !== undefined ? req.body.disable : coupon.disable; // toggle disable
         coupon.disable = false; // always set to false after editing
+        coupon.disabledMessage = disabledMessage || coupon.disabledMessage; // update disabled message
 
         // update coupon number of codes
         // if user wants to change total code num
@@ -342,7 +351,7 @@ const editCoupon = async (req, res) => {
 
             // if decrease code count
             if (newTotalNum < currentCodeNum) {
-                const unusedCodes = currentCodes.filter( c => !c.isUsed );
+                const unusedCodes = currentCodes.filter(c => !c.isUsed);
                 const codesToRemove = currentCodeNum - newTotalNum;
 
                 // dont remove used codes, just remove the number of unused codes needed to reduce code count 
@@ -415,14 +424,14 @@ const getAllValidCoupons = async (req, res) => {
 
 
 // Export the coupon handler methods to the routes page
-export { 
-    createCoupon, 
-    getAllCoupons, 
-    getSingleCoupon, 
-    deleteCoupon, 
-    editCoupon, 
-    toggleDisableCoupon, 
-    redeemCoupon, 
-    getACouponCode, 
+export {
+    createCoupon,
+    getAllCoupons,
+    getSingleCoupon,
+    deleteCoupon,
+    editCoupon,
+    toggleDisableCoupon,
+    redeemCoupon,
+    getACouponCode,
     getAllValidCoupons
- }; 
+}; 

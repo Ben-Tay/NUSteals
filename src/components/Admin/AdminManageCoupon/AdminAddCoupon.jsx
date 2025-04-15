@@ -19,6 +19,7 @@ const AdminAddCoupon = () => {
   const [showModal, setShowModal] = useState(false);
   const [couponNameError, setCouponNameError] = useState("");
   const [isDisabled, setIsDisabled] = useState(false); // default to false
+  const [disabledMessage, setDisabledMessage] = useState('');
 
   const standardTemplate = `Standard Terms & Conditions:
 1. Offer valid until the expiry date.
@@ -44,6 +45,8 @@ const AdminAddCoupon = () => {
 
     // Use `disable` from backend
     setIsDisabled(editingCoupon.disable ?? false);
+    setDisabledMessage(editingCoupon.disabledMessage || '');
+
 
     if (editingCoupon.expiryDate) {
       const date = new Date(editingCoupon.expiryDate);
@@ -56,20 +59,26 @@ const AdminAddCoupon = () => {
     if (!editingCoupon || !editingCoupon._id) return;
 
     try {
+      console.log("Sending disable reason:", disabledMessage);
       const response = await fetch(`https://nusteals-express.onrender.com/api/coupons/${editingCoupon._id}/toggle`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          disabledMessage, // include the current value of the reason field
+        }),
       });
 
       if (!response.ok) throw new Error('Toggle failed');
 
       const updated = await response.json();
 
-      // ✅ Backend returns full coupon object in `updated.coupon`
+      //Backend returns full coupon object in `updated.coupon`
       const updatedCoupon = updated.coupon;
 
       setIsDisabled(updatedCoupon.disable);
-      setEditingCoupon(prev => ({ ...prev, disable: updatedCoupon.disable }));
+      setDisabledMessage(updatedCoupon.disabledMessage || '');
+      setEditingCoupon(prev => ({ ...prev, disable: updatedCoupon.disable, disabledMessage: updatedCoupon.disabledMessage }));
+
 
       alert(`Coupon ${updatedCoupon.disable ? 'disabled' : 'enabled'} successfully!`);
     } catch (error) {
@@ -216,8 +225,24 @@ const AdminAddCoupon = () => {
                   onChange={(e) => setExpiryDate(e.target.value)}
                   disabled
                 />
+
+
               </div>
             </Row>
+            {isDisabled && (
+              <Row className="mb-4">
+                <div className="box-orange">
+                  <h2>Reason for Disabling:</h2>
+                  <Form.Control
+                    as="textarea"
+                    rows={2}
+                    placeholder="Enter reason for disabling this coupon"
+                    value={disabledMessage}
+                    onChange={(e) => setDisabledMessage(e.target.value)}
+                  />
+                </div>
+              </Row>
+            )}
           </div>
         </Col>
       </Row>
