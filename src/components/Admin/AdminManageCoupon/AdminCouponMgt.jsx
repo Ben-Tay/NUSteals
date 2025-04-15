@@ -59,13 +59,8 @@ const ManageCoupon = () => {
             <AdminCoupon
               key={coupon._id}
               coupon={coupon}
-              discount={`${coupon.discount}`}
-              discountBottom={coupon.discountType}
-              descriptionHeader={coupon.couponName}
-              description={coupon.description}
-              children="merchant"
+              role="merchant"
               onEditClick={() => handleEditClick(coupon)}
-              disabled={coupon.isDisabled}
               onToggleClick={() => handleEditClick(coupon)}
             />
           ))

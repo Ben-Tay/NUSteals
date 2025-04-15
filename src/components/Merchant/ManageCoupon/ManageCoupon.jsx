@@ -5,17 +5,37 @@ import GeneralCoupon from '../../../layout/GeneralCoupon';
 
 const ManageCoupon = () => {
     const navigate = useNavigate();
-    const [merchantName] = useState('John Doe');
+    const [photo, setPhoto] = useState('');
+    const [merchantName, setMerchantName] = useState('');
     const [loading, setLoading] = useState(true);
     const [coupons, setCoupons] = useState([]);
+    let token = localStorage.getItem('accessToken');
+    let userId = localStorage.getItem('userId');
+    if (!userId && token) {
+        try {
+          const decoded = jwtDecode(token);
+          userId = decoded.uid;
+          localStorage.setItem('userId', userId);
+        } catch (err) {
+          console.error('Error decoding token:', err);
+        }
+    }
+    if (!userId) {
+        navigate('/login');
+        return null;
+    }
+    const API_URL = 'https://nusteals-express.onrender.com';
 
     // SHOW ALL COUPONS
     useEffect(() => {
         const fetchCoupons = async () => {
             try {
-                const response = await fetch("http://localhost:3000/api/coupons", {
+                const response = await fetch(`${API_URL}/api/coupons`, {
                     method: "GET",
-                    credentials: "include",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
                 });
 
                 if (!response.ok) {
@@ -32,16 +52,59 @@ const ManageCoupon = () => {
         };
 
         fetchCoupons();
-    }, []);
+    }, [API_URL, token]);
 
     // GO TO EDIT COUPON
     const handleEditClick = (coupon) => {
-        navigate('/addCoupon', {
+        navigate('/merchantLogin/addCoupon', {
             state: {
                 editingCoupon: coupon
             }
         });
     };
+
+    // FETCH MERCHANT PROFILE
+    useEffect(() => {
+        const fetchProfile = async () => {
+            if (!token || !userId) {
+                console.warn('No token or userId found.');
+                return;
+            }
+            try {
+                const response = await fetch(`${API_URL}/api/users/${userId}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch profile');
+            }
+            const data = await response.json();
+            // Check if the user's role is "merchant"
+            if (data.role !== 'merchant') {
+                alert('Access denied. You do not have permission to view this page.');
+                if (data.role === 'admin') {
+                    navigate('/adminLogin');
+                } else if (data.role === 'student') {
+                    navigate('/studentLogin');
+                } else {
+                    navigate('/login');
+                }
+                return;
+            }
+            setMerchantName(data.name || '');
+            setPhoto(data.photo || '');
+
+        } catch (error) {
+        console.error('Error fetching profile:', error);
+        navigate('/login');
+        } finally {
+        setLoading(false);
+        }
+    };
+        fetchProfile();
+        }, [userId, token, API_URL, navigate]);
 
     return (
         <>
@@ -54,6 +117,19 @@ const ManageCoupon = () => {
                         </Container>
                         <Card className="mb-4" style={{ width: '210px' }}>
                             <Card.Body className="p-4 d-flex flex-column align-items-center justify-content-center">
+                            {photo ? (
+                                <img
+                                    src={photo}
+                                    alt="Profile"
+                                    style={{
+                                    width: '150px',
+                                    height: '150px',
+                                    borderRadius: '50%',
+                                    objectFit: 'cover',
+                                    marginBottom: '1rem',
+                                    }}
+                                    />
+                                ): (
                                 <div
                                     style={{
                                         width: '150px',
@@ -69,8 +145,9 @@ const ManageCoupon = () => {
                                     }}
                                 >
                                     {/* Display first letters or an icon */}
-                                    {merchantName.split(' ').map((part) => part[0]).join('')}
+                                    {merchantName ? merchantName.split(' ').map((part) => part[0]).join('') : ''}
                                 </div>
+                                )}
                             </Card.Body>
                         </Card>
                     </Col>
@@ -88,14 +165,8 @@ const ManageCoupon = () => {
                             coupons.map((coupon) => (
                                 <GeneralCoupon
                                     key={coupon._id}
-                                    discount={`${coupon.discount}`}
-                                    discountBottom={coupon.discountType}
-                                    descriptionHeader={coupon.couponName}
-                                    description={coupon.description}
-                                    redeemedNum={coupon.redeemedNum}
-                                    totalNum={coupon.totalNum}
-                                    disabled={coupon.disable}
-                                    children="merchant"
+                                    coupon = {coupon}
+                                    role="merchant"
                                     onEditClick={() => handleEditClick(coupon)}
                                 />
                             ))

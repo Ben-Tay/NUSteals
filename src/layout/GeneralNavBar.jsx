@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink, Link } from "react-router-dom";
-import Container from "react-bootstrap/Container";
+import { Container, Button } from "react-bootstrap";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
-import { TbLogout } from "react-icons/tb";
+import { TbLogout, TbScan } from "react-icons/tb";
+import QRScannerModal from "./components/QRScannerModal.jsx";
 
 const GeneralNavBar = ({ userRole }) => {
   const linkClass = ({ isActive }) =>
@@ -11,12 +12,43 @@ const GeneralNavBar = ({ userRole }) => {
       ? "text-blue py-3 px-3 no-underline"
       : "text-black py-3 px-3 no-underline";
 
+
+  const apiURL = "https://nusteals-express.onrender.com"; // API URL
+
   const handleLogout = () => {
-     // Clear the access token from localStorage
-     localStorage.removeItem('accessToken');
-     localStorage.removeItem('userId');
-     localStorage.removeItem('userRole');
+    // Clear the access token from localStorage
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userRole');
   }
+
+  const [showScanner, setShowScanner] = useState(false);
+
+  const handleScanComplete = async (data) => {
+    // Handle the scanned QR code data
+    console.log('Scanned data:', data);
+    // Make API call to redeem coupon
+    const response = await fetch(`${apiURL}/api/coupons/redeem`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+      },
+      body: JSON.stringify({
+        code: data.code,
+        studentId: data.studentId,
+        couponId: data.couponId
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to redeem coupon');
+    }
+
+    alert('Coupon redeemed successfully!');
+    setShowScanner(false);
+  };
 
   const renderLinks = () => {
     switch (userRole) {
@@ -46,11 +78,25 @@ const GeneralNavBar = ({ userRole }) => {
                 </NavLink>
               </Nav.Item>
               <Nav.Item className="flex">
-                <NavLink to="/" className={linkClass} style = {{ marginTop: "3px"}} onClick={handleLogout}>
-                    <TbLogout className="mr-3 text-xl" />
+                <Button
+                  variant="link"
+                  className={linkClass}
+                  onClick={() => setShowScanner(true)}
+                >
+                  <TbScan className="mr-2" />
+                </Button>
+              </Nav.Item>
+              <Nav.Item className="flex">
+                <NavLink to="/" className={linkClass} style={{ marginTop: "3px" }} onClick={handleLogout}>
+                  <TbLogout className="mr-3 text-xl" />
                 </NavLink>
               </Nav.Item>
             </div>
+            <QRScannerModal
+              show={showScanner}
+              handleClose={() => setShowScanner(false)}
+              onCodeScanned={handleScanComplete}
+            />
           </>
         );
       // STUDENT NAVBAR
@@ -63,20 +109,20 @@ const GeneralNavBar = ({ userRole }) => {
                   Redeem Coupons
                 </NavLink>
               </Nav.Item>
-              <Nav.Item className="flex"> 
+              <Nav.Item className="flex">
                 <NavLink to="/studentLogin/profile" className={linkClass}>
                   Profile
                 </NavLink>
               </Nav.Item>
-              <Nav.Item className="flex"> 
+              <Nav.Item className="flex">
                 <NavLink to="/studentLogin/faq" className={linkClass}>
                   FAQs
                 </NavLink>
               </Nav.Item>
-              <Nav.Item className="flex"> 
-                  <NavLink to="/" className={linkClass} style = {{ marginTop: "3px"}} onClick={handleLogout}>
-                    <TbLogout className="mr-3 text-xl" />
-                  </NavLink>
+              <Nav.Item className="flex">
+                <NavLink to="/" className={linkClass} style={{ marginTop: "3px" }} onClick={handleLogout}>
+                  <TbLogout className="mr-3 text-xl" />
+                </NavLink>
               </Nav.Item>
             </div>
           </>
@@ -106,11 +152,11 @@ const GeneralNavBar = ({ userRole }) => {
                 >
                   Manage Coupons
                 </NavLink>
-              </Nav.Item> 
-              <Nav.Item className="flex"> 
-                  <NavLink to="/" className={linkClass} style = {{ marginTop: "3px"}} onClick={handleLogout}>
-                    <TbLogout className="mr-3 text-xl" />
-                  </NavLink>
+              </Nav.Item>
+              <Nav.Item className="flex">
+                <NavLink to="/" className={linkClass} style={{ marginTop: "3px" }} onClick={handleLogout}>
+                  <TbLogout className="mr-3 text-xl" />
+                </NavLink>
               </Nav.Item>
             </div>
           </>

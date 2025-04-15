@@ -4,6 +4,8 @@ import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 import { Spinner } from 'react-bootstrap';
 
+const API_URL = "https://nusteals-express.onrender.com"; // Replace with your API URL
+
 const StudentProfile = () => {
   const navigate = useNavigate();
   
@@ -30,7 +32,7 @@ const StudentProfile = () => {
         const decodedToken = jwtDecode(token);
         const userId = decodedToken.uid;
 
-        const response = await fetch(`https://nusteals-express.onrender.com/api/users/${userId}`, {
+        const response = await fetch(`${API_URL}/api/users/${userId}`, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
@@ -84,7 +86,7 @@ const StudentProfile = () => {
     }
   
     try {
-      const response = await fetch(`https://nusteals-express.onrender.com/api/users/${user._id}`, {
+      const response = await fetch(`${API_URL}/api/users/${user._id}`, {
         method: "PATCH",
         headers: {
           'Content-Type': 'application/json',
