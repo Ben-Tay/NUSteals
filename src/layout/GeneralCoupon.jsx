@@ -10,18 +10,20 @@ const Coupon = (props) => {
     coupon,
     onEditClick,
     onRedeemClick, // prop for student redeem function
-    onViewClick,   // new prop for admin view function
+    onViewClick, // new prop for admin view function
   } = props;
 
   // Debug log (this is fine, but ensure no extra semicolon outside the curly braces)
-  { console.log("role:", role) }
+  {
+    console.log("role:", role);
+  }
 
   const discountTop =
     coupon.discountType === "flat"
       ? `$${coupon.discount}`
       : coupon.discountType === "percentage"
-        ? `${coupon.discount}%`
-        : null;
+      ? `${coupon.discount}%`
+      : null;
 
   const renderButtons = () => {
     switch (role) {
@@ -58,13 +60,19 @@ const Coupon = (props) => {
         );
       case "student":
         return (
-          <Button
-            variant="success"
-            onClick={() => onRedeemClick(coupon)}
-            className="w-100"
-          >
-            Redeem
-          </Button>
+          <div className="w-100 text-center">
+            <Button
+              variant="success"
+              onClick={() => onRedeemClick(coupon)}
+              className="w-100 mb-2"
+            >
+              Redeem
+            </Button>
+            <div className="text-muted small">
+              Coupons left: {coupon.totalNum - coupon.redeemedNum}/
+              {coupon.totalNum}
+            </div>
+          </div>
         );
       default:
         return null;
