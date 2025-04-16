@@ -146,7 +146,8 @@ const redeemCoupon = async (req, res) => {
 
 // Create a single coupon
 const createCoupon = async (req, res) => {
-    console.log("Received create coupon request with body:", req.body);
+    console.log("User from token:", req.user);
+    console.log("Request body:", req.body);
     const { couponName, discount, discountType, description, termsConditions, category, totalNum, expiryDate, disable, disabledMessage } = req.body;
 
     // Validate input (400 - invalid data)
@@ -160,6 +161,9 @@ const createCoupon = async (req, res) => {
 
     try {
         const merchant = req.user.uid;
+        if (!req.user?.uid) {
+            return res.status(401).json({ error: "Unauthorized - Missing merchant ID" });
+        }
         console.log("Checking if coupon already exists:", couponName);
 
         // Check if a coupon with the same name already exists

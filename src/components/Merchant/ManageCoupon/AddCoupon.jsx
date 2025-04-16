@@ -67,7 +67,7 @@ const AddCoupon = () => {
     expiryDate: ''
   });
 
-  // VALIDATE ERRORS (keep original implementation)
+  // VALIDATE ERRORS 
   const validateForm = () => {
     const newErrors = {};
     let isValid = true;
@@ -75,7 +75,7 @@ const AddCoupon = () => {
     if (!couponName.trim()) {
       newErrors.couponName = 'Coupon name is required';
       isValid = false;
-    }
+    } 
 
     if (!discount) {
       newErrors.discount = 'Discount value is required';
@@ -125,7 +125,7 @@ const AddCoupon = () => {
     return isValid;
   };
 
-  // Keep original useEffect
+
   useEffect(() => {
     if (editingCoupon) {
       setCouponName(editingCoupon.couponName);
@@ -147,9 +147,9 @@ const AddCoupon = () => {
     }
   }, [editingCoupon]);
 
-  // Keep original handleCreateCoupon
+
   const handleCreateCoupon = async () => {
-    
+    console.log("Current user ID:", userId); 
     if (!userId) {
       alert("Please login first");
       navigate('/login');
@@ -179,6 +179,12 @@ const AddCoupon = () => {
       });
       
       const data = await response.json();
+      if (response.status === 409) {
+        setErrors({
+          couponName: "Coupon name already exists."
+        });
+        return;
+      }
       if (!response.ok) {
         if (data.errors) {
           const validationErrors = {};
@@ -198,7 +204,7 @@ const AddCoupon = () => {
     }
   };
 
-  // Keep original handleSaveChanges
+
   const handleSaveChanges = async () => {
     if (!editingCoupon || !editingCoupon._id) {
       console.error("No coupon ID available for updating");
@@ -237,7 +243,7 @@ const AddCoupon = () => {
     }
   };
 
-  // Keep original delete functionality
+
   const handleCouponDelete = async (couponId) => {
     try {
       const response = await fetch(`${API_URL}/api/coupons/${couponId}`, {
