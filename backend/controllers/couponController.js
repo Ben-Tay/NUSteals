@@ -291,8 +291,13 @@ const toggleDisableCoupon = async (req, res) => {
         // Toggle the disable field
         coupon.disable = !coupon.disable;
 
-        // Handle the disable message
-        coupon.disabledMessage = disabledMessage || ''; // set message if provided
+        if (coupon.disable) {
+            coupon.disabledMessage = disabledMessage || '';
+        } else {
+
+            coupon.disabledMessage = '';
+        }
+
 
 
         await coupon.save();

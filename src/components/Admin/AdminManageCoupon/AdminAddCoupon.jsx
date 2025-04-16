@@ -88,6 +88,7 @@ const AdminAddCoupon = () => {
       setEditingCoupon(prev => ({ ...prev, disable: updatedCoupon.disable, disabledMessage: updatedCoupon.disabledMessage }));
 
 
+
       alert(`Coupon ${updatedCoupon.disable ? 'disabled' : 'enabled'} successfully!`);
     } catch (error) {
       console.error('Error toggling coupon status:', error);
@@ -244,10 +245,18 @@ const AdminAddCoupon = () => {
                   <Form.Control
                     as="textarea"
                     rows={2}
-                    placeholder="Enter reason for disabling this coupon"
                     value={disabledMessage}
-                    onChange={(e) => setDisabledMessage(e.target.value)}
+                    onChange={(e) => {
+                      setDisabledMessage(e.target.value);
+                      setDisabledMessageError('');
+                    }}
+                    isInvalid={!!disabledMessageError}
                   />
+                  {disabledMessageError && (
+                    <Form.Control.Feedback type="invalid">
+                      {disabledMessageError}
+                    </Form.Control.Feedback>
+                  )}
                 </div>
               </Row>
             )}
