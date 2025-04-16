@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Row, Col, Button, Form } from 'react-bootstrap';
+import { jwtDecode } from 'jwt-decode';
 import './AddCoupon.css';
 
 const STANDARD_CATEGORIES = [
@@ -24,6 +25,22 @@ const AddCoupon = () => {
   const location = useLocation();
 
   const API_URL = 'https://nusteals-express.onrender.com';
+
+  let token = localStorage.getItem('accessToken');
+  let userId = localStorage.getItem('userId');
+  if (!userId && token) {
+    try {
+      const decoded = jwtDecode(token);
+      userId = decoded.uid;
+      localStorage.setItem('userId', userId);
+    } catch (err) {
+      console.error('Error decoding token:', err);
+    }
+  }
+  if (!userId) {
+    navigate('/login');
+    return null;
+  }
 
   const [couponName, setCouponName] = useState('');
   const [discount, setDiscount] = useState('');
@@ -132,6 +149,12 @@ const AddCoupon = () => {
 
   // Keep original handleCreateCoupon
   const handleCreateCoupon = async () => {
+    
+    if (!userId) {
+      alert("Please login first");
+      navigate('/login');
+      return;
+  }
     setErrors({});
     if (!validateForm()) return;
 
@@ -139,7 +162,9 @@ const AddCoupon = () => {
       const response = await fetch(`${API_URL}/api/coupons`, {
         method: 'POST',
         credentials: "include",
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+         },
         body: JSON.stringify({
           couponName,
           discount: Number(discount),

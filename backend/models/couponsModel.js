@@ -8,6 +8,8 @@ const couponSchema = new Schema({
 
     discountType: { type: String, enum: ['flat', 'percentage'], required: true },
 
+    merchant: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+
     discount: { type: Number, required: true, min: 0 },
 
     description: { type: String, required: true },

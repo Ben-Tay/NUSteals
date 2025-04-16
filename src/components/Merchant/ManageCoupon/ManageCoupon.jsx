@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Row, Col, Container, Card } from 'react-bootstrap';
+import { jwtDecode } from 'jwt-decode';
 import GeneralCoupon from '../../../layout/GeneralCoupon';
 
 const ManageCoupon = () => {
@@ -30,7 +31,8 @@ const ManageCoupon = () => {
     useEffect(() => {
         const fetchCoupons = async () => {
             try {
-                const response = await fetch(`${API_URL}/api/coupons`, {
+                console.log(`Fetching coupons for merchantId: ${userId}`);
+                const response = await fetch(`${API_URL}/api/coupons/merchant?merchantId=${userId}`, {
                     method: "GET",
                     headers: {
                         'Content-Type': 'application/json',
@@ -52,7 +54,7 @@ const ManageCoupon = () => {
         };
 
         fetchCoupons();
-    }, [API_URL, token]);
+    }, [API_URL, token, userId]);
 
     // GO TO EDIT COUPON
     const handleEditClick = (coupon) => {

@@ -159,6 +159,7 @@ const createCoupon = async (req, res) => {
     }
 
     try {
+        const merchant = req.user.uid;
         console.log("Checking if coupon already exists:", couponName);
 
         // Check if a coupon with the same name already exists
@@ -168,12 +169,14 @@ const createCoupon = async (req, res) => {
         }
 
         console.log("Creating coupon with totalNum:", totalNum);
+        console.log("merchant:", merchant);
 
         const newCoupon = await Coupon.create({
             couponName,
             discount,
             description,
             discountType,
+            merchant,
             termsConditions,
             category,
             totalNum,
@@ -208,6 +211,7 @@ const createCoupon = async (req, res) => {
             description: updatedCoupon.description,
             discountType: updatedCoupon.discountType,
             category: updatedCoupon.category,
+            merchant: updatedCoupon.merchant,
             createdAt: updatedCoupon.createdAt,
             disable: updatedCoupon.disable,
             uniqueCodes: updatedCoupon.uniqueCodes,
@@ -242,10 +246,33 @@ const getSingleCoupon = async (req, res) => {
 
 }
 
-// Get all coupons
+// Get all coupons from all merchants
+// Includes filters
 const getAllCoupons = async (req, res) => {
+    console.log('Received merchantId:', req.query.merchantId);
     try {
-        const allCoupons = await Coupon.find({}).sort({ createdAt: -1 }); // Fetch all coupons from DB from most recent
+        const merchantId = req.user.uid; // From auth middleware
+        const { disabled } = req.query;  // Optional disabled filter
+        console.log("Merchant ID:", merchantId);
+
+        if (!mongoose.Types.ObjectId.isValid(merchantId)) {
+            return res.status(400).json({ error: "Invalid merchant ID" });
+        }
+
+        const filter = {
+            merchant: merchantId
+        };
+        
+        // filter by disabled
+        //GET /api/coupons?disabled=true 
+        // GET /api/coupons?disabled=false
+        if (disabled !== undefined) {
+            filter.disable = disabled === 'true';
+        }
+
+        console.log('Final filter being used:', filter);
+        const allCoupons = await Coupon.find(filter).sort({ createdAt: -1 }); // Fetch all coupons from DB from most recent
+        console.log('Number of coupons found:', allCoupons.length);
         res.status(200).json(allCoupons);
         console.log("First coupon codes:", allCoupons[0]?.uniqueCodes);
     } catch (error) {

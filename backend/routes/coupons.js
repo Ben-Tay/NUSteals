@@ -1,12 +1,13 @@
 import express from 'express';
-import { createCoupon, getAllCoupons, getSingleCoupon, deleteCoupon, editCoupon, toggleDisableCoupon, redeemCoupon, getACouponCode, getAllValidCoupons } from '../controllers/couponController.js';
+import { createCoupon, getAllCoupons, getSingleCoupon, deleteCoupon, editCoupon, toggleDisableCoupon, redeemCoupon, getACouponCode, getAllValidCoupons
+} from '../controllers/couponController.js';
 import { requireAuthJWT } from '../controllers/userController.js';
 import validateCoupon from '../controllers/validateCoupon.js';
 
 const router = express.Router();
 
-// Get all coupons
-router.get('/', getAllCoupons);
+// Get all coupons (includes filter)
+router.get('/merchant', requireAuthJWT, getAllCoupons);
 
 // Get all coupons for a specific user
 router.get('/user/:userId', requireAuthJWT, getAllValidCoupons);
@@ -15,7 +16,7 @@ router.get('/user/:userId', requireAuthJWT, getAllValidCoupons);
 router.get('/:id', getSingleCoupon);
 
 // create a single coupon
-router.post('/', validateCoupon, createCoupon);
+router.post('/', requireAuthJWT, validateCoupon, createCoupon);
 
 // delete a single coupon
 router.delete('/:id', deleteCoupon);
