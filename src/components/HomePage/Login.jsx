@@ -127,6 +127,7 @@ const Login = () => {
         setIsLoading(false);
       }
     }
+    setValidated(true);
   };
 
   return (
@@ -186,7 +187,7 @@ const Login = () => {
                   <Form.Control.Feedback type="invalid">
                         {password.length < 6
                         ? "Password must be at least 6 characters."
-                        : passwordError || "Please enter a valid password"}                  
+                        : passwordError}                  
                   </Form.Control.Feedback>
                  
                   {/* Display Error Message */}
