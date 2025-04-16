@@ -10,7 +10,7 @@ const RedemptionModal = ({
 }) => {
 
     const discount =
-    coupon.discountType === "flat"
+    selectedCoupon.discountType === "flat"
       ? `$${selectedCoupon.discount}`
       : selectedCoupon.discountType === "percentage"
         ? `${selectedCoupon.discount}%`
@@ -31,7 +31,7 @@ const RedemptionModal = ({
             <Modal.Body>
                 {/* Coupon Details */}
                 <h5>
-                    {selectedCoupon.couponName} - ${discount} off
+                    {selectedCoupon.couponName} - {discount} off
                 </h5>
                 <p>{selectedCoupon.description}</p>
 
