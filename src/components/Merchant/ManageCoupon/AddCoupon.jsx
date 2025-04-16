@@ -15,6 +15,9 @@ const STANDARD_CATEGORIES = [
 const AddCoupon = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const API_URL = 'https://nusteals-express.onrender.com';
+
   const [couponName, setCouponName] = useState('');
   const [discount, setDiscount] = useState('');
   const [discountType, setDiscountType] = useState('flat'); // 'flat' or 'percentage'
@@ -93,6 +96,11 @@ const AddCoupon = () => {
       isValid = false;
     }
 
+    if (!category) {
+      newErrors.category = 'Category is required';
+      isValid = false;
+    }
+
     if (category === 'Others' && !customCategory.trim()) {
       newErrors.category = 'Please specify a custom category';
       isValid = false;
@@ -136,8 +144,9 @@ const AddCoupon = () => {
       return;
     } 
     
+    
     try {
-      const response = await fetch('http://localhost:3000/api/coupons', {
+      const response = await fetch(`${API_URL}/api/coupons`, {
         method: 'POST',
         credentials: "include",
         headers: { 'Content-Type': 'application/json' },
@@ -188,7 +197,7 @@ const AddCoupon = () => {
     if (!validateForm()) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/coupons/${editingCoupon._id}`, {
+      const response = await fetch(`${API_URL}/api/coupons/${editingCoupon._id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -218,10 +227,11 @@ const AddCoupon = () => {
     }
   };
 
+
   // DELETE COUPON
   const handleCouponDelete = async (couponId) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/coupons/${couponId}`, {
+      const response = await fetch(`${API_URL}/api/coupons/${couponId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -298,20 +308,21 @@ const AddCoupon = () => {
                       value="percentage"
                       checked={discountType === 'percentage'}
                       onChange={(e) => setDiscountType(e.target.value)}
-                      isInvalid={!!errors.discount}
                     />
-                    {errors.discount && (
-                      <div className="floating-error">
-                        {errors.discount}
-                      </div>
-                    )}
+
                   </Form.Group>
                   <Form.Control
                     type="number"
                     placeholder={discountType === 'flat' ? 'Flat discount amount' : 'Percentage'}
                     value={discount}
                     onChange={(e) => setDiscount(e.target.value)}
-                  />
+                    isInvalid={!!errors.discount}
+                    />
+                    {errors.discount && (
+                      <div className="floating-error">
+                        {errors.discount}
+                      </div>
+                    )}
                 </Form>
               </div>
             </Row>
@@ -420,6 +431,7 @@ const AddCoupon = () => {
                   )}
                 </div>
               </Row>
+
               <Row className="mb-4">
                 <div className="box-orange">
                   <p>Total Number of Coupons:</p>
@@ -436,7 +448,10 @@ const AddCoupon = () => {
                   </div>
                   )}
                   </div>
+                </Row>
                   <br />
+                  <Row className="mb-4">
+                  <div className="box-orange">
                   <p>Expiry Date:</p>
                   <Form.Control
                     type="date"
@@ -449,6 +464,7 @@ const AddCoupon = () => {
                     {errors.expiryDate}
                   </div>
                 )}
+                </div>
               </Row>
             </div>
           </Col>

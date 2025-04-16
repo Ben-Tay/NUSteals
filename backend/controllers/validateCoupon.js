@@ -36,7 +36,7 @@ const validateCoupon = [
     .isInt({ min: 1 }).notEmpty().withMessage('Number of coupons must be a positive integer'),
 
   body('expiryDate')
-    .isISO8601().withMessage('Expiry Date must be a valid date (YYYY-MM-DD)')
+    .isISO8601().withMessage('Expiry Date is required')
 
 ];
 

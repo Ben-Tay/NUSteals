@@ -26,6 +26,9 @@
     margin-top: 5px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     animation: fadeIn 0.3s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
 .floating-error:before {
