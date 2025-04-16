@@ -272,7 +272,6 @@ const deleteCoupon = async (req, res) => {
     res.status(200).json({ message: "Coupon deleted successfully", coupon: deletedCoupon })
 }
 
-
 const toggleDisableCoupon = async (req, res) => {
     const { id } = req.params;
     const { disabledMessage } = req.body;
@@ -288,17 +287,19 @@ const toggleDisableCoupon = async (req, res) => {
             return res.status(404).json({ error: "Coupon not found" });
         }
 
-        // Toggle the disable field
-        coupon.disable = !coupon.disable;
+        const currentlyDisabled = coupon.disable; // store the current state
 
-        if (coupon.disable) {
-            coupon.disabledMessage = disabledMessage || '';
-        } else {
+        // Toggle it
+        coupon.disable = !currentlyDisabled;
+
+        // Set or clear disabledMessage based on what you're doing
+        if (currentlyDisabled) {
 
             coupon.disabledMessage = '';
+        } else {
+            // If it's currently enabled → you're disabling → save the message
+            coupon.disabledMessage = disabledMessage || '';
         }
-
-
 
         await coupon.save();
 

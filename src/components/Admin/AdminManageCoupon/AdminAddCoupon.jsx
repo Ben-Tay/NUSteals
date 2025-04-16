@@ -68,7 +68,7 @@ const AdminAddCoupon = () => {
 
     try {
       console.log("Sending disable reason:", disabledMessage);
-      const response = await fetch(`https://nusteals-express.onrender.com/api/coupons/${editingCoupon._id}/toggle`, {
+      const response = await fetch(`http://localhost:3000/api/coupons/${editingCoupon._id}/toggle`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
