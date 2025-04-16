@@ -68,7 +68,7 @@ const AdminAddCoupon = () => {
 
     try {
       console.log("Sending disable reason:", disabledMessage);
-      const response = await fetch(`https://nusteals-express.onrender.com/api/coupons/${editingCoupon._id}/toggle`, {
+      const response = await fetch(`http://localhost:3000/api/coupons/${editingCoupon._id}/toggle`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -86,6 +86,7 @@ const AdminAddCoupon = () => {
       setIsDisabled(updatedCoupon.disable);
       setDisabledMessage(updatedCoupon.disabledMessage || '');
       setEditingCoupon(prev => ({ ...prev, disable: updatedCoupon.disable, disabledMessage: updatedCoupon.disabledMessage }));
+
 
 
       alert(`Coupon ${updatedCoupon.disable ? 'disabled' : 'enabled'} successfully!`);
@@ -244,10 +245,18 @@ const AdminAddCoupon = () => {
                   <Form.Control
                     as="textarea"
                     rows={2}
-                    placeholder="Enter reason for disabling this coupon"
                     value={disabledMessage}
-                    onChange={(e) => setDisabledMessage(e.target.value)}
+                    onChange={(e) => {
+                      setDisabledMessage(e.target.value);
+                      setDisabledMessageError('');
+                    }}
+                    isInvalid={!!disabledMessageError}
                   />
+                  {disabledMessageError && (
+                    <Form.Control.Feedback type="invalid">
+                      {disabledMessageError}
+                    </Form.Control.Feedback>
+                  )}
                 </div>
               </Row>
             )}
