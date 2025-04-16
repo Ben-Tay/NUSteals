@@ -50,7 +50,7 @@ const ManageCoupon = () => {
         }
 
         const data = await response.json();
-        setCoupons(prev => [...prev, ...data]);
+        setCoupons(data);
       } catch (error) {
         console.error('Error fetching coupons:', error);
       } finally {
@@ -61,7 +61,7 @@ const ManageCoupon = () => {
     fetchCoupons();
   }, [API_URL]);
 
-  // Fetch user profile (allow merchants and admins only)
+  // Fetch user profile
   useEffect(() => {
     const fetchProfile = async () => {
       if (!token || !userId) {
@@ -114,6 +114,25 @@ const ManageCoupon = () => {
   const currentCoupons = coupons.slice(indexOfFirstCoupon, indexOfLastCoupon);
   const totalPages = Math.ceil(coupons.length / couponsPerPage);
 
+  // Limit visible pagination buttons
+  const visiblePageCount = 5;
+  const startPage = Math.max(currentPage - Math.floor(visiblePageCount / 2), 1);
+  const endPage = Math.min(startPage + visiblePageCount - 1, totalPages);
+
+  const paginationButtons = [];
+  for (let i = startPage; i <= endPage; i++) {
+    paginationButtons.push(
+      <Button
+        key={i}
+        variant={i === currentPage ? 'primary' : 'outline-primary'}
+        onClick={() => setCurrentPage(i)}
+        className="mx-1"
+      >
+        {i}
+      </Button>
+    );
+  }
+
   return (
     <div className="content-wrapper mb-4">
       <Container>
@@ -138,18 +157,8 @@ const ManageCoupon = () => {
                   />
                 ))}
 
-                {/* Pagination Controls */}
                 <div className="pagination-controls text-center mt-3">
-                  {Array.from({ length: totalPages }, (_, i) => (
-                    <Button
-                      key={i}
-                      variant={i + 1 === currentPage ? 'primary' : 'outline-primary'}
-                      onClick={() => setCurrentPage(i + 1)}
-                      className="mx-1"
-                    >
-                      {i + 1}
-                    </Button>
-                  ))}
+                  {paginationButtons}
                 </div>
               </>
             )}
