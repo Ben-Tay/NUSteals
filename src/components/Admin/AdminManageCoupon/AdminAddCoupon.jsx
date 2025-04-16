@@ -20,6 +20,7 @@ const AdminAddCoupon = () => {
   const [couponNameError, setCouponNameError] = useState("");
   const [isDisabled, setIsDisabled] = useState(false); // default to false
   const [disabledMessage, setDisabledMessage] = useState('');
+  const [disabledMessageError, setDisabledMessageError] = useState('');
 
   const standardTemplate = `Standard Terms & Conditions:
 1. Offer valid until the expiry date.
@@ -57,6 +58,13 @@ const AdminAddCoupon = () => {
 
   const handleToggleDisable = async () => {
     if (!editingCoupon || !editingCoupon._id) return;
+
+    if (!isDisabled && disabledMessage.trim() === '') {
+      setDisabledMessageError('Reason is required when disabling.');
+      return;
+    } else {
+      setDisabledMessageError('');
+    }
 
     try {
       console.log("Sending disable reason:", disabledMessage);
