@@ -229,7 +229,7 @@ const AdminAddCoupon = () => {
 
               </div>
             </Row>
-            {isDisabled && (
+            {!isDisabled && (
               <Row className="mb-4">
                 <div className="box-orange">
                   <h2>Reason for Disabling:</h2>

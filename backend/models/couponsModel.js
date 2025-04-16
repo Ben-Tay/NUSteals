@@ -24,7 +24,7 @@ const couponSchema = new Schema({
 
     disable: { type: Boolean, default: false },
 
-    disabledMessage: { type: String }, // Message to be sent to the user
+    disabledMessage: { type: String, required: true }, // Message to be sent to the user
 
     uniqueCodes: [{
         code: { type: String, unique: true },
