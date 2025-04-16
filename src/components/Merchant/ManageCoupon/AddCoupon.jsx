@@ -249,7 +249,7 @@ const AddCoupon = () => {
         <Col>
           {/* Coupon Name */}
           <div className="box-orange mb-4">
-            <h3>Coupon Name:</h3>
+            <h4>Coupon Name:</h4>
             <Form.Control
               type="text"
               placeholder="Enter coupon name"
@@ -266,7 +266,7 @@ const AddCoupon = () => {
 
           {/* Discount */}
           <div className="box-orange mb-4">
-            <h3>DISCOUNT:</h3>
+            <h4>DISCOUNT:</h4>
             <Form.Group className="mb-3">
               <Form.Check
                 inline
@@ -305,7 +305,7 @@ const AddCoupon = () => {
 
           {/* Description */}
           <div className="box-orange mb-4">
-            <h3>DESCRIPTION:</h3>
+            <h4>DESCRIPTION:</h4>
             <Form.Control
               as="textarea"
               rows={3}
@@ -323,7 +323,7 @@ const AddCoupon = () => {
 
           {/* Terms & Conditions */}
           <div className="box-orange mb-4">
-            <h3>TERMS & CONDITIONS:</h3>
+            <h4>TERMS & CONDITIONS:</h4>
             <Form.Control
               as="textarea"
               rows={3}
@@ -349,7 +349,7 @@ const AddCoupon = () => {
 
           {/* Category */}
           <div className="box-orange mb-4">
-            <h3>CATEGORY:</h3>
+            <h4>CATEGORY:</h4>
             <Form.Select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -379,7 +379,7 @@ const AddCoupon = () => {
 
           {/* Total Coupons */}
           <div className="box-orange mb-4">
-            <h3>TOTAL NUMBER OF COUPONS:</h3>
+            <h4>TOTAL NUMBER OF COUPONS:</h4>
             <Form.Control
               type="number"
               placeholder="Enter total coupons"
@@ -396,7 +396,7 @@ const AddCoupon = () => {
 
           {/* Expiry Date */}
           <div className="box-orange mb-4">
-            <h3>EXPIRY DATE:</h3>
+            <h4>EXPIRY DATE:</h4>
             <Form.Control
               type="date"
               value={expiryDate}
