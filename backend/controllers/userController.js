@@ -95,11 +95,16 @@ const getUserByLogin = async(req, res) => {
     const { email, password} = req.body; // Get email and password from req body
     
     if (!email || !password) {
-        return res.status(400).json({error: "Email and password are required"});
+        return res.status(400).json({message: "Email and password are required"});
     }
 
     try {
         const foundUser = await users.findOne({ email }) // Find user by email
+
+        if (!foundUser) {
+            return res.status(404).json({ message: "User not found"})
+        }
+
         if (foundUser && foundUser.password === password) {
             // handle authentication to sign on found User's id
             const userDetails = { uid: foundUser._id} 
@@ -107,7 +112,7 @@ const getUserByLogin = async(req, res) => {
             res.status(200).json({accessToken}); // return user data if credentials correct
         }
         else {
-            return res.status(401).json({ message: "Invalid login credentials"});
+            return res.status(409).json({ message: "Password Mismatch"});
         }
 
         

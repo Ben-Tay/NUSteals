@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import GeneralNavBar from '../../layout/GeneralNavBar';
 import Form from 'react-bootstrap/Form';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +13,8 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [validated, setValidated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -29,6 +31,10 @@ const Login = () => {
     if (form.checkValidity() === false) {
       event.stopPropagation();
     } else {
+
+      setError('');
+      setEmailError('');
+      setPasswordError('');
       setIsLoading(true); // Show the spinner while loading
 
       try {
@@ -45,13 +51,26 @@ const Login = () => {
            credentials: 'include', // Allow sending cookies or tokens
         });
 
+        const status = response.status;
         // Handle internal server error
         if (!response.ok) {
-          const errorData = await response.json();
-          console.error('Error during login:', errorData);
-          setError(errorData.message || 'Unable to fetch users');
+            const errorData = await response.json();
+            switch(status) {
+              case 400:
+                  setError(errorData.message || 'Unable to fetch users');
+                  setValidated(true);
+                  break;
+              case 404:
+                  setEmailError(errorData.message);
+                  setValidated(true);
+                  break;
+              case 409:
+                  setPasswordError(errorData.message);
+                  setValidated(true);
+                  break;
+            }
           setIsLoading(false);
-          return;
+          throw new Error(errorData.message);
         }
 
         const data = await response.json(); // Get acces token
@@ -69,6 +88,7 @@ const Login = () => {
         localStorage.setItem('userId', userId);
 
         const token = localStorage.getItem('accessToken');
+        console.log("token=" + token);
         const findUser = await fetch(`https://nusteals-express.onrender.com/api/users/${userId}`, {
             headers: {
               "Content-Type": "application/json",
@@ -76,6 +96,7 @@ const Login = () => {
             },
             method: "GET",
         });
+        console.log("fu=" + findUser);
 
         if (!findUser.ok) {
           // Handle error response (e.g., user not found, server error)
@@ -102,12 +123,10 @@ const Login = () => {
 
         setIsLoading(false); // Hide loading spinner after processing everything
       } catch (error) {
-        console.error('Error during login:', error);
-        setError(error.message || 'An unexpected error occurred while trying to log in.');
+        console.log(error);
         setIsLoading(false);
       }
     }
-    setValidated(true); // Set validated to true for form feedback
   };
 
   return (
@@ -134,9 +153,10 @@ const Login = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    isInvalid={validated && !!emailError}
                   />
                   <Form.Control.Feedback type="invalid">
-                    Please enter a correct email address
+                    { emailError || "Please enter a correct email address"}
                   </Form.Control.Feedback>
     
                   <div class="flex justify-content-between">
@@ -158,13 +178,15 @@ const Login = () => {
                       placeholder="********"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      isInvalid={password.length < 6}
+                      isInvalid={validated && (password.length < 6 || !!passwordError)}                      
                       minLength={6}
                       required
                       autoComplete="new-password"
                     />
                   <Form.Control.Feedback type="invalid">
-                    {password.length < 6 ? "Password must be at least 6 characters long" : "Please enter a valid password"}
+                        {password.length < 6
+                        ? "Password must be at least 6 characters."
+                        : passwordError || "Please enter a valid password"}                  
                   </Form.Control.Feedback>
                  
                   {/* Display Error Message */}
