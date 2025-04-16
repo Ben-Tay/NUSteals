@@ -324,7 +324,7 @@ const StudentCoupon = () => {
 
         {/* Pagination Controls */}
         {sortedCoupons.length > 0 && (
-          <div className="d-flex justify-content-center mt-4">
+          <div className="d-flex justify-content-center mt-4 mb-4">
             <Button
               className="pagination-button me-2 px-4"
               disabled={currentPage === 1}
