@@ -1,0 +1,15 @@
+const validateImageSize = (req, res, next) => {
+    if (req.method === 'PATCH' && req.path.includes('/api/users/') && req.body.photo) {
+        const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+        
+        if (req.body.photo.length > MAX_IMAGE_SIZE) {
+            return res.status(413).json({
+                message: 'Image size exceeds 5MB limit. Please upload a smaller image.'
+            });
+        }
+    }
+    next();
+};
+
+
+export default validateImageSize;

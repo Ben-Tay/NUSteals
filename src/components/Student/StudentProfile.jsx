@@ -129,7 +129,7 @@ const StudentProfile = () => {
   }
 
   if (error) {
-    return <div className="text-danger">{error}</div>;
+    alert(error);
   }
 
   return (
@@ -177,9 +177,6 @@ const StudentProfile = () => {
 
       {/* Update Button */}
       <button onClick={handleUpdateProfile}>Update Profile</button>
-
-      {/* Display any error messages */}
-      {error && <div className="error-message">{error}</div>}
     </div>
   );
 };
