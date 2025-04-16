@@ -67,3 +67,23 @@
 .off {
   color: #ff8c39;
 }
+
+/* Pagination button styles with overrides */
+.pagination-button {
+  color: #ff8c39 !important;
+  border: 1px solid #ff8c39 !important;
+  background-color: white !important;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.pagination-button:hover {
+  background-color: #ff8c39 !important;
+  color: white !important;
+  border-color: #ff8c39 !important;
+}
+
+.pagination-button:disabled {
+  background-color: #ffe0c2 !important;
+  color: #888 !important;
+  border-color: #ffc18f !important;
+}

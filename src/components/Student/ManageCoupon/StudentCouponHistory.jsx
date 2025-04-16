@@ -1,13 +1,13 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import { Row, Col, Button, Form, Modal, Spinner } from "react-bootstrap";
 import { NavLink, useNavigate } from "react-router-dom"; // Import NavLink for navigation
 import { jwtDecode } from "jwt-decode"; // Import jwtDecode for decoding JWT tokens
 import "./ManageCoupon.css"; // Reuse styles from ManageCoupon.css
 import Coupon from "../../../layout/GeneralCoupon"; // Import general coupon template
 import StudentCouponNavbar from "../../../layout/StudentCouponNavbar";
+import { BiSolidLeftArrow, BiSolidRightArrow } from "react-icons/bi";
 
 const apiURL = "https://nusteals-express.onrender.com"; // API URL
-
 
 const StudentCoupon = () => {
   const navigate = useNavigate(); // Initialize navigate function
@@ -20,6 +20,13 @@ const StudentCoupon = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState("recent");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // Reset page when filters or search are changed
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, discountTypeFilter, sortBy]);
 
   // Sorting
   const sortCoupons = (coupons, sortType) => {
@@ -35,14 +42,18 @@ const StudentCoupon = () => {
         });
 
       case "popular":
-        return [...coupons].sort((a, b) =>
-          // Fix syntax error in comparison
-          (b?.redeemedNum || 0) - (a?.redeemedNum || 0)
+        return [...coupons].sort(
+          (a, b) =>
+            // Fix syntax error in comparison
+            (b?.redeemedNum || 0) - (a?.redeemedNum || 0)
         );
 
       case "percentageHigh":
         return [...coupons].sort((a, b) => {
-          if (a?.discountType === "percentage" && b?.discountType === "percentage") {
+          if (
+            a?.discountType === "percentage" &&
+            b?.discountType === "percentage"
+          ) {
             // Fix syntax error in comparison
             return (b?.discount || 0) - (a?.discount || 0);
           }
@@ -92,15 +103,12 @@ const StudentCoupon = () => {
         }
 
         // Filter for coupns redeemed by logged in user then cache them
-        const couponData = await response.json()
-        const usedCoupons = couponData.filter(coupon =>
-          coupon.uniqueCodes?.some(code =>
-            code.usedBy === userId
-          )
+        const couponData = await response.json();
+        const usedCoupons = couponData.filter((coupon) =>
+          coupon.uniqueCodes?.some((code) => code.usedBy === userId)
         );
         setCoupons(usedCoupons);
         setIsLoading(false);
-
       } catch (err) {
         console.error("Error fetching coupon data:", err);
         setError("Failed to fetch coupon data");
@@ -126,16 +134,23 @@ const StudentCoupon = () => {
   const filteredCoupons = coupons.filter((coupon) => {
     if (!coupon) return false;
 
-    const matchesSearch = coupon?.description?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+    const matchesSearch =
+      coupon?.description?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
       coupon?.couponName?.toLowerCase()?.includes(searchTerm.toLowerCase());
 
     const matchesDiscountType =
       discountTypeFilter === "all" ||
-    coupon?.discountType?.toLowerCase() === discountTypeFilter.toLowerCase();
+      coupon?.discountType?.toLowerCase() === discountTypeFilter.toLowerCase();
 
     return matchesSearch && matchesDiscountType;
   });
 
+  const sortedCoupons = sortCoupons(filteredCoupons, sortBy);
+  const totalPages = Math.ceil(sortedCoupons.length / itemsPerPage);
+  const paginatedCoupons = sortedCoupons.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   // Render loading spinner
   if (isLoading) {
@@ -161,7 +176,6 @@ const StudentCoupon = () => {
         <Row className="mb-3 align-items-center">
           <StudentCouponNavbar />
           <Col xs={9}>
-
             {/* Search Bar */}
             <Form.Control
               type="text"
@@ -244,26 +258,42 @@ const StudentCoupon = () => {
 
         {/* Coupons List */}
         <div className="coupon-list">
-          {coupons.length === 0 ? (
+          {paginatedCoupons.length === 0 ? (
             <div className="text-center text-muted my-5">
-              <h4>
-                No coupons redeemed yet. Check back later!
-              </h4>
+              <h4>No coupons redeemed yet. Check back later!</h4>
             </div>
           ) : (
-            sortCoupons(
-              // Replace this filter with filteredCoupons
-              filteredCoupons,
-              sortBy
-            ).map((coupon) => (
-              <Coupon
-                key={coupon._id}
-                brandName="Unknown"
-                coupon={coupon}
-              />
+            paginatedCoupons.map((coupon) => (
+              <Coupon key={coupon._id} brandName="Unknown" coupon={coupon} />
             ))
           )}
         </div>
+        {/* Pagination Controls */}
+        {sortedCoupons.length > 0 && (
+          <div className="d-flex justify-content-center mt-4">
+            <Button
+              className="pagination-button me-2 px-4"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            >
+              <BiSolidLeftArrow className="me-2" /> Prev
+            </Button>
+
+            <span className="align-self-center mx-3">
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <Button
+              className="pagination-button ms-2 px-4"
+              disabled={currentPage === totalPages}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+            >
+              Next <BiSolidRightArrow className="ms-2" />
+            </Button>
+          </div>
+        )}
       </div>
     </>
   );
