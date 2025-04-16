@@ -9,6 +9,13 @@ const RedemptionModal = ({
     userId 
 }) => {
 
+    const discount =
+    coupon.discountType === "flat"
+      ? `$${selectedCoupon.discount}`
+      : selectedCoupon.discountType === "percentage"
+        ? `${selectedCoupon.discount}%`
+        : null;
+
     // Create QR code data object
     const qrData = JSON.stringify({
         code: selectedCoupon.code,
@@ -24,8 +31,7 @@ const RedemptionModal = ({
             <Modal.Body>
                 {/* Coupon Details */}
                 <h5>
-                    {selectedCoupon.couponName} - {selectedCoupon.discount}
-                    {selectedCoupon.discountType === 'percentage' ? '%' : '$'} off
+                    {selectedCoupon.couponName} - ${discount} off
                 </h5>
                 <p>{selectedCoupon.description}</p>
 
