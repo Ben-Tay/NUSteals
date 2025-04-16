@@ -3,7 +3,6 @@ import { createUser, getUserByLogin, getAllUsers, getSingleUser,
          deleteUser, editUser, resetPassword, getUserSignUps, requireAuthJWT} from '../controllers/userController.js';
 
 import validateUser from '../controllers/validateUser';
-import validateImageSize from '../controllers/validateImageSize';
 
 const router = express.Router();
 
@@ -29,7 +28,7 @@ router.post('/reset', resetPassword)
 router.delete('/:id', requireAuthJWT,  deleteUser)
 
 // Edit a user profile based on parameters
-router.patch('/:id', validateImageSize, validateUser, editUser);
+router.patch('/:id', validateUser, editUser);
 
 
 export default router;

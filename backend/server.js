@@ -19,8 +19,6 @@ app.use(cors({
     credentials: true, // Allow credentials (cookies, tokens, etc.)
 }));
 
-
-
 // allow us to access req body for post and edit requests in json format
 app.use(express.json());
 // 1.Log endpoint requests
@@ -40,6 +38,15 @@ dotenv.config({ path: path.resolve('backend', '.env') });
 app.use('/api/users', userRoutes); // add authentication 
 app.use('/api/coupons', couponRoutes);
 
+// Middleware to handle requests with large payloads
+app.use((err, req, res, next) => {
+    if (err.type === 'entity.too.large') {
+        return res.status(413).json({
+            message: 'Image size is too large. Please upload a smaller image.'
+        });
+    }
+});
+
 // connect to db
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
@@ -47,7 +54,7 @@ mongoose.connect(process.env.MONGO_URI)
         app.listen(process.env.PORT, () => {
             console.log("Connected to db + Listening on port " + process.env.PORT);
 
-            
+
         })
     })
     .catch((error) => {
