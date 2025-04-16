@@ -3,7 +3,6 @@ import { Container, Table, Form, Button, Modal } from "react-bootstrap";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 
-
 const AdminUserMgt = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,6 +14,10 @@ const AdminUserMgt = () => {
   const [emailError, setEmailError] = useState("");
   const [nameError, setNameError] = useState("");
   const [authToken, setAuthToken] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 5;
+  const visiblePageCount = 5;
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,8 +26,9 @@ const AdminUserMgt = () => {
       setAuthToken(token);
       if (!token) {
         navigate('/login');
+        return;
       }
-    
+
       try {
         const response = await fetch("https://nusteals-express.onrender.com/api/users", {
           headers: {
@@ -46,7 +50,6 @@ const AdminUserMgt = () => {
       } finally {
         setLoading(false);
       }
-      
     };
 
     fetchUsers();
@@ -56,7 +59,6 @@ const AdminUserMgt = () => {
     if (!editingUser) return;
 
     try {
-      // Check for duplicate name or email
       const existingUser = users.find(
         (user) =>
           (user.name === editingUser.name && user._id !== editingUser._id) ||
@@ -73,7 +75,6 @@ const AdminUserMgt = () => {
         return;
       }
 
-      // Proceed with saving the changes if no duplicates
       const response = await fetch(
         `https://nusteals-express.onrender.com/api/users/${editingUser._id}`,
         {
@@ -104,8 +105,8 @@ const AdminUserMgt = () => {
       );
 
       setShowModal(false);
-      setEmailError(""); // Reset error on success
-      setNameError(""); // Reset error on success
+      setEmailError("");
+      setNameError("");
     } catch (error) {
       console.error("Error updating user:", error);
     }
@@ -114,16 +115,16 @@ const AdminUserMgt = () => {
   const handleEditClick = (user) => {
     setEditingUser({ ...user });
     setShowModal(true);
-    setEmailError(""); // Reset email error on edit
-    setNameError(""); // Reset name error on edit
+    setEmailError("");
+    setNameError("");
   };
 
   const handleUserDelete = async (userId) => {
     try {
       const response = await fetch(`https://nusteals-express.onrender.com/api/users/${userId}`, {
         method: "DELETE",
-        headers: { 
-          "Content-Type": "application/json",             
+        headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${authToken}`,
         },
         credentials: "include",
@@ -148,10 +149,19 @@ const AdminUserMgt = () => {
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value.toLowerCase());
+    setCurrentPage(1); // reset to page 1 on search
   };
 
   const filteredUsers = users.filter((user) =>
     user.name.toLowerCase().includes(searchQuery)
+  );
+
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const startPage = Math.max(currentPage - Math.floor(visiblePageCount / 2), 1);
+  const endPage = Math.min(startPage + visiblePageCount - 1, totalPages);
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * usersPerPage,
+    currentPage * usersPerPage
   );
 
   return (
@@ -180,12 +190,12 @@ const AdminUserMgt = () => {
             <tr>
               <td colSpan="5">Loading...</td>
             </tr>
-          ) : filteredUsers.length === 0 ? (
+          ) : paginatedUsers.length === 0 ? (
             <tr>
               <td colSpan="5">No users found</td>
             </tr>
           ) : (
-            filteredUsers.map((user) => (
+            paginatedUsers.map((user) => (
               <tr key={user._id}>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
@@ -213,6 +223,21 @@ const AdminUserMgt = () => {
           )}
         </tbody>
       </Table>
+
+      {totalPages > 1 && (
+        <div className="text-center mt-3">
+          {Array.from({ length: endPage - startPage + 1 }, (_, i) => (
+            <Button
+              key={startPage + i}
+              variant={currentPage === startPage + i ? "primary" : "outline-primary"}
+              onClick={() => setCurrentPage(startPage + i)}
+              className="mx-1"
+            >
+              {startPage + i}
+            </Button>
+          ))}
+        </div>
+      )}
 
       {/* Edit User Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
