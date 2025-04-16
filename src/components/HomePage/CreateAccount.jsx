@@ -122,7 +122,7 @@ const CreateAccount = () => {
                 <Form.Group className="mb-3" controlId="formPassword">
                   <Form.Label>Password</Form.Label>
                   <Form.Control
-                    type="password"
+                    type="text"
                     placeholder="Enter password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}

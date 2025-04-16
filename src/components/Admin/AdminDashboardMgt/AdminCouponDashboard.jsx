@@ -96,7 +96,7 @@ const AdminCouponDashboard = ({today}) => {
                         </div>
                         <div className="w-full md:w-1/2">                            
                             <h3 className="text-2xl font-bold mb-2 text-center space-y-8 mb-4 md:mt-0 md: space-y-0">
-                                Top 5 Redeemed Coupons By Category
+                                Top Coupon Categories by Redemptions                            
                             </h3>
 
                             <div className="w-[100%] max-w-[800px] mx-auto">
