@@ -43,7 +43,8 @@ const GeneralNavBar = ({ userRole }) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to redeem coupon");
+      alert(errorData.details);
+      return;
     }
 
     alert("Coupon redeemed successfully!");

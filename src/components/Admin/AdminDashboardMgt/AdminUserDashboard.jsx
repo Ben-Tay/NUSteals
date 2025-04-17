@@ -1,10 +1,10 @@
-import React , {useEffect, useState} from 'react'
+import React, { useEffect, useState } from 'react'
 import Card from 'react-bootstrap/Card';
 import { Row, Spinner } from 'react-bootstrap';
 import SignupsChart from '../Charts/SignupsChart';
 import moment from 'moment';
 
-const AdminUserDashboard = ({today}) => {
+const AdminUserDashboard = ({ today, api }) => {
     const [userList, setUserList] = useState([]);
     const [monthlySignups, setMonthlySignups] = useState(0);
     const [growthRate, setGrowthRate] = useState(0);
@@ -25,9 +25,9 @@ const AdminUserDashboard = ({today}) => {
 
             try {
 
-            
+
                 // Fetch all users
-                const allUsersRes = await fetch(`https://nusteals-express.onrender.com/api/users`, {
+                const allUsersRes = await fetch(`${api}/api/users`, {
                     headers: {
                         "Content-Type": "application/json",
                     }
@@ -42,43 +42,43 @@ const AdminUserDashboard = ({today}) => {
 
                 const allUsers = await allUsersRes.json();
                 setUserList(allUsers); //
-            } catch(err) {
+            } catch (err) {
                 console.error('Error')
             } finally {
                 setIsLoading(false); // Hide loading spinner after data fetch is done
             }
-    }
-    fetchUserList();
-
-}, []);
-
-useEffect(() => {
-    const fetchData = async() => {
-
-
-        try {
-            const getSignUps = await fetch(`https://nusteals-express.onrender.com/api/users/user-signups?year=${year}&month=${month}`, {
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                method: "GET"
-                
-            });
-            const data = await getSignUps.json();
-
-            if (data.length > 0) {
-                setMonthlySignups(data[0].count); // we expect a single result
-            } else {
-                setMonthlySignups(0); // no signups
-            }
-        } catch (err) {
-            console.error('Error fetching signups:', err);
-            setMonthlySignups(0);
         }
-    }
+        fetchUserList();
 
-    fetchData();
-}, [])
+    }, []);
+
+    useEffect(() => {
+        const fetchData = async () => {
+
+
+            try {
+                const getSignUps = await fetch(`${api}/api/users/user-signups?year=${year}&month=${month}`, {
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    method: "GET"
+
+                });
+                const data = await getSignUps.json();
+
+                if (data.length > 0) {
+                    setMonthlySignups(data[0].count); // we expect a single result
+                } else {
+                    setMonthlySignups(0); // no signups
+                }
+            } catch (err) {
+                console.error('Error fetching signups:', err);
+                setMonthlySignups(0);
+            }
+        }
+
+        fetchData();
+    }, [])
 
 
     return (
@@ -90,14 +90,14 @@ useEffect(() => {
                         <Card className="p-3 text-center w-full font-roboto max-w-s md:max-w-md !bg-gray-50">
                             <Card.Title className="fw-semibold text-2xl !text-blue-700">Total Users</Card.Title>
                             <Card.Body>
-                            <Card.Text className="text-xl !text-orange-600">{userList.length}</Card.Text>
+                                <Card.Text className="text-xl !text-orange-600">{userList.length}</Card.Text>
                             </Card.Body>
                         </Card>
 
                         <Card className="p-3 text-center w-full font-roboto max-w-s md:max-w-md !bg-gray-50">
                             <Card.Title className="fw-semibold text-2xl !text-blue-700"> {today} Sign Ups</Card.Title>
                             <Card.Body>
-                            <Card.Text className="text-xl !text-orange-600">{monthlySignups}</Card.Text>
+                                <Card.Text className="text-xl !text-orange-600">{monthlySignups}</Card.Text>
                             </Card.Body>
                         </Card>
 
@@ -111,7 +111,7 @@ useEffect(() => {
                 </Row>
 
                 <Row>
-                    <SignupsChart onGrowthUpdate={handleGrowthUpdate} />                            
+                    <SignupsChart onGrowthUpdate={handleGrowthUpdate} />
                 </Row>
             </Card.Body>
         </>
