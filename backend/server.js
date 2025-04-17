@@ -14,7 +14,7 @@ const app = express();
 // This must come before other middleware
 const allowedOrigins = [
     'http://localhost:5173',                    // for local dev
-    'https://nus-steals.vercel.app/'            // ✅ new live frontend
+    'https://nus-steals.vercel.app'            // ✅ new live frontend
 ];
 
 app.use(cors({
