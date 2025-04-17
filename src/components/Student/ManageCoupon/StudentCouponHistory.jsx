@@ -5,7 +5,7 @@ import "./ManageCoupon.css"; // Reuse styles from ManageCoupon.css
 import Coupon from "../../../layout/GeneralCoupon"; // Import general coupon template
 import StudentCouponNavbar from "../../../layout/StudentCouponNavbar";
 import { BiSolidLeftArrow, BiSolidRightArrow } from "react-icons/bi";
-import FilterDropdown from '../components/FilterDropdown';
+import FilterDropdown from "../components/FilterDropdown";
 
 const apiURL = "https://nusteals-express.onrender.com"; // API URL
 
@@ -29,8 +29,12 @@ const StudentCouponHistory = () => {
 
   // Extract unique brands and categories
   const extractFilters = (couponData) => {
-    const brands = [...new Set(couponData.map(coupon => coupon.merchant?.name))].sort();
-    const categories = [...new Set(couponData.map(coupon => coupon.category))].sort();
+    const brands = [
+      ...new Set(couponData.map((coupon) => coupon.merchant?.name)),
+    ].sort();
+    const categories = [
+      ...new Set(couponData.map((coupon) => coupon.category)),
+    ].sort();
     setAvailableBrands(brands);
     setAvailableCategories(categories);
   };
@@ -38,21 +42,32 @@ const StudentCouponHistory = () => {
   useEffect(() => {
     const fetchCoupons = async () => {
       try {
-        // Fetch token from local storage and decode it to get logged in user ID
+        // Fetch token from local storage and check if user is logged in
         const token = localStorage.getItem("accessToken");
         if (!token) {
           navigate("/login");
           return;
         }
 
+        const role = localStorage.getItem("userRole");
+
+        if (role === "admin") {
+          navigate("/adminLogin");
+        } else if (role === "merchant") {
+          navigate("/merchantLogin");
+        }
+
         // Fetch coupons from the API
-        const response = await fetch(`${apiURL}/api/coupons/student?type=history`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          method: "GET",
-        });
+        const response = await fetch(
+          `${apiURL}/api/coupons/student?type=history`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            method: "GET",
+          }
+        );
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -82,7 +97,7 @@ const StudentCouponHistory = () => {
     discountType = discountTypeFilter,
     brands = selectedBrands,
     categories = selectedCategories,
-    search = searchTerm
+    search = searchTerm,
   }) => {
     setDiscountTypeFilter(discountType);
     setSelectedBrands(brands);
@@ -104,7 +119,7 @@ const StudentCouponHistory = () => {
   // Handle brand filter change
   const handleBrandChange = (brand) => {
     const updatedBrands = selectedBrands.includes(brand)
-      ? selectedBrands.filter(b => b !== brand)
+      ? selectedBrands.filter((b) => b !== brand)
       : [...selectedBrands, brand];
     handleFilterChange({ brands: updatedBrands });
   };
@@ -112,7 +127,7 @@ const StudentCouponHistory = () => {
   // Handle category filter change
   const handleCategoryChange = (category) => {
     const updatedCategories = selectedCategories.includes(category)
-      ? selectedCategories.filter(c => c !== category)
+      ? selectedCategories.filter((c) => c !== category)
       : [...selectedCategories, category];
     handleFilterChange({ categories: updatedCategories });
   };
@@ -123,7 +138,7 @@ const StudentCouponHistory = () => {
       discountType: "all",
       brands: [],
       categories: [],
-      search: ""
+      search: "",
     });
     setShowFilterDropdown(false);
   };
@@ -148,7 +163,9 @@ const StudentCouponHistory = () => {
       selectedCategories.length === 0 ||
       selectedCategories.includes(coupon.category);
 
-    return matchesSearch && matchesDiscountType && matchesBrand && matchesCategory;
+    return (
+      matchesSearch && matchesDiscountType && matchesBrand && matchesCategory
+    );
   });
 
   const totalPages = Math.ceil(filteredCoupons.length / itemsPerPage);
@@ -221,10 +238,7 @@ const StudentCouponHistory = () => {
             </div>
           ) : (
             paginatedCoupons.map((coupon) => (
-              <Coupon
-                key={coupon._id}
-                coupon={coupon}
-              />
+              <Coupon key={coupon._id} coupon={coupon} />
             ))
           )}
         </div>

@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
 import "./StudentStyle.css";
-import { jwtDecode } from 'jwt-decode';
-import { useNavigate } from 'react-router-dom';
-import { Spinner } from 'react-bootstrap';
+import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
+import { Spinner } from "react-bootstrap";
 
 const API_URL = "https://nusteals-express.onrender.com"; // Replace with your API URL
 
 const StudentProfile = () => {
   const navigate = useNavigate();
-  
+
   // State variables for the profile
   const [user, setUser] = useState(null);
-  const [username, setUsername] = useState(""); 
-  const [email, setEmail] = useState(""); 
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [profilePicture, setProfilePicture] = useState(""); // Stored URL in database
   const [previewUrl, setPreviewUrl] = useState(""); // Temporary URL for preview
   const [error, setError] = useState("");
@@ -21,11 +21,19 @@ const StudentProfile = () => {
   // Fetch user data on component mount
   useEffect(() => {
     const fetchUser = async () => {
+      // Fetch token from local storage and check if user is logged in
       const token = localStorage.getItem("accessToken");
-
       if (!token) {
         navigate("/login");
         return;
+      }
+
+      const role = localStorage.getItem("userRole");
+
+      if (role === "admin") {
+        navigate("/adminLogin");
+      } else if (role === "merchant") {
+        navigate("/merchantLogin");
       }
 
       try {
@@ -34,8 +42,8 @@ const StudentProfile = () => {
 
         const response = await fetch(`${API_URL}/api/users/${userId}`, {
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           method: "GET",
         });
@@ -84,13 +92,13 @@ const StudentProfile = () => {
       setError("Not authenticated");
       return;
     }
-  
+
     try {
       const response = await fetch(`${API_URL}/api/users/${user._id}`, {
         method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           name: username,
@@ -98,15 +106,15 @@ const StudentProfile = () => {
           password: user.password,
           role: user.role,
           address: user.address || "",
-          photo: previewUrl // Save the preview URL to database
+          photo: previewUrl, // Save the preview URL to database
         }),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to update profile");
       }
-  
+
       const updatedUser = await response.json();
       setUser(updatedUser);
       setUsername(updatedUser.name);
@@ -122,7 +130,10 @@ const StudentProfile = () => {
 
   if (isLoading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ height: "100vh" }}>
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
         <Spinner animation="border" variant="primary" />
       </div>
     );

@@ -10,8 +10,8 @@ import logo from "../assets/NUSteals logo.png";
 const GeneralNavBar = ({ userRole }) => {
   const linkClass = ({ isActive }) =>
     isActive
-      ? "text-blue py-3 px-3 no-underline"
-      : "text-black py-3 px-3 no-underline";
+      ? "text-blue py-1 px-2 no-underline text-sm"
+      : "text-black py-1 px-2 no-underline text-sm";
 
   const apiURL = "https://nusteals-express.onrender.com"; // API URL
 
@@ -25,30 +25,47 @@ const GeneralNavBar = ({ userRole }) => {
   const [showScanner, setShowScanner] = useState(false);
 
   const handleScanComplete = async (data) => {
-    // Handle the scanned QR code data
-    console.log("Scanned data:", data);
-    // Make API call to redeem coupon
-    const response = await fetch(`${apiURL}/api/coupons/redeem`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      },
-      body: JSON.stringify({
-        code: data.code,
-        studentId: data.studentId,
-        couponId: data.couponId,
-      }),
-    });
+    try {
+      const response = await fetch(`${apiURL}/api/coupons/redeem`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        body: JSON.stringify({
+          code: data.code,
+          studentId: data.studentId,
+          couponId: data.couponId,
+        }),
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      alert(errorData.details);
-      return;
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.details || "Redemption failed.");
+        return;
+      }
+
+      const result = await response.json();
+      const { coupon } = result;
+
+      // ✅ Display coupon name and details in alert
+      alert(
+        `✅ Coupon Redeemed Successfully!\n\n` +
+          `🧾 Coupon: ${coupon.couponName}\n` +
+          `💬 Description: ${coupon.description}\n` +
+          `🎯 Discount: ${
+            coupon.discountType === "flat"
+              ? `$${coupon.discount}`
+              : `${coupon.discount}%`
+          }\n` +
+          `📆 Expiry: ${new Date(coupon.expiryDate).toLocaleDateString()}`
+      );
+
+      setShowScanner(false);
+    } catch (error) {
+      console.error("Error redeeming coupon:", error);
+      alert("An unexpected error occurred. Please try again.");
     }
-
-    alert("Coupon redeemed successfully!");
-    setShowScanner(false);
   };
 
   const renderLinks = () => {
@@ -229,8 +246,13 @@ const GeneralNavBar = ({ userRole }) => {
         <header className="bg-orange-400 h-7"></header>
         <Navbar
           expand="lg"
-          className="bg-white shadow-lg"
-          style={{ marginBottom: "40px" }}
+          className="bg-white shadow-sm"
+          style={{
+            marginBottom: "24px",
+            minHeight: "48px",
+            paddingTop: "4px",
+            paddingBottom: "4px",
+          }}
         >
           <Container fluid>
             {/* Make the NUSteals logo clickable */}
@@ -242,8 +264,8 @@ const GeneralNavBar = ({ userRole }) => {
               <img
                 src={logo}
                 alt="NUSteals logo"
-                height="40"
-                style={{ maxWidth: "150px", objectFit: "contain" }}
+                height="28" // try reducing to 24 or 20
+                style={{ maxWidth: "100px", objectFit: "contain" }}
               />
             </Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
