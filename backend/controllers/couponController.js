@@ -459,6 +459,16 @@ const getAllValidCoupons = async (req, res) => {
     }
 };
 
+const adminGetAllCoupons = async (res) => {
+    try {
+        const filter = {};
+        const coupons = await Coupon.find(filter).sort({ createdAt: -1 });
+        return res.status(200).json(coupons);
+       } catch (err) {
+           console.error("Error in adminGetAllCoupons:", err);
+    return res.status(500).json({ error: 'Internal server error', details: err.message });
+  }
+};
 
 // Export the coupon handler methods to the routes page
 export {
@@ -470,5 +480,6 @@ export {
     toggleDisableCoupon,
     redeemCoupon,
     getACouponCode,
-    getAllValidCoupons
+    getAllValidCoupons,
+    adminGetAllCoupons
 }; 

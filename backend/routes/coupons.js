@@ -1,10 +1,17 @@
 import express from 'express';
-import { createCoupon, getAllCoupons, getSingleCoupon, deleteCoupon, editCoupon, toggleDisableCoupon, redeemCoupon, getACouponCode, getAllValidCoupons
+import { createCoupon, getAllCoupons, getSingleCoupon, deleteCoupon, editCoupon, toggleDisableCoupon, redeemCoupon, getACouponCode, getAllValidCoupons, adminGetAllCoupons
 } from '../controllers/couponController.js';
-import { requireAuthJWT } from '../controllers/userController.js';
+import { requireAuthJWT} from '../controllers/userController.js';
 import validateCoupon from '../controllers/validateCoupon.js';
 
 const router = express.Router();
+
+// Admin get all coupons
+router.get(
+    '/',
+    requireAuthJWT,       
+    adminGetAllCoupons
+  );
 
 // Get all coupons (includes filter)
 router.get('/merchant', requireAuthJWT, getAllCoupons);
