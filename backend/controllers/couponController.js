@@ -82,16 +82,17 @@ const redeemCoupon = async (req, res) => {
     try {
         session.startTransaction();
 
-        const code = req.body.code; // Get code from request body
-        const studentId = req.body.studentId; // Get studentId from request body
+        const { code, studentId } = req.body;
+        const merchantId = req.user.uid;
 
-        // Attempt to atomically find and update the coupon
+        // Single atomic query to find and update the coupon
         const updatedCoupon = await Coupon.findOneAndUpdate(
             {
+                merchant: merchantId,  // Validate merchant ownership
                 'uniqueCodes.code': code,
-                'uniqueCodes.isUsed': false,  // Must not be used
-                disable: false,               // Must not be disabled
-                expiryDate: { $gt: new Date() }  // Must not be expired
+                'uniqueCodes.isUsed': false,
+                disable: false,
+                expiryDate: { $gt: new Date() }
             },
             {
                 $set: {
@@ -112,25 +113,14 @@ const redeemCoupon = async (req, res) => {
             await session.abortTransaction();
             return res.status(409).json({
                 error: "Coupon redemption failed",
-                details: "Code may have been taken by someone else or is no longer valid"
+                details: "Code may be invalid, already used, or you're not authorized to redeem it"
             });
         }
 
         await session.commitTransaction();
         res.status(200).json({
             message: "Coupon redeemed successfully",
-            coupon: {
-                id: updatedCoupon._id,
-                couponName: updatedCoupon.couponName,
-                discount: updatedCoupon.discount,
-                description: updatedCoupon.description,
-                discountType: updatedCoupon.discountType,
-                category: updatedCoupon.category,
-                expiryDate: updatedCoupon.expiryDate,
-                disable: updatedCoupon.disable,
-                totalNum: updatedCoupon.totalNum,
-                redeemedNum: updatedCoupon.redeemedNum
-            }
+            coupon: updatedCoupon
         });
     } catch (error) {
         await session.abortTransaction();
