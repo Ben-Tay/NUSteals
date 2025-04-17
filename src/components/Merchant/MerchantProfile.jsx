@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Container, Row, Col, Form, Button, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Spinner, Modal} from 'react-bootstrap';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 
@@ -37,6 +37,9 @@ const MerchantProfile = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const fileInputRef = useRef(null);
+
+  // confirmation of update
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -221,7 +224,7 @@ const MerchantProfile = () => {
                 onChange={handleFileChange}
                 style={{ display: 'none' }}
               />
-              <Button variant="primary" onClick={handleUpdateProfile}>
+              <Button variant="primary" onClick={() => setShowConfirmModal(true)}>
                 Update Profile
               </Button>
             </Form>
@@ -263,6 +266,29 @@ const MerchantProfile = () => {
           </Col>
         </Row>
       </Container>
+
+      {/* CONFIRMATION MODAL */}
+      <Modal
+        show={showConfirmModal}
+        onHide={() => setShowConfirmModal(false)}
+        backdrop="static"
+        keyboard={false}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Update</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to update your profile?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={() => {setShowConfirmModal(false); handleUpdateProfile();}}>
+            Yes, Update
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };
