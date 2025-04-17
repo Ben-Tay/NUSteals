@@ -436,26 +436,52 @@ const editCoupon = async (req, res) => {
     }
 };
 
-// Get all valid coupons for a user
-const getAllValidCoupons = async (req, res) => {
+// Get all valid coupons OR redeemed coupons for a student based on query param
+const getAllStudentCoupons = async (req, res) => {
     try {
-        const userId = req.user.uid; // get userId from token
-        const coupons = await Coupon.find({
-            disable: false, // filter out disabled coupons
-            $expr: { $lt: ["$redeemedNum", "$totalNum"] }, // filter out fully redeemed coupons
-            expiryDate: { $gt: new Date() },  // filter out expired coupons
-            'uniqueCodes': { // filter out coupons that have been redeemed by user
-                $not: {
+        const userId = req.user.uid;
+        const { type } = req.query; // 'valid' or 'history'
+
+        let query = {};
+
+        if (type === 'valid') {
+            // Get valid, unredeemed coupons
+            query = {
+                disable: false,
+                $expr: { $lt: ["$redeemedNum", "$totalNum"] },
+                expiryDate: { $gt: new Date() },
+                'uniqueCodes': {
+                    $not: {
+                        $elemMatch: {
+                            'usedBy': userId
+                        }
+                    }
+                }
+            };
+        } else if (type === 'history') {
+            // Get redeemed coupons
+            query = {
+                'uniqueCodes': {
                     $elemMatch: {
                         'usedBy': userId
                     }
                 }
-            }
-        }).sort({ createdAt: -1 });
+            };
+        } else {
+            return res.status(400).json({ 
+                error: "Invalid type parameter. Use 'valid' or 'history'" 
+            });
+        }
+
+        // sort coupons by createdAt in descending order and send back to user
+        const coupons = await Coupon.find(query).sort({ createdAt: -1 });
         res.status(200).json(coupons);
     } catch (error) {
-        console.error("Error fetching valid coupons:", error);
-        res.status(500).json({ error: "Internal server error", details: error.message });
+        console.error("Error fetching coupons:", error);
+        res.status(500).json({ 
+            error: "Internal server error", 
+            details: error.message 
+        });
     }
 };
 
@@ -480,6 +506,6 @@ export {
     toggleDisableCoupon,
     redeemCoupon,
     getACouponCode,
-    getAllValidCoupons,
+    getAllStudentCoupons,
     adminGetAllCoupons
 }; 
