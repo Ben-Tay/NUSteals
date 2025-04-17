@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-// import GeneralNavBar from '../../layout/GeneralNavBar'; // Uncomment if needed (and remove duplicate nav bar in parent)
 import { useNavigate } from 'react-router-dom';
 import {
   Spinner,
@@ -111,7 +110,7 @@ function aggregateCategoryCounts(coupons) {
   }));
 }
 
-/** Formats X-axis date labels as "14 Apr". */
+/** Formats X-axis date labels as dd month */
 function dateTickFormatter(dateStr) {
   const d = parseISO(dateStr);
   return format(d, 'd MMM');
@@ -127,7 +126,7 @@ const MerchantDashboard = () => {
   const [authorized, setAuthorized] = useState(false);
   const [coupons, setCoupons] = useState([]);
 
-  // Merchant name (no longer used for filtering)
+  // Merchant name -> no longer used for filtering
   const [merchantName, setMerchantName] = useState('');
 
   // Pagination for Disabled Coupons
@@ -140,7 +139,7 @@ const MerchantDashboard = () => {
   const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [editForm, setEditForm] = useState({});
 
-  // 1. Verify user is merchant
+  // 1. Verify user is merchant -> redirect if not
   useEffect(() => {
     if (!token || !userId) {
       navigate('/login');
@@ -181,7 +180,7 @@ const MerchantDashboard = () => {
     verifyUser();
   }, [token, userId, API_URL, navigate]);
 
-  // 2. Fetch coupons for this merchant (new backend endpoint)
+  // 2. Fetch coupons for this merchant -> check new endpoint
   useEffect(() => {
     const fetchCoupons = async () => {
       try {
@@ -454,7 +453,7 @@ const MerchantDashboard = () => {
           <Col>
             <Card className="p-3">
               <Card.Title className
-="text-center">Category Distribution</Card.Title>
+              ="text-center">Category Distribution</Card.Title>
               {categoryData.length === 0 ? (
                 <p className="text-center mt-2">No categories found.</p>
               ) : (
