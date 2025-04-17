@@ -1,6 +1,6 @@
-import React, { useState, useEffect, use } from "react";
-import { Row, Col, Button, Form, Modal, Spinner } from "react-bootstrap";
-import { NavLink, useNavigate } from "react-router-dom"; // Import NavLink for navigation
+import React, { useState, useEffect} from "react";
+import { Row, Col, Button, Form, Spinner } from "react-bootstrap";
+import { useNavigate } from "react-router-dom"; // Import NavLink for navigation
 import { jwtDecode } from "jwt-decode"; // Import jwtDecode for decoding JWT tokens
 import "./ManageCoupon.css"; // Reuse styles from ManageCoupon.css
 import Coupon from "../../../layout/GeneralCoupon"; // Import general coupon template

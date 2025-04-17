@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button, Row, Col } from 'react-bootstrap';
 
 const FilterDropdown = ({ 
   discountTypeFilter,
@@ -26,57 +26,65 @@ const FilterDropdown = ({
       </div>
 
       <Form>
-        {/* Discount Type Section */}
-        <Form.Group className="mb-3">
-          <Form.Label>Discount Type</Form.Label>
-          <div>
-            {['all', 'flat', 'percentage'].map(type => (
-              <Form.Check
-                key={type}
-                type="radio"
-                id={`discount-${type}`}
-                label={type === 'all' ? 'All Types' : `${type.charAt(0).toUpperCase() + type.slice(1)} Discount`}
-                name="discountType"
-                checked={discountTypeFilter === type}
-                onChange={() => onDiscountTypeChange(type)}
-              />
-            ))}
-          </div>
-        </Form.Group>
+        <Row>
+          {/* Discount Type Section */}
+          <Col md={4}>
+            <Form.Group className="mb-3">
+              <Form.Label>Discount Type</Form.Label>
+              <div>
+                {['all', 'flat', 'percentage'].map(type => (
+                  <Form.Check
+                    key={type}
+                    type="radio"
+                    id={`discount-${type}`}
+                    label={type === 'all' ? 'All Types' : `${type.charAt(0).toUpperCase() + type.slice(1)} Discount`}
+                    name="discountType"
+                    checked={discountTypeFilter === type}
+                    onChange={() => onDiscountTypeChange(type)}
+                  />
+                ))}
+              </div>
+            </Form.Group>
+          </Col>
 
-        {/* Brands Section */}
-        <Form.Group className="mb-3">
-          <Form.Label>Brands ({selectedBrands.length} selected)</Form.Label>
-          <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
-            {availableBrands.map(brand => (
-              <Form.Check
-                key={brand}
-                type="checkbox"
-                id={`brand-${brand}`}
-                label={brand}
-                checked={selectedBrands.includes(brand)}
-                onChange={() => onBrandChange(brand)}
-              />
-            ))}
-          </div>
-        </Form.Group>
+          {/* Brands Section */}
+          <Col md={4}>
+            <Form.Group className="mb-3">
+              <Form.Label>Brands ({selectedBrands.length} selected)</Form.Label>
+              <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #dee2e6', borderRadius: '4px', padding: '8px' }}>
+                {availableBrands.map(brand => (
+                  <Form.Check
+                    key={brand}
+                    type="checkbox"
+                    id={`brand-${brand}`}
+                    label={brand}
+                    checked={selectedBrands.includes(brand)}
+                    onChange={() => onBrandChange(brand)}
+                  />
+                ))}
+              </div>
+            </Form.Group>
+          </Col>
 
-        {/* Categories Section */}
-        <Form.Group className="mb-3">
-          <Form.Label>Categories ({selectedCategories.length} selected)</Form.Label>
-          <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
-            {availableCategories.map(category => (
-              <Form.Check
-                key={category}
-                type="checkbox"
-                id={`category-${category}`}
-                label={category}
-                checked={selectedCategories.includes(category)}
-                onChange={() => onCategoryChange(category)}
-              />
-            ))}
-          </div>
-        </Form.Group>
+          {/* Categories Section */}
+          <Col md={4}>
+            <Form.Group className="mb-3">
+              <Form.Label>Categories ({selectedCategories.length} selected)</Form.Label>
+              <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #dee2e6', borderRadius: '4px', padding: '8px' }}>
+                {availableCategories.map(category => (
+                  <Form.Check
+                    key={category}
+                    type="checkbox"
+                    id={`category-${category}`}
+                    label={category}
+                    checked={selectedCategories.includes(category)}
+                    onChange={() => onCategoryChange(category)}
+                  />
+                ))}
+              </div>
+            </Form.Group>
+          </Col>
+        </Row>
       </Form>
     </div>
   );

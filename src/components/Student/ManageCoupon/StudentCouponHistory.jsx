@@ -1,77 +1,38 @@
 import React, { useState, useEffect } from "react";
-import { Row, Col, Button, Form, Modal, Spinner } from "react-bootstrap";
-import { NavLink, useNavigate } from "react-router-dom"; // Import NavLink for navigation
-import { jwtDecode } from "jwt-decode"; // Import jwtDecode for decoding JWT tokens
+import { Row, Col, Button, Form, Spinner } from "react-bootstrap";
+import { useNavigate } from "react-router-dom"; // Import NavLink for navigation
 import "./ManageCoupon.css"; // Reuse styles from ManageCoupon.css
 import Coupon from "../../../layout/GeneralCoupon"; // Import general coupon template
 import StudentCouponNavbar from "../../../layout/StudentCouponNavbar";
 import { BiSolidLeftArrow, BiSolidRightArrow } from "react-icons/bi";
+import FilterDropdown from '../components/FilterDropdown';
 
 const apiURL = "https://nusteals-express.onrender.com"; // API URL
 
 const StudentCouponHistory = () => {
   const navigate = useNavigate(); // Initialize navigate function
 
-  // State for search bar and filters
+  // State management
   const [searchTerm, setSearchTerm] = useState("");
   const [discountTypeFilter, setDiscountTypeFilter] = useState("all");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [coupons, setCoupons] = useState([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [sortBy, setSortBy] = useState("recent");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedBrands, setSelectedBrands] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [availableBrands, setAvailableBrands] = useState([]);
+  const [availableCategories, setAvailableCategories] = useState([]);
+
   const itemsPerPage = 5;
 
-  // Reset page when filters or search are changed
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, discountTypeFilter, sortBy]);
-
-  // Sorting
-  const sortCoupons = (coupons, sortType) => {
-    if (!Array.isArray(coupons)) return [];
-
-    switch (sortType) {
-      case "recent":
-        return [...coupons].sort((a, b) => {
-          // Remove isHistoryView since it's not defined
-          const dateA = new Date(a?.createdAt || 0);
-          const dateB = new Date(b?.createdAt || 0);
-          return dateB - dateA;
-        });
-
-      case "popular":
-        return [...coupons].sort(
-          (a, b) =>
-            // Fix syntax error in comparison
-            (b?.redeemedNum || 0) - (a?.redeemedNum || 0)
-        );
-
-      case "percentageHigh":
-        return [...coupons].sort((a, b) => {
-          if (
-            a?.discountType === "percentage" &&
-            b?.discountType === "percentage"
-          ) {
-            // Fix syntax error in comparison
-            return (b?.discount || 0) - (a?.discount || 0);
-          }
-          return a?.discountType === "percentage" ? -1 : 1;
-        });
-
-      case "flatHigh":
-        return [...coupons].sort((a, b) => {
-          if (a?.discountType === "flat" && b?.discountType === "flat") {
-            // Fix syntax error in comparison
-            return (b?.discount || 0) - (a?.discount || 0);
-          }
-          return a?.discountType === "flat" ? -1 : 1;
-        });
-
-      default:
-        return coupons;
-    }
+  // Extract unique brands and categories
+  const extractFilters = (couponData) => {
+    const brands = [...new Set(couponData.map(coupon => coupon.merchant?.name))].sort();
+    const categories = [...new Set(couponData.map(coupon => coupon.category))].sort();
+    setAvailableBrands(brands);
+    setAvailableCategories(categories);
   };
 
   useEffect(() => {
@@ -83,8 +44,6 @@ const StudentCouponHistory = () => {
           navigate("/login");
           return;
         }
-        const decodedToken = jwtDecode(token);
-        const userId = decodedToken.uid;
 
         // Fetch coupons from the API
         const response = await fetch(`${apiURL}/api/coupons/student?type=history`, {
@@ -102,8 +61,10 @@ const StudentCouponHistory = () => {
           return;
         }
 
-        const usedCoupons = await response.json();
-        setCoupons(usedCoupons);
+        // Cache all valid coupons
+        const couponData = await response.json();
+        setCoupons(couponData);
+        extractFilters(couponData); // Extract filters from coupon data
         setIsLoading(false);
       } catch (err) {
         console.error("Error fetching coupon data:", err);
@@ -116,14 +77,55 @@ const StudentCouponHistory = () => {
     fetchCoupons();
   }, []);
 
+  // Add a single filter change handler
+  const handleFilterChange = ({
+    discountType = discountTypeFilter,
+    brands = selectedBrands,
+    categories = selectedCategories,
+    search = searchTerm
+  }) => {
+    setDiscountTypeFilter(discountType);
+    setSelectedBrands(brands);
+    setSelectedCategories(categories);
+    setSearchTerm(search);
+    setCurrentPage(1);
+  };
+
   // Handle Search
   const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
+    handleFilterChange({ search: e.target.value });
   };
 
   // Handle discount type filter change
   const handleDiscountTypeChange = (type) => {
-    setDiscountTypeFilter(type);
+    handleFilterChange({ discountType: type });
+  };
+
+  // Handle brand filter change
+  const handleBrandChange = (brand) => {
+    const updatedBrands = selectedBrands.includes(brand)
+      ? selectedBrands.filter(b => b !== brand)
+      : [...selectedBrands, brand];
+    handleFilterChange({ brands: updatedBrands });
+  };
+
+  // Handle category filter change
+  const handleCategoryChange = (category) => {
+    const updatedCategories = selectedCategories.includes(category)
+      ? selectedCategories.filter(c => c !== category)
+      : [...selectedCategories, category];
+    handleFilterChange({ categories: updatedCategories });
+  };
+
+  // Clear filters handler
+  const handleClearFilters = () => {
+    handleFilterChange({
+      discountType: "all",
+      brands: [],
+      categories: [],
+      search: ""
+    });
+    setShowFilterDropdown(false);
   };
 
   // Filter coupons based on search term and discount type
@@ -138,12 +140,19 @@ const StudentCouponHistory = () => {
       discountTypeFilter === "all" ||
       coupon?.discountType?.toLowerCase() === discountTypeFilter.toLowerCase();
 
-    return matchesSearch && matchesDiscountType;
+    const matchesBrand =
+      selectedBrands.length === 0 ||
+      selectedBrands.includes(coupon.merchant?.name);
+
+    const matchesCategory =
+      selectedCategories.length === 0 ||
+      selectedCategories.includes(coupon.category);
+
+    return matchesSearch && matchesDiscountType && matchesBrand && matchesCategory;
   });
 
-  const sortedCoupons = sortCoupons(filteredCoupons, sortBy);
-  const totalPages = Math.ceil(sortedCoupons.length / itemsPerPage);
-  const paginatedCoupons = sortedCoupons.slice(
+  const totalPages = Math.ceil(filteredCoupons.length / itemsPerPage);
+  const paginatedCoupons = filteredCoupons.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -172,7 +181,6 @@ const StudentCouponHistory = () => {
         <Row className="mb-3 align-items-center">
           <StudentCouponNavbar />
           <Col xs={9}>
-            {/* Search Bar */}
             <Form.Control
               type="text"
               placeholder="Search Coupons..."
@@ -192,81 +200,38 @@ const StudentCouponHistory = () => {
 
         {/* Updated Filter Dropdown */}
         {showFilterDropdown && (
-          <div className="box-orange">
-            <h5>Filter by Discount Type:</h5>
-            <Form.Check
-              type="radio"
-              name="discountType"
-              label="All Discounts"
-              checked={discountTypeFilter === "all"}
-              onChange={() => handleDiscountTypeChange("all")}
-            />
-            <Form.Check
-              type="radio"
-              name="discountType"
-              label="Flat Discount"
-              checked={discountTypeFilter === "flat"}
-              onChange={() => handleDiscountTypeChange("flat")}
-            />
-            <Form.Check
-              type="radio"
-              name="discountType"
-              label="Percentage Discount"
-              checked={discountTypeFilter === "percentage"}
-              onChange={() => handleDiscountTypeChange("percentage")}
-            />
-          </div>
+          <FilterDropdown
+            discountTypeFilter={discountTypeFilter}
+            selectedBrands={selectedBrands}
+            selectedCategories={selectedCategories}
+            availableBrands={availableBrands}
+            availableCategories={availableCategories}
+            onDiscountTypeChange={handleDiscountTypeChange}
+            onBrandChange={handleBrandChange}
+            onCategoryChange={handleCategoryChange}
+            onClearFilters={handleClearFilters}
+          />
         )}
-
-        {/* Sort Buttons */}
-        <Row className="mb-3">
-          <Col>
-            <div className="sort-buttons">
-              <Button
-                variant={sortBy === "recent" ? "primary" : "outline-primary"}
-                onClick={() => setSortBy("recent")}
-              >
-                Most Recent
-              </Button>
-              <Button
-                variant={sortBy === "popular" ? "primary" : "outline-primary"}
-                onClick={() => setSortBy("popular")}
-              >
-                Most Popular
-              </Button>
-              <Button
-                variant={
-                  sortBy === "percentageHigh" ? "primary" : "outline-primary"
-                }
-                onClick={() => setSortBy("percentageHigh")}
-              >
-                Highest % Discount
-              </Button>
-              <Button
-                variant={sortBy === "flatHigh" ? "primary" : "outline-primary"}
-                onClick={() => setSortBy("flatHigh")}
-              >
-                Highest $ Discount
-              </Button>
-            </div>
-          </Col>
-        </Row>
 
         {/* Coupons List */}
         <div className="coupon-list">
-          {paginatedCoupons.length === 0 ? (
+          {filteredCoupons.length === 0 ? (
             <div className="text-center text-muted my-5">
-              <h4>No coupons redeemed yet. Check back later!</h4>
+              <h4>No redeemed coupons found with search criteria.</h4>
             </div>
           ) : (
             paginatedCoupons.map((coupon) => (
-              <Coupon key={coupon._id} brandName="Unknown" coupon={coupon} />
+              <Coupon
+                key={coupon._id}
+                coupon={coupon}
+              />
             ))
           )}
         </div>
+
         {/* Pagination Controls */}
-        {sortedCoupons.length > 0 && (
-          <div className="d-flex justify-content-center mt-4">
+        {filteredCoupons.length > 0 && (
+          <div className="d-flex justify-content-center mt-4 mb-4">
             <Button
               className="pagination-button me-2 px-4"
               disabled={currentPage === 1}
