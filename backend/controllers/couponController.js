@@ -266,7 +266,7 @@ const getAllCoupons = async (req, res) => {
         const filter = {
             merchant: merchantId
         };
-        
+
         // filter by disabled
         //GET /api/coupons?disabled=true 
         // GET /api/coupons?disabled=false
@@ -459,16 +459,16 @@ const getAllValidCoupons = async (req, res) => {
     }
 };
 
-const adminGetAllCoupons = async (res) => {
+const adminGetAllCoupons = async (req, res) => {
     try {
-        const filter = {};
-        const coupons = await Coupon.find(filter).sort({ createdAt: -1 });
-        return res.status(200).json(coupons);
-       } catch (err) {
-           console.error("Error in adminGetAllCoupons:", err);
-    return res.status(500).json({ error: 'Internal server error', details: err.message });
-  }
-};
+        const allCoupons = await Coupon.find({}).sort({ createdAt: -1 }); // Fetch all coupons from DB from most recent
+        res.status(200).json(allCoupons);
+        console.log("First coupon codes:", allCoupons[0]?.uniqueCodes);
+    } catch (error) {
+        console.error("Error fetching coupons:", error);
+        res.status(500).json({ error: "Internal server error", details: error.message });
+    }
+}
 
 // Export the coupon handler methods to the routes page
 export {
