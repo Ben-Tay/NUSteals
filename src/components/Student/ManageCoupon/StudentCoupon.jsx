@@ -85,7 +85,7 @@ const StudentCoupon = () => {
         const userId = decodedToken.uid;
 
         // Fetch coupons from the API
-        const response = await fetch(`${apiURL}/api/coupons/user/${userId}`, {
+        const response = await fetch(`${apiURL}/api/coupons/student?type=valid`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,

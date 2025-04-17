@@ -82,16 +82,17 @@ const redeemCoupon = async (req, res) => {
     try {
         session.startTransaction();
 
-        const code = req.body.code; // Get code from request body
-        const studentId = req.body.studentId; // Get studentId from request body
+        const { code, studentId } = req.body;
+        const merchantId = req.user.uid;
 
-        // Attempt to atomically find and update the coupon
+        // Single atomic query to find and update the coupon
         const updatedCoupon = await Coupon.findOneAndUpdate(
             {
+                merchant: merchantId,  // Validate merchant ownership
                 'uniqueCodes.code': code,
-                'uniqueCodes.isUsed': false,  // Must not be used
-                disable: false,               // Must not be disabled
-                expiryDate: { $gt: new Date() }  // Must not be expired
+                'uniqueCodes.isUsed': false,
+                disable: false,
+                expiryDate: { $gt: new Date() }
             },
             {
                 $set: {
@@ -112,25 +113,14 @@ const redeemCoupon = async (req, res) => {
             await session.abortTransaction();
             return res.status(409).json({
                 error: "Coupon redemption failed",
-                details: "Code may have been taken by someone else or is no longer valid"
+                details: "Code may be invalid, already used, or you're not authorized to redeem it"
             });
         }
 
         await session.commitTransaction();
         res.status(200).json({
             message: "Coupon redeemed successfully",
-            coupon: {
-                id: updatedCoupon._id,
-                couponName: updatedCoupon.couponName,
-                discount: updatedCoupon.discount,
-                description: updatedCoupon.description,
-                discountType: updatedCoupon.discountType,
-                category: updatedCoupon.category,
-                expiryDate: updatedCoupon.expiryDate,
-                disable: updatedCoupon.disable,
-                totalNum: updatedCoupon.totalNum,
-                redeemedNum: updatedCoupon.redeemedNum
-            }
+            coupon: updatedCoupon
         });
     } catch (error) {
         await session.abortTransaction();
@@ -266,7 +256,7 @@ const getAllCoupons = async (req, res) => {
         const filter = {
             merchant: merchantId
         };
-        
+
         // filter by disabled
         //GET /api/coupons?disabled=true 
         // GET /api/coupons?disabled=false
@@ -436,29 +426,65 @@ const editCoupon = async (req, res) => {
     }
 };
 
-// Get all valid coupons for a user
-const getAllValidCoupons = async (req, res) => {
+// Get all valid coupons OR redeemed coupons for a student based on query param
+const getAllStudentCoupons = async (req, res) => {
     try {
-        const userId = req.user.uid; // get userId from token
-        const coupons = await Coupon.find({
-            disable: false, // filter out disabled coupons
-            $expr: { $lt: ["$redeemedNum", "$totalNum"] }, // filter out fully redeemed coupons
-            expiryDate: { $gt: new Date() },  // filter out expired coupons
-            'uniqueCodes': { // filter out coupons that have been redeemed by user
-                $not: {
+        const userId = req.user.uid;
+        const { type } = req.query; // 'valid' or 'history'
+
+        let query = {};
+
+        if (type === 'valid') {
+            // Get valid, unredeemed coupons
+            query = {
+                disable: false,
+                $expr: { $lt: ["$redeemedNum", "$totalNum"] },
+                expiryDate: { $gt: new Date() },
+                'uniqueCodes': {
+                    $not: {
+                        $elemMatch: {
+                            'usedBy': userId
+                        }
+                    }
+                }
+            };
+        } else if (type === 'history') {
+            // Get redeemed coupons
+            query = {
+                'uniqueCodes': {
                     $elemMatch: {
                         'usedBy': userId
                     }
                 }
-            }
-        }).sort({ createdAt: -1 });
+            };
+        } else {
+            return res.status(400).json({ 
+                error: "Invalid type parameter. Use 'valid' or 'history'" 
+            });
+        }
+
+        // sort coupons by createdAt in descending order and send back to user
+        const coupons = await Coupon.find(query).sort({ createdAt: -1 });
         res.status(200).json(coupons);
     } catch (error) {
-        console.error("Error fetching valid coupons:", error);
-        res.status(500).json({ error: "Internal server error", details: error.message });
+        console.error("Error fetching coupons:", error);
+        res.status(500).json({ 
+            error: "Internal server error", 
+            details: error.message 
+        });
     }
 };
 
+const adminGetAllCoupons = async (req, res) => {
+    try {
+        const allCoupons = await Coupon.find({}).sort({ createdAt: -1 }); // Fetch all coupons from DB from most recent
+        res.status(200).json(allCoupons);
+        console.log("First coupon codes:", allCoupons[0]?.uniqueCodes);
+    } catch (error) {
+        console.error("Error fetching coupons:", error);
+        res.status(500).json({ error: "Internal server error", details: error.message });
+    }
+}
 
 // Export the coupon handler methods to the routes page
 export {
@@ -470,5 +496,6 @@ export {
     toggleDisableCoupon,
     redeemCoupon,
     getACouponCode,
-    getAllValidCoupons
+    getAllStudentCoupons,
+    adminGetAllCoupons
 }; 

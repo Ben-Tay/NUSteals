@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Row, Col, Container, Card } from 'react-bootstrap';
+import { Row, Col, Container, Card, Pagination } from 'react-bootstrap';
 import { jwtDecode } from 'jwt-decode';
 import GeneralCoupon from '../../../layout/GeneralCoupon';
 
@@ -10,6 +10,11 @@ const ManageCoupon = () => {
     const [merchantName, setMerchantName] = useState('');
     const [loading, setLoading] = useState(true);
     const [coupons, setCoupons] = useState([]);
+
+    // adding pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
     let token = localStorage.getItem('accessToken');
     let userId = localStorage.getItem('userId');
     if (!userId && token) {
@@ -55,6 +60,13 @@ const ManageCoupon = () => {
 
         fetchCoupons();
     }, [API_URL, token, userId]);
+
+    //pagination logic
+    const totalPages = Math.ceil(coupons.length / itemsPerPage);
+    const paginatedCoupons = coupons.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
 
     // GO TO EDIT COUPON
     const handleEditClick = (coupon) => {
@@ -164,7 +176,7 @@ const ManageCoupon = () => {
                         ) : coupons.length === 0 ? (
                             <p>No coupons found</p>
                         ) : (
-                            coupons.map((coupon) => (
+                            paginatedCoupons.map((coupon) => (
                                 <GeneralCoupon
                                     key={coupon._id}
                                     coupon = {coupon}
@@ -173,6 +185,29 @@ const ManageCoupon = () => {
                                 />
                             ))
                         )}
+
+                        {coupons.length > itemsPerPage && (
+                        <Pagination className="justify-content-center mt-4">
+                            <Pagination.Prev
+                            onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                            disabled={currentPage === 1}
+                            />
+                            {[...Array(totalPages)].map((_, idx) => (
+                            <Pagination.Item
+                                key={idx + 1}
+                                active={currentPage === idx + 1}
+                                onClick={() => setCurrentPage(idx + 1)}
+                            >
+                                {idx + 1}
+                            </Pagination.Item>
+                            ))}
+                            <Pagination.Next
+                            onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            />
+                        </Pagination>
+                        )}
+
                         <div className="d-flex justify-content-end mt-4">
                             <a href="/merchantLogin/addCoupon">
                                 <button className="px-10 py-2 bg-[#F88B2C] text-white border-none rounded text-center" >Add Coupon</button>

@@ -9,7 +9,7 @@ import { BiSolidLeftArrow, BiSolidRightArrow } from "react-icons/bi";
 
 const apiURL = "https://nusteals-express.onrender.com"; // API URL
 
-const StudentCoupon = () => {
+const StudentCouponHistory = () => {
   const navigate = useNavigate(); // Initialize navigate function
 
   // State for search bar and filters
@@ -87,7 +87,7 @@ const StudentCoupon = () => {
         const userId = decodedToken.uid;
 
         // Fetch coupons from the API
-        const response = await fetch(`${apiURL}/api/coupons/`, {
+        const response = await fetch(`${apiURL}/api/coupons/student?type=history`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -102,11 +102,7 @@ const StudentCoupon = () => {
           return;
         }
 
-        // Filter for coupns redeemed by logged in user then cache them
-        const couponData = await response.json();
-        const usedCoupons = couponData.filter((coupon) =>
-          coupon.uniqueCodes?.some((code) => code.usedBy === userId)
-        );
+        const usedCoupons = await response.json();
         setCoupons(usedCoupons);
         setIsLoading(false);
       } catch (err) {
@@ -299,4 +295,4 @@ const StudentCoupon = () => {
   );
 };
 
-export default StudentCoupon;
+export default StudentCouponHistory;
