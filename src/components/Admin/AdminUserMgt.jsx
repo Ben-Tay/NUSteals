@@ -13,6 +13,7 @@ const AdminUserMgt = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [emailError, setEmailError] = useState("");
   const [nameError, setNameError] = useState("");
+  const [roleError, setRoleError] = useState("");
   const [authToken, setAuthToken] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 5;
@@ -57,6 +58,31 @@ const AdminUserMgt = () => {
 
   const handleSaveChanges = async () => {
     if (!editingUser) return;
+
+    // Validation
+    let hasError = false;
+    if (!editingUser.name.trim()) {
+      setNameError("Username is required.");
+      hasError = true;
+    } else {
+      setNameError("");
+    }
+    if (!editingUser.email.trim()) {
+      setEmailError("Email is required.");
+      hasError = true;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editingUser.email)) {
+      setEmailError("Please enter a valid email address.");
+      hasError = true;
+    } else {
+      setEmailError("");
+    }
+    if (!editingUser.role.trim()) {
+      setRoleError("Role selection is required.");
+      hasError = true;
+    } else {
+      setRoleError("");
+    }
+    if (hasError) return;
 
     try {
       const existingUser = users.find(
@@ -107,6 +133,7 @@ const AdminUserMgt = () => {
       setShowModal(false);
       setEmailError("");
       setNameError("");
+      setRoleError("");
     } catch (error) {
       console.error("Error updating user:", error);
     }
@@ -117,6 +144,7 @@ const AdminUserMgt = () => {
     setShowModal(true);
     setEmailError("");
     setNameError("");
+    setRoleError("");
   };
 
   const handleUserDelete = async (userId) => {
@@ -281,6 +309,7 @@ const AdminUserMgt = () => {
                   <option value="student">Student</option>
                   <option value="merchant">Merchant</option>
                 </Form.Select>
+                {roleError && <div className="text-danger">{roleError}</div>}
               </Form.Group>
               <Form.Group>
                 <Form.Label>Address</Form.Label>
