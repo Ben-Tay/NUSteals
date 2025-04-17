@@ -12,8 +12,13 @@ const app = express();
 
 // Middleware
 // This must come before other middleware
+const allowedOrigins = [
+    'http://localhost:5173',                    // for local dev
+    'https://nus-steals.vercel.app/'            // ✅ new live frontend
+];
+
 app.use(cors({
-    origin: 'http://localhost:5173', // Allow only your frontend origin, need to make this dynamic
+    origin: allowedOrigins, // Allow only your frontend origin, need to make this dynamic
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
     allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
     credentials: true, // Allow credentials (cookies, tokens, etc.)
