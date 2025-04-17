@@ -1,34 +1,38 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Container, Row, Col, Form, Button, Spinner, Modal} from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Spinner, Modal } from 'react-bootstrap';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 
 const MerchantProfile = () => {
   const navigate = useNavigate();
-
-  let token = localStorage.getItem('accessToken');
+  const token = localStorage.getItem('accessToken');
   let userId = localStorage.getItem('userId');
+
+  // Decode token if we don't yet have a userId
   if (!userId && token) {
     try {
       const decoded = jwtDecode(token);
       userId = decoded.uid;
       localStorage.setItem('userId', userId);
     } catch (err) {
-      console.error('Error decoding token:', err);
+      console.error('Invalid token:', err);
     }
   }
-  if (!userId) {
-    navigate('/login');
-    return null;
-  }
+
+  // 1️⃣ Redirect immediately if not logged in
+  useEffect(() => {
+    if (!token || !userId) {
+      navigate('/login');
+    }
+  }, [token, userId, navigate]);
 
   const API_URL = 'https://nusteals-express.onrender.com';
 
-  // Loading and authorization state
+  // Loading & role state
   const [loading, setLoading] = useState(true);
   const [isMerchant, setIsMerchant] = useState(false);
 
-  // State for profile fields
+  // Profile fields
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,134 +40,115 @@ const MerchantProfile = () => {
   const [photo, setPhoto] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const fileInputRef = useRef(null);
+  // Validation errors
+  const [errors, setErrors] = useState({});
 
-  // confirmation of update
+  // Confirmation modal
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  useEffect(() => {
-    if (!token) {
-      navigate('/login');
-    }
-  }, [token, navigate]);
+  const fileInputRef = useRef(null);
 
+  // 2️⃣ Fetch profile and gate by role
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!token || !userId) {
-        console.warn('No token or userId found.');
-        return;
-      }
+    if (!token || !userId) return;
+    (async () => {
       try {
-        const response = await fetch(`${API_URL}/api/users/${userId}`, {
+        const res = await fetch(`${API_URL}/api/users/${userId}`, {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
-        if (!response.ok) {
-          throw new Error('Failed to fetch profile');
-        }
-        const data = await response.json();
-        // Check if the user's role is "merchant"
-        if (data.role !== 'merchant') {
-          alert('Access denied. You do not have permission to view this page.');
-          if (data.role === 'admin') {
-            navigate('/adminLogin');
-          } else if (data.role === 'student') {
+        if (!res.ok) throw new Error('Failed to fetch profile');
+        const data = await res.json();
+
+        switch (data.role) {
+          case 'merchant':
+            setIsMerchant(true);
+            setName(data.name || '');
+            setEmail(data.email || '');
+            setAddress(data.address || '');
+            setPhoto(data.photo || '');
+            // populate password if returned (unlikely)
+            if (data.password) setPassword(data.password);
+            break;
+          case 'student':
             navigate('/studentLogin');
-          } else {
+            return;
+          case 'admin':
+            navigate('/adminLogin');
+            return;
+          default:
             navigate('/login');
-          }
-          return;
+            return;
         }
-        setIsMerchant(true);
-        setName(data.name || '');
-        setEmail(data.email || '');
-        setAddress(data.address || '');
-        setPhoto(data.photo || '');
-        if (data.password) {
-          setPassword(data.password);
-        }
-      } catch (error) {
-        console.error('Error fetching profile:', error);
+      } catch (err) {
+        console.error(err);
         navigate('/login');
       } finally {
         setLoading(false);
       }
-    };
+    })();
+  }, [token, userId, navigate]);
 
-    fetchProfile();
-  }, [userId, token, API_URL, navigate]);
-
-  // File input handler
-  const handleFileChange = (e) => {
+  // File change handler
+  const handleFileChange = e => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setPhoto(reader.result);
-    };
+    reader.onloadend = () => setPhoto(reader.result);
     reader.readAsDataURL(file);
   };
-
-  // Trigger the file input dialog
-  const handleChangePhoto = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
+  const handleChangePhoto = () => fileInputRef.current?.click();
 
   // Toggle password visibility
-  const togglePasswordVisibility = () => {
-    setShowPassword(prev => !prev);
+  const togglePasswordVisibility = () => setShowPassword(p => !p);
+
+  // Field validation
+  const validateFields = () => {
+    const errs = {};
+    if (!name.trim()) errs.name = 'Name is required';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) errs.email = 'Invalid email address';
+    if (!password.trim()) errs.password = 'Password is required';
+    if (!address.trim()) errs.address = 'Address is required';
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
   };
 
-  // Update profile data via PATCH request
+  // Submit update
   const handleUpdateProfile = async () => {
     if (!token || !userId) {
-      alert('No token or userId found; cannot update profile.');
+      alert('Cannot update profile.');
       return;
     }
-    const updatedProfile = {
-      name,
-      email,
-      password,
-      address,
-      photo,
-    };
-
+    const updatedProfile = { name, email, password, address, photo };
     try {
-      const response = await fetch(`${API_URL}/api/users/${userId}`, {
+      const res = await fetch(`${API_URL}/api/users/${userId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(updatedProfile),
       });
-      if (!response.ok) {
-        throw new Error('Failed to update profile');
-      }
-      const data = await response.json();
-      console.log('Profile updated:', data);
+      if (!res.ok) throw new Error('Update failed');
       alert('Profile updated successfully!');
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      alert('Error updating profile. Check console for details.');
+    } catch (err) {
+      console.error(err);
+      alert('Error updating profile.');
     }
   };
 
   if (loading) {
     return (
-      <>
-        <div className="container mt-4 d-flex justify-content-center">
-          <Spinner animation="border" variant="primary" />
-        </div>
-      </>
+      <div className="d-flex justify-content-center mt-5">
+        <Spinner animation="border" variant="primary" />
+      </div>
     );
   }
-
   if (!isMerchant) {
+    // Either we redirected away or it's not a merchant
     return null;
   }
 
@@ -174,49 +159,63 @@ const MerchantProfile = () => {
         <Row className="mt-3">
           <Col md={6}>
             <Form>
-              <Form.Group className="mb-3" controlId="formName">
+              <Form.Group controlId="formName" className="mb-3">
                 <Form.Label>Name</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Enter your name"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  isInvalid={!!errors.name}
+                  onChange={e => setName(e.target.value)}
                 />
+                <Form.Control.Feedback type="invalid">
+                  {errors.name}
+                </Form.Control.Feedback>
               </Form.Group>
-              <Form.Group className="mb-3" controlId="formEmail">
-                <Form.Label>Email Address</Form.Label>
+
+              <Form.Group controlId="formEmail" className="mb-3">
+                <Form.Label>Email</Form.Label>
                 <Form.Control
                   type="email"
-                  placeholder="Enter your email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  isInvalid={!!errors.email}
+                  onChange={e => setEmail(e.target.value)}
                 />
+                <Form.Control.Feedback type="invalid">
+                  {errors.email}
+                </Form.Control.Feedback>
               </Form.Group>
-              <Form.Group className="mb-3" controlId="formPassword">
+
+              <Form.Group controlId="formPassword" className="mb-3">
                 <Form.Label>Password</Form.Label>
                 <div className="d-flex">
                   <Form.Control
-                    id="passwordInput"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter new password (leave blank to keep current)"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    style={{ marginRight: '0.5rem' }}
+                    isInvalid={!!errors.password}
+                    onChange={e => setPassword(e.target.value)}
                   />
                   <Button variant="outline-secondary" onClick={togglePasswordVisibility}>
                     {showPassword ? 'Hide' : 'Show'}
                   </Button>
+                  <Form.Control.Feedback type="invalid">
+                    {errors.password}
+                  </Form.Control.Feedback>
                 </div>
               </Form.Group>
-              <Form.Group className="mb-3" controlId="formAddress">
+
+              <Form.Group controlId="formAddress" className="mb-3">
                 <Form.Label>Address</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Enter your address"
                   value={address}
-                  onChange={(e) => setAddress(e.target.value)}
+                  isInvalid={!!errors.address}
+                  onChange={e => setAddress(e.target.value)}
                 />
+                <Form.Control.Feedback type="invalid">
+                  {errors.address}
+                </Form.Control.Feedback>
               </Form.Group>
+
               <input
                 type="file"
                 accept="image/*"
@@ -224,50 +223,45 @@ const MerchantProfile = () => {
                 onChange={handleFileChange}
                 style={{ display: 'none' }}
               />
-              <Button variant="primary" onClick={() => setShowConfirmModal(true)}>
+
+              <Button
+                variant="primary"
+                onClick={() => {
+                  if (validateFields()) {
+                    setShowConfirmModal(true);
+                  }
+                }}
+              >
                 Update Profile
               </Button>
             </Form>
           </Col>
+
           <Col md={6} className="d-flex flex-column align-items-center justify-content-center">
             {photo ? (
               <img
                 src={photo}
                 alt="Profile"
-                style={{
-                  width: '150px',
-                  height: '150px',
-                  borderRadius: '50%',
-                  objectFit: 'cover',
-                  marginBottom: '1rem',
-                }}
+                style={{ width: 150, height: 150, borderRadius: '50%' }}
               />
             ) : (
               <div
                 style={{
-                  width: '150px',
-                  height: '150px',
+                  width: 150,
+                  height: 150,
                   borderRadius: '50%',
                   backgroundColor: '#ccc',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.2rem',
-                  color: '#666',
-                  marginBottom: '1rem',
                 }}
-              >
-                {name ? name.split(' ').map((part) => part[0]).join('') : ''}
-              </div>
+              />
             )}
-            <Button variant="secondary" onClick={handleChangePhoto}>
+            <Button variant="secondary" onClick={handleChangePhoto} className="mt-3">
               Change Photo
             </Button>
           </Col>
         </Row>
       </Container>
 
-      {/* CONFIRMATION MODAL */}
+      {/* Confirmation Modal */}
       <Modal
         show={showConfirmModal}
         onHide={() => setShowConfirmModal(false)}
@@ -277,14 +271,18 @@ const MerchantProfile = () => {
         <Modal.Header closeButton>
           <Modal.Title>Confirm Update</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          Are you sure you want to update your profile?
-        </Modal.Body>
+        <Modal.Body>Are you sure you want to update your profile?</Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={() => {setShowConfirmModal(false); handleUpdateProfile();}}>
+          <Button
+            variant="primary"
+            onClick={() => {
+              setShowConfirmModal(false);
+              handleUpdateProfile();
+            }}
+          >
             Yes, Update
           </Button>
         </Modal.Footer>

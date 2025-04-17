@@ -113,7 +113,7 @@ function aggregateCategoryCounts(coupons) {
 /** Formats X-axis date labels as dd month */
 function dateTickFormatter(dateStr) {
   const d = parseISO(dateStr);
-  return format(d, 'd MMM');
+  return format(d, 'd MMM');
 }
 
 const MerchantDashboard = () => {
@@ -138,6 +138,9 @@ const MerchantDashboard = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [editForm, setEditForm] = useState({});
+
+  // form validation for edit coupon modal
+  const [formValidated, setFormValidated] = useState(false);
 
   // 1. Verify user is merchant -> redirect if not
   useEffect(() => {
@@ -210,7 +213,7 @@ const MerchantDashboard = () => {
   );
   const redeemedCodes = coupons.reduce((sum, c) => sum + (c.redeemedNum || 0), 0);
   const availableCodes = totalCodes - redeemedCodes;
-  const disabledCoupons = coupons.filter(c => c.disable);
+  const disabledCoupons = coupons.filter((c) => c.disable);
 
   // Pagination for Disabled Coupons
   const realTotalPages = Math.ceil(disabledCoupons.length / itemsPerPage);
@@ -242,6 +245,7 @@ const MerchantDashboard = () => {
       expiryDate: coupon.expiryDate ? coupon.expiryDate.slice(0, 10) : '',
       disabledMessage: coupon.disabledMessage || ''
     });
+    setFormValidated(false);
     setShowEditModal(true);
   };
 
@@ -250,15 +254,21 @@ const MerchantDashboard = () => {
     setEditForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Save & Enable flow
-  const handleSaveAndEnableClick = () => {
+  const handleEditFormSubmit = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const form = event.currentTarget;
+    if (form.checkValidity() === false) {
+      setFormValidated(true);
+      return;
+    }
+
+    setFormValidated(false);
     setShowEditModal(false);
     setShowConfirmModal(true);
   };
-  const handleCancelConfirm = () => {
-    setShowConfirmModal(false);
-    setShowEditModal(true);
-  };
+
   const handleConfirmSave = async () => {
     try {
       const res = await fetch(`${API_URL}/api/coupons/${selectedCoupon._id}`, {
@@ -282,10 +292,17 @@ const MerchantDashboard = () => {
       alert('Error updating coupon. Please try again.');
     }
   };
+
   const handleCancelEdit = () => {
     setShowEditModal(false);
     setSelectedCoupon(null);
   };
+
+  const handleCancelConfirm = () => {
+    setShowConfirmModal(false);
+    setShowEditModal(true);
+  };
+
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
   if (loading) {
@@ -452,8 +469,7 @@ const MerchantDashboard = () => {
         <Row className="g-4 mb-3">
           <Col>
             <Card className="p-3">
-              <Card.Title className
-              ="text-center">Category Distribution</Card.Title>
+              <Card.Title className="text-center">Category Distribution</Card.Title>
               {categoryData.length === 0 ? (
                 <p className="text-center mt-2">No categories found.</p>
               ) : (
@@ -467,7 +483,7 @@ const MerchantDashboard = () => {
                       cy="50%"
                       outerRadius={90}
                       label
-                      labelLine={false}  /* ← no connector line */
+                      labelLine={false}
                     >
                       {categoryData.map((entry, idx) => (
                         <Cell key={`cell-${idx}`} fill={CAT_COLORS[idx % CAT_COLORS.length]} />
@@ -490,7 +506,12 @@ const MerchantDashboard = () => {
       </Container>
 
       {/* Edit Coupon Modal */}
-      <Modal show={showEditModal} onHide={handleCancelEdit}>
+      <Modal
+        show={showEditModal}
+        onHide={handleCancelEdit}
+        size="xl"
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>Edit Coupon</Modal.Title>
         </Modal.Header>
@@ -500,66 +521,111 @@ const MerchantDashboard = () => {
               <strong>Reason for disabling:</strong> {editForm.disabledMessage}
             </Alert>
           )}
-          <Form>
-            <Form.Group controlId="formCouponName" className="mb-3">
-              <Form.Label>Campaign Name</Form.Label>
-              <Form.Control
-                type="text"
-                name="couponName"
-                value={editForm.couponName || ''}
-                onChange={handleFormChange}
-              />
-            </Form.Group>
-            <Form.Group controlId="formDiscount" className="mb-3">
-              <Form.Label>Discount</Form.Label>
-              <Form.Control
-                type="number"
-                name="discount"
-                value={editForm.discount || ''}
-                onChange={handleFormChange}
-              />
-            </Form.Group>
-            <Form.Group controlId="formDiscountType" className="mb-3">
-              <Form.Label>Discount Type</Form.Label>
-              <Form.Control
-                as="select"
-                name="discountType"
-                value={editForm.discountType || ''}
-                onChange={handleFormChange}
-              >
-                <option value="percentage">Percentage</option>
-                <option value="flat">Flat</option>
-              </Form.Control>
-            </Form.Group>
-            <Form.Group controlId="formDescription" className="mb-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={2}
-                name="description"
-                value={editForm.description || ''}
-                onChange={handleFormChange}
-              />
-            </Form.Group>
-            <Form.Group controlId="formTermsConditions" className="mb-3">
-              <Form.Label>Terms & Conditions</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={2}
-                name="termsConditions"
-                value={editForm.termsConditions || ''}
-                onChange={handleFormChange}
-              />
-            </Form.Group>
-            <Form.Group controlId="formCategory" className="mb-3">
-              <Form.Label>Category</Form.Label>
-              <Form.Control
-                type="text"
-                name="category"
-                value={editForm.category || ''}
-                onChange={handleFormChange}
-              />
-            </Form.Group>
+          <Form
+            noValidate
+            validated={formValidated}
+            onSubmit={handleEditFormSubmit}
+          >
+            <Row>
+              <Col md={6}>
+                <Form.Group controlId="formCouponName" className="mb-3">
+                  <Form.Label>Campaign Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="couponName"
+                    value={editForm.couponName || ''}
+                    onChange={handleFormChange}
+                    required
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    Please enter a campaign name.
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formDiscount" className="mb-3">
+                  <Form.Label>Discount</Form.Label>
+                  <Form.Control
+                    type="number"
+                    name="discount"
+                    value={editForm.discount || ''}
+                    onChange={handleFormChange}
+                    required
+                    min={0}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    Enter a non-negative value.
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col md={6}>
+                <Form.Group controlId="formDiscountType" className="mb-3">
+                  <Form.Label>Discount Type</Form.Label>
+                  <Form.Control
+                    as="select"
+                    name="discountType"
+                    value={editForm.discountType || ''}
+                    onChange={handleFormChange}
+                  >
+                    <option value="percentage">Percentage</option>
+                    <option value="flat">Flat</option>
+                  </Form.Control>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formDescription" className="mb-3">
+                  <Form.Label>Description</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={2}
+                    name="description"
+                    value={editForm.description || ''}
+                    onChange={handleFormChange}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col md={6}>
+                <Form.Group controlId="formTermsConditions" className="mb-3">
+                  <Form.Label>Terms &amp; Conditions</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={2}
+                    name="termsConditions"
+                    value={editForm.termsConditions || ''}
+                    onChange={handleFormChange}
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formCategory" className="mb-3">
+                  <Form.Label>Category</Form.Label>
+                  <Form.Control
+                    as="select"
+                    name="category"
+                    value={editForm.category || ''}
+                    onChange={handleFormChange}
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    <option value="Clothing">Clothing</option>
+                    <option value="Food & Beverages">Food & Beverages</option>
+                    <option value="Home & Living">Home & Living</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Others">Others</option>
+                  </Form.Control>
+                  <Form.Control.Feedback type="invalid">
+                    Please select a category.
+                  </Form.Control.Feedback>
+                </Form.Group>
+              </Col>
+            </Row>
+
             <Form.Group controlId="formTotalNum" className="mb-3">
               <Form.Label>Total Codes</Form.Label>
               <Form.Control
@@ -567,8 +633,14 @@ const MerchantDashboard = () => {
                 name="totalNum"
                 value={editForm.totalNum || ''}
                 onChange={handleFormChange}
+                required
+                min={1}
               />
+              <Form.Control.Feedback type="invalid">
+                Enter a positive value.
+              </Form.Control.Feedback>
             </Form.Group>
+
             <Form.Group controlId="formExpiryDate" className="mb-3">
               <Form.Label>Expiry Date</Form.Label>
               <Form.Control
@@ -576,25 +648,30 @@ const MerchantDashboard = () => {
                 name="expiryDate"
                 value={editForm.expiryDate || ''}
                 onChange={handleFormChange}
+                required
               />
+              <Form.Control.Feedback type="invalid">
+                Please select an expiry date.
+              </Form.Control.Feedback>
             </Form.Group>
+
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleCancelEdit}>
+                Cancel
+              </Button>
+              <Button variant="primary" type="submit">
+                Save and Enable
+              </Button>
+            </Modal.Footer>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCancelEdit}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSaveAndEnableClick}>
-            Save and Enable
-          </Button>
-        </Modal.Footer>
       </Modal>
 
       {/* Confirmation Modal */}
       <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)} backdrop="static">
         <Modal.Header>
           <Modal.Title>Confirm Update</Modal.Title>
-        </Modal.Header>
+        </Modal.Header>  
         <Modal.Body>
           Are you sure you want to save the changes and enable this coupon?
         </Modal.Body>

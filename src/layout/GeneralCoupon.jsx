@@ -4,8 +4,6 @@ import "./GeneralCoupon.css";
 
 const Coupon = (props) => {
   const {
-    brandLogo,
-    brandName,
     role,
     coupon,
     onEditClick,

@@ -1,8 +1,27 @@
-import React from "react";
 import { Container, Accordion } from "react-bootstrap";
 import "./StudentStyle.css";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const StudentFaqs = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    // Fetch token from local storage and check if user is logged in
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    const role = localStorage.getItem("userRole");
+
+    if (role === "admin") {
+      navigate("/adminLogin");
+    } else if (role === "merchant") {
+      navigate("/merchantLogin");
+    }
+  }, []);
+
   return (
     <Container className="mt-4">
       <h1>Frequently Asked Questions</h1>

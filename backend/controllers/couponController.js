@@ -463,8 +463,11 @@ const getAllStudentCoupons = async (req, res) => {
             });
         }
 
-        // sort coupons by createdAt in descending order and send back to user
-        const coupons = await Coupon.find(query).sort({ createdAt: -1 });
+        // Get coupons and populate merchant details then send it to user
+        const coupons = await Coupon.find(query)
+            .populate('merchant', 'name')
+            .sort({ createdAt: -1 });
+
         res.status(200).json(coupons);
     } catch (error) {
         console.error("Error fetching coupons:", error);
