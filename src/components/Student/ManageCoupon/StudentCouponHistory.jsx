@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Row, Col, Button, Form, Spinner } from "react-bootstrap";
-import { useNavigate } from "react-router-dom"; // Import NavLink for navigation
-import "./ManageCoupon.css"; // Reuse styles from ManageCoupon.css
-import Coupon from "../../../layout/GeneralCoupon"; // Import general coupon template
+import { useNavigate } from "react-router-dom";
+import "./ManageCoupon.css";
+import Coupon from "../../../layout/GeneralCoupon";
 import StudentCouponNavbar from "../../../layout/StudentCouponNavbar";
 import { BiSolidLeftArrow, BiSolidRightArrow } from "react-icons/bi";
 import FilterDropdown from "../components/FilterDropdown";
@@ -10,7 +10,7 @@ import FilterDropdown from "../components/FilterDropdown";
 const apiURL = "https://nusteals-express.onrender.com"; // API URL
 
 const StudentCouponHistory = () => {
-  const navigate = useNavigate(); // Initialize navigate function
+  const navigate = useNavigate();
 
   // State management
   const [searchTerm, setSearchTerm] = useState("");

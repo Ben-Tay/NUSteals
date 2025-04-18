@@ -1,7 +1,7 @@
-import React from 'react';
-import { Form, Button, Row, Col } from 'react-bootstrap';
+import React from "react";
+import { Form, Button, Row, Col } from "react-bootstrap";
 
-const FilterDropdown = ({ 
+const FilterDropdown = ({
   discountTypeFilter,
   selectedBrands,
   selectedCategories,
@@ -10,49 +10,65 @@ const FilterDropdown = ({
   onDiscountTypeChange,
   onBrandChange,
   onCategoryChange,
-  onClearFilters 
+  onClearFilters,
 }) => {
   return (
-    <div className="box-orange p-3 mb-3">
+    <div
+      style={{
+        border: "1px solid #ffa500",
+        borderRadius: "10px",
+        padding: "1.5rem",
+        marginBottom: "1.5rem",
+        backgroundColor: "#fff",
+      }}
+    >
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h5 className="mb-0">Filters</h5>
-        <Button 
-          variant="outline-secondary" 
-          size="sm"
-          onClick={onClearFilters}
-        >
+        <Button variant="outline-secondary" size="sm" onClick={onClearFilters}>
           Clear All
         </Button>
       </div>
 
       <Form>
         <Row>
-          {/* Discount Type Section */}
-          <Col md={4}>
+          {/* Discount Type */}
+          <Col md={4} sm={12}>
             <Form.Group className="mb-3">
               <Form.Label>Discount Type</Form.Label>
-              <div>
-                {['all', 'flat', 'percentage'].map(type => (
-                  <Form.Check
-                    key={type}
-                    type="radio"
-                    id={`discount-${type}`}
-                    label={type === 'all' ? 'All Types' : `${type.charAt(0).toUpperCase() + type.slice(1)} Discount`}
-                    name="discountType"
-                    checked={discountTypeFilter === type}
-                    onChange={() => onDiscountTypeChange(type)}
-                  />
-                ))}
-              </div>
+              {["all", "flat", "percentage"].map((type) => (
+                <Form.Check
+                  key={type}
+                  type="radio"
+                  id={`discount-${type}`}
+                  label={
+                    type === "all"
+                      ? "All Types"
+                      : `${
+                          type.charAt(0).toUpperCase() + type.slice(1)
+                        } Discount`
+                  }
+                  name="discountType"
+                  checked={discountTypeFilter === type}
+                  onChange={() => onDiscountTypeChange(type)}
+                />
+              ))}
             </Form.Group>
           </Col>
 
-          {/* Brands Section */}
-          <Col md={4}>
+          {/* Brands */}
+          <Col md={4} sm={12}>
             <Form.Group className="mb-3">
               <Form.Label>Brands ({selectedBrands.length} selected)</Form.Label>
-              <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #dee2e6', borderRadius: '4px', padding: '8px' }}>
-                {availableBrands.map(brand => (
+              <div
+                style={{
+                  maxHeight: "200px",
+                  overflowY: "auto",
+                  border: "1px solid #dee2e6",
+                  borderRadius: "4px",
+                  padding: "8px",
+                }}
+              >
+                {availableBrands.map((brand) => (
                   <Form.Check
                     key={brand}
                     type="checkbox"
@@ -66,12 +82,22 @@ const FilterDropdown = ({
             </Form.Group>
           </Col>
 
-          {/* Categories Section */}
-          <Col md={4}>
+          {/* Categories */}
+          <Col md={4} sm={12}>
             <Form.Group className="mb-3">
-              <Form.Label>Categories ({selectedCategories.length} selected)</Form.Label>
-              <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #dee2e6', borderRadius: '4px', padding: '8px' }}>
-                {availableCategories.map(category => (
+              <Form.Label>
+                Categories ({selectedCategories.length} selected)
+              </Form.Label>
+              <div
+                style={{
+                  maxHeight: "200px",
+                  overflowY: "auto",
+                  border: "1px solid #dee2e6",
+                  borderRadius: "4px",
+                  padding: "8px",
+                }}
+              >
+                {availableCategories.map((category) => (
                   <Form.Check
                     key={category}
                     type="checkbox"
